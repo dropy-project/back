@@ -24,34 +24,49 @@ class UserService {
   public async createUser(userData: CreateUserDto): Promise<User> {
     if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
 
-    const findUser: User = await this.users.findUnique({ where: { email: userData.email } });
-    if (findUser) throw new HttpException(409, `You're email ${userData.email} already exists`);
+    const findUser: User = await this.users.findUnique({ where: { UID: userData.UID } });
+    if (findUser) throw new HttpException(409, `You're UID ${userData.UID} already exists`);
 
-    const hashedPassword = await hash(userData.password, 10);
-    const createUserData: User = await this.users.create({ data: { ...userData, password: hashedPassword } });
+    const creationDate: Date = new Date();
+    let userName : string = await this.displayNameToUsername(userData.displayName);
+    const createUserData: User = await this.users.create({ data: { ...userData, userName: userName , registerDate : creationDate } });
     return createUserData;
   }
 
-  public async updateUser(userId: number, userData: CreateUserDto): Promise<User> {
-    if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
-
-    const findUser: User = await this.users.findUnique({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "You're not user");
-
-    const hashedPassword = await hash(userData.password, 10);
-    const updateUserData = await this.users.update({ where: { id: userId }, data: { ...userData, password: hashedPassword } });
-    return updateUserData;
+  public async displayNameToUsername(displayName: string): string {
+    let userName : string = displayName.toLowerCase();
+    userName.replace(/\s/g, "_");
+    let count : number = 0;
+    let uniqueUserName : string = userName;
+    let findUser: User = await this.users.findUnique({ where: { userName: uniqueUserName}})
+    while (findUser) {
+      uniqueUserName = userName + count.toString();
+      count++;
+      findUser = await this.users.findUnique({ where: { userName: uniqueUserName}})
+    }
+    return uniqueUserName
   }
 
-  public async deleteUser(userId: number): Promise<User> {
-    if (isEmpty(userId)) throw new HttpException(400, "You're not userId");
+  // public async updateUser(userId: number, userData: CreateUserDto): Promise<User> {
+  //   if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
 
-    const findUser: User = await this.users.findUnique({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "You're not user");
+  //   const findUser: User = await this.users.findUnique({ where: { id: userId } });
+  //   if (!findUser) throw new HttpException(409, "You're not user");
 
-    const deleteUserData = await this.users.delete({ where: { id: userId } });
-    return deleteUserData;
-  }
+  //   const hashedPassword = await hash(userData.password, 10);
+  //   const updateUserData = await this.users.update({ where: { id: userId }, data: { ...userData, password: hashedPassword } });
+  //   return updateUserData;
+  // }
+
+  // public async deleteUser(userId: number): Promise<User> {
+  //   if (isEmpty(userId)) throw new HttpException(400, "You're not userId");
+
+  //   const findUser: User = await this.users.findUnique({ where: { id: userId } });
+  //   if (!findUser) throw new HttpException(409, "You're not user");
+
+  //   const deleteUserData = await this.users.delete({ where: { id: userId } });
+  //   return deleteUserData;
+  // }
 }
 
 export default UserService;
