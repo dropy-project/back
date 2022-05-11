@@ -37,7 +37,7 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: test
     ports:
-      - '3306:3306'
+      - '8081:3306'
     networks:
       - backend
 
