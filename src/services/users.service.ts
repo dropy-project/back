@@ -28,23 +28,21 @@ class UserService {
     if (findUser) throw new HttpException(409, `You're UID ${userData.UID} already exists`);
 
     const creationDate: Date = new Date();
-    let userName : string = await this.displayNameToUsername(userData.displayName);
-    const createUserData: User = await this.users.create({ data: { ...userData, userName: userName , registerDate : creationDate } });
+    const userName: string = await this.displayNameToUsername(userData.displayName);
+    const createUserData: User = await this.users.create({ data: { ...userData, userName: userName, registerDate: creationDate } });
     return createUserData;
   }
-
-  public async displayNameToUsername(displayName: string): string {
-    let userName : string = displayName.toLowerCase();
-    userName.replace(/\s/g, "_");
-    let count : number = 0;
-    let uniqueUserName : string = userName;
-    let findUser: User = await this.users.findUnique({ where: { userName: uniqueUserName}})
-    while (findUser) {
+  //test comment
+  public async displayNameToUsername(displayName: string): Promise<string> {
+    const userName: string = displayName.toLowerCase();
+    userName.replace(/\s/g, '_');
+    let count = 0;
+    let uniqueUserName: string = userName;
+    while (await this.users.findUnique({ where: { userName: uniqueUserName } })) {
       uniqueUserName = userName + count.toString();
       count++;
-      findUser = await this.users.findUnique({ where: { userName: uniqueUserName}})
     }
-    return uniqueUserName
+    return uniqueUserName;
   }
 
   // public async updateUser(userId: number, userData: CreateUserDto): Promise<User> {
