@@ -1,7 +1,7 @@
 ## Setup projet : 
 
 ### Préconditions : 
-- Installer Docker : 'sudo apt install docker' pour MacOS passer par brew
+- Installer Docker : 'sudo apt install docker' pour MacOS installer Docker desktop
 - Avoir une version de Node correcte
 - Installer un client Postgres quelconque (Exemple : Beekeeper studio)
 
