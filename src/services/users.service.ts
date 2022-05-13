@@ -32,7 +32,7 @@ class UserService {
     const createUserData: User = await this.users.create({ data: { ...userData, userName: userName, registerDate: creationDate } });
     return createUserData;
   }
-  //test comment
+
   public async displayNameToUsername(displayName: string): Promise<string> {
     const userName: string = displayName.toLowerCase();
     userName.replace(/\s/g, '_');
@@ -46,34 +46,12 @@ class UserService {
   }
 
   public async findUserByUID(userUID: string): Promise<User> {
-    if (isEmpty(userUID)) throw new HttpException(400, 'need userUID');
+    if (isEmpty(userUID)) throw new HttpException(400, 'the userUID parameter is required');
 
     const findUser: User = await this.users.findUnique({ where: { UID: userUID } });
-    if (!findUser) throw new HttpException(409, 'No user find');
+    if (!findUser) throw new HttpException(409, 'No user found');
 
     return findUser;
   }
 }
-
-// public async updateUser(userId: number, userData: CreateUserDto): Promise<User> {
-//   if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
-
-//   const findUser: User = await this.users.findUnique({ where: { id: userId } });
-//   if (!findUser) throw new HttpException(409, "You're not user");
-
-//   const hashedPassword = await hash(userData.password, 10);
-//   const updateUserData = await this.users.update({ where: { id: userId }, data: { ...userData, password: hashedPassword } });
-//   return updateUserData;
-// }
-
-// public async deleteUser(userId: number): Promise<User> {
-//   if (isEmpty(userId)) throw new HttpException(400, "You're not userId");
-
-//   const findUser: User = await this.users.findUnique({ where: { id: userId } });
-//   if (!findUser) throw new HttpException(409, "You're not user");
-
-//   const deleteUserData = await this.users.delete({ where: { id: userId } });
-//   return deleteUserData;
-// }
-
 export default UserService;
