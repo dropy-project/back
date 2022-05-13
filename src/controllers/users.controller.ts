@@ -32,30 +32,18 @@ class UsersController {
       const userData: CreateUserDto = req.body;
       const createUserData: User = await this.userService.createUser(userData);
 
-      res.status(201).json({ data: createUserData, message: 'created' });
+      res.status(201).json(createUserData);
     } catch (error) {
       next(error);
     }
   };
 
-  public updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getUserbyUID = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = Number(req.params.id);
-      const userData: CreateUserDto = req.body;
-      const updateUserData: User = await this.userService.updateUser(userId, userData);
+      const userUID = req.params.uid;
+      const findOneUserData: User = await this.userService.findUserByUID(userUID);
 
-      res.status(200).json({ data: updateUserData, message: 'updated' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userId = Number(req.params.id);
-      const deleteUserData: User = await this.userService.deleteUser(userId);
-
-      res.status(200).json({ data: deleteUserData, message: 'deleted' });
+      res.status(200).json(findOneUserData);
     } catch (error) {
       next(error);
     }
