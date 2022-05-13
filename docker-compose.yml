@@ -26,12 +26,12 @@ services:
     networks:
       - backend
     links:
-      - postgres
+      - postgres2
     depends_on:
-      - postgres
-  postgres:
+      - postgres2
+  postgres2:
     image: postgres:14.1-alpine
-    container_name: postgres
+    container_name: postgres2
 
     environment:
       POSTGRE_USER: postgres

@@ -32,7 +32,18 @@ class UsersController {
       const userData: CreateUserDto = req.body;
       const createUserData: User = await this.userService.createUser(userData);
 
-      res.status(201).json({ data: createUserData, message: 'created' });
+      res.status(201).json(createUserData);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getUserbyUID = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userUID = req.params.uid;
+      const findOneUserData: User = await this.userService.findUserByUID(userUID);
+
+      res.status(200).json(findOneUserData);
     } catch (error) {
       next(error);
     }
