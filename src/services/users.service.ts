@@ -1,6 +1,4 @@
-import { hash } from 'bcrypt';
 import { PrismaClient, User } from '@prisma/client';
-import { CreateUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
 
@@ -21,34 +19,10 @@ class UserService {
     return findUser;
   }
 
-  public async createUser(userData: CreateUserDto): Promise<User> {
-    if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
-
-    const findUser: User = await this.users.findUnique({ where: { UID: userData.UID } });
-    if (findUser) throw new HttpException(409, `You're UID ${userData.UID} already exists`);
-
-    const creationDate: Date = new Date();
-    const userName: string = await this.displayNameToUsername(userData.displayName);
-    const createUserData: User = await this.users.create({ data: { ...userData, userName: userName, registerDate: creationDate } });
-    return createUserData;
-  }
-
-  public async displayNameToUsername(displayName: string): Promise<string> {
-    const userName: string = displayName.toLowerCase();
-    userName.replace(/\s/g, '_');
-    let count = 0;
-    let uniqueUserName: string = userName;
-    while (await this.users.findUnique({ where: { userName: uniqueUserName } })) {
-      uniqueUserName = userName + count.toString();
-      count++;
-    }
-    return uniqueUserName;
-  }
-
   public async findUserByUID(userUID: string): Promise<User> {
     if (isEmpty(userUID)) throw new HttpException(400, 'the userUID parameter is required');
 
-    const findUser: User = await this.users.findUnique({ where: { UID: userUID } });
+    const findUser: User = await this.users.findUnique({ where: { uid: userUID } });
     if (!findUser) throw new HttpException(409, 'No user found');
 
     return findUser;

@@ -12,7 +12,7 @@ generator client {
 
 model User {
   id       Int    @id @default(autoincrement())
-  UID    String @unique
+  uid    String @unique
   userName String @unique
   displayName String
   registerDate DateTime

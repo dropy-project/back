@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
-import { CreateUserDto } from '@dtos/users.dto';
 import userService from '@services/users.service';
 
 class UsersController {
@@ -10,7 +9,7 @@ class UsersController {
     try {
       const findAllUsersData: User[] = await this.userService.findAllUser();
 
-      res.status(200).json({ data: findAllUsersData, message: 'findAll' });
+      res.status(200).json(findAllUsersData);
     } catch (error) {
       next(error);
     }
@@ -21,18 +20,7 @@ class UsersController {
       const userId = Number(req.params.id);
       const findOneUserData: User = await this.userService.findUserById(userId);
 
-      res.status(200).json({ data: findOneUserData, message: 'findOne' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userData: CreateUserDto = req.body;
-      const createUserData: User = await this.userService.createUser(userData);
-
-      res.status(201).json(createUserData);
+      res.status(200).json(findOneUserData);
     } catch (error) {
       next(error);
     }
