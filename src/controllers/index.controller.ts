@@ -9,7 +9,6 @@ class IndexController {
       });
 
       res.sendStatus(200);
-
     } catch (error) {
       next(error);
     }

@@ -1,15 +1,9 @@
-import { IsDate, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
-export class CreateUserDto {
+export class UserAuthDTO {
   @IsString()
-  public userName: string;
+  public uid: string;
 
-  @IsString()
-  public UID: string;
-  
   @IsString()
   public displayName: string;
-  
-  @IsDate()
-  public registerDate: Date;
 }
