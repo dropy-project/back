@@ -33,7 +33,7 @@ class AuthController {
   public logOut = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-      res.status(200).json('User loged out');
+      res.status(200).json('User logged out');
     } catch (error) {
       next(error);
     }
