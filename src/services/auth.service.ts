@@ -17,9 +17,8 @@ class AuthService {
     const findUser: User = await this.users.findUnique({ where: { uid: userData.uid } });
     if (findUser) throw new HttpException(409, `This uid ${userData.uid} is already registered`);
 
-    const creationDate: Date = new Date();
     const userName: string = await this.displayNameToUsername(userData.displayName);
-    const createUserData: User = await this.users.create({ data: { ...userData, userName: userName, registerDate: creationDate } });
+    const createUserData: User = await this.users.create({ data: { ...userData, userName: userName } });
     return createUserData;
   }
 

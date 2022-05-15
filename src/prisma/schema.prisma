@@ -15,7 +15,16 @@ model User {
   uid    String @unique
   userName String @unique
   displayName String
-  registerDate DateTime
+  registerDate DateTime @default(now())
+  emittedDropies Dropy[] @relation("emittedDropies")
+  receivedDropies Dropy[] @relation("receivedDropies")
 }
 
-
+model Dropy {
+  id       Int    @id @default(autoincrement())
+  creationDate DateTime @default(now())
+  emitter     User   @relation("emittedDropies", fields: [id], references: [id], map: "emitterId")
+  receiver     User?   @relation("receivedDropies", fields: [id], references: [id], map: "receiverId")
+  latitude Float
+  longitude Float
+}
