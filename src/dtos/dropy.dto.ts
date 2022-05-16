@@ -2,7 +2,7 @@ import { IsNumber } from 'class-validator';
 
 export class DropyDTO {
   @IsNumber()
-  public userId: number;
+  public emitterId: number;
 
   @IsNumber()
   public latitude: number;
