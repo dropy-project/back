@@ -18,22 +18,22 @@ class AuthService {
     if (findUser) throw new HttpException(409, `This uid ${userData.uid} is already registered`);
 
     const creationDate: Date = new Date();
-    const userName: string = await this.displayNameToUsername(userData.displayName);
-    const createUserData: User = await this.users.create({ data: { ...userData, userName: userName, registerDate: creationDate } });
+    const username: string = await this.displayNameToUsername(userData.displayName);
+    const createUserData: User = await this.users.create({ data: { ...userData, username: username, registerDate: creationDate } });
     return createUserData;
   }
 
   public async displayNameToUsername(displayName: string): Promise<string> {
-    const userName: string = displayName.toLowerCase();
-    const cleanedUsername = userName.replace(/\s/g, '_').replace(/[^\w\s]/gi, '');
+    const username: string = displayName.toLowerCase();
+    const cleanedUsername = username.replace(/\s/g, '_').replace(/[^\w\s]/gi, '');
 
     let count = 0;
-    let uniqueUserName = cleanedUsername;
-    while (await this.users.findUnique({ where: { userName: uniqueUserName } })) {
-      uniqueUserName = userName + count.toString();
+    let uniqueUsername = cleanedUsername;
+    while (await this.users.findUnique({ where: { username: uniqueUsername } })) {
+      uniqueUsername = username + count.toString();
       count++;
     }
-    return uniqueUserName;
+    return uniqueUsername;
   }
 
   public async login(userData: UserAuthDTO): Promise<{ cookie: string; findUser: User }> {
