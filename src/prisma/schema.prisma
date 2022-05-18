@@ -10,10 +10,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum MediaType {
+  TEXT
+  PICTURE
+  VIDEO
+  MUSIC
+}
+
 model User {
   id       Int    @id @default(autoincrement())
   uid    String @unique
-  userName String @unique
+  username String @unique
   displayName String
   registerDate DateTime @default(now())
   emittedDropies Dropy[] @relation("emittedDropies")
@@ -29,4 +36,23 @@ model Dropy {
   receiver     User?   @relation("receivedDropies", fields: [receiverId], references: [id], map: "receiverId")
   latitude Float
   longitude Float
+  media DropyMedia?
 }
+
+model DropyMedia {
+  id      Int    @id @default(autoincrement())
+  dropy  Dropy @relation(fields: [dropyId], references: [id])
+  dropyId Int
+  mediaType MediaType
+  mediaId Int
+}
+
+model TextDropy {
+  id      Int    @id @default(autoincrement())
+  text String
+}
+
+// model PictureDropy {
+//   id      Int    @id @default(autoincrement())
+//   text String
+// }

@@ -2,7 +2,7 @@
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "UID" TEXT NOT NULL,
-    "userName" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
     "displayName" TEXT NOT NULL,
     "registerDate" TIMESTAMP(3) NOT NULL,
 
@@ -13,4 +13,4 @@ CREATE TABLE "User" (
 CREATE UNIQUE INDEX "User_UID_key" ON "User"("UID");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_userName_key" ON "User"("userName");
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
