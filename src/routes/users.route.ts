@@ -4,7 +4,7 @@ import UsersController from '@controllers/users.controller';
 import authMiddleware from '@/middlewares/auth.middleware';
 
 class UsersRoute implements Routes {
-  public path = '/users';
+  public path = '/user';
   public router = Router();
   public usersController = new UsersController();
 
@@ -13,7 +13,7 @@ class UsersRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get(`${this.path}`, authMiddleware, this.usersController.getUsers);
+    this.router.get(`${this.path}/all`, authMiddleware, this.usersController.getUsers);
     this.router.get(`${this.path}/:uid`, authMiddleware, this.usersController.getUserbyUID);
   }
 }

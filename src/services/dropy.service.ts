@@ -10,5 +10,10 @@ class DropyService {
     const dropy = this.dropies.create({ data: { ...dropyData } });
     return dropy;
   }
+
+  public async getDropies(): Promise<Dropy[]> {
+    const dropies = await this.dropies.findMany();
+    return dropies;
+  }
 }
 export default DropyService;
