@@ -15,5 +15,13 @@ class DropyService {
     const dropies = await this.dropies.findMany();
     return dropies;
   }
+
+  public async createDropyMedia(dropyId: number, mediaData: DropyDTO): Promise<Dropy> {
+    const dropy = await this.dropies.update({
+      where: { id: dropyId },
+      data: { ...mediaData },
+    });
+    return dropy;
+  }
 }
 export default DropyService;
