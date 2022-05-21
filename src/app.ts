@@ -10,6 +10,7 @@ import swaggerUi from 'swagger-ui-express';
 import { NODE_ENV, PORT, LOG_FORMAT, ORIGIN, CREDENTIALS } from '@config';
 import { Routes } from '@interfaces/routes.interface';
 import { logger, stream } from '@utils/logger';
+import fileUpload from 'express-fileupload';
 
 class App {
   public app: express.Application;
@@ -48,6 +49,13 @@ class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+
+    this.app.use(
+      fileUpload({
+        useTempFiles: true,
+        tempFileDir: '/tmp/',
+      }),
+    );
   }
 
   private initializeRoutes(routes: Routes[]) {

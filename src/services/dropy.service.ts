@@ -1,10 +1,9 @@
 import { DropyDTO } from '@/dtos/dropy.dto';
-import { Dropy, PrismaClient } from '@prisma/client';
-import UserService from './users.service';
+import { Dropy, MediaType, PrismaClient } from '@prisma/client';
+import { UploadedFile } from 'express-fileupload';
 
 class DropyService {
   public dropies = new PrismaClient().dropy;
-  public users = new UserService();
 
   public async createDropy(dropyData: DropyDTO): Promise<Dropy> {
     const dropy = this.dropies.create({ data: { ...dropyData } });
@@ -16,12 +15,11 @@ class DropyService {
     return dropies;
   }
 
-  public async createDropyMedia(dropyId: number, mediaData: DropyDTO): Promise<Dropy> {
-    const dropy = await this.dropies.update({
-      where: { id: dropyId },
-      data: { ...mediaData },
-    });
-    return dropy;
+  public async createDropyMedia(dropyId: number, file: UploadedFile, mediaType: MediaType) {
+    // TODO :
+    // - récup le dropy et check si il existe
+    // - check si le mediaType est valide (Correspond au type de fichier)
+    // - ajouter le media dans le dropy
   }
 }
 export default DropyService;

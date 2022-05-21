@@ -30,19 +30,15 @@ model User {
 model Dropy {
   id       Int    @id @default(autoincrement())
   creationDate DateTime @default(now())
+
   emitterId Int
   receiverId Int?
   emitter     User   @relation("emittedDropies", fields: [emitterId], references: [id], map: "emitterId")
   receiver     User?   @relation("receivedDropies", fields: [receiverId], references: [id], map: "receiverId")
+
   latitude Float
   longitude Float
-  media DropyMedia?
-}
 
-model DropyMedia {
-  id      Int    @id @default(autoincrement())
-  dropy  Dropy @relation(fields: [dropyId], references: [id])
-  dropyId Int
   filePath String
   mediaType MediaType
 }
