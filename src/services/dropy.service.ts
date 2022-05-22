@@ -1,10 +1,14 @@
 import { DropyDTO } from '@/dtos/dropy.dto';
 import { HttpException } from '@/exceptions/HttpException';
+import { DropyAround } from '@/interfaces/dropy.interface';
 import { Dropy, MediaType, PrismaClient } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 
+const DISTANCE_FILTER_RADIUS = 0.004; // Environ 300m
+
 class DropyService {
   public dropies = new PrismaClient().dropy;
+  public users = new PrismaClient().user;
 
   public async createDropy(dropyData: DropyDTO): Promise<Dropy> {
     const dropy = this.dropies.create({ data: { ...dropyData } });
@@ -54,5 +58,46 @@ class DropyService {
       });
     }
   }
+
+  public findAround = async (userId: number, latitude: number, longitude: number): Promise<DropyAround[]> => {
+    const user = await this.users.findUnique({ where: { id: userId } });
+
+    if (user == undefined) {
+      throw new HttpException(404, `User with id ${userId} not found`);
+    }
+
+    const dropies = await this.dropies.findMany({
+      where: {
+        AND: [
+          {
+            latitude: {
+              gt: latitude - DISTANCE_FILTER_RADIUS,
+              lt: latitude + DISTANCE_FILTER_RADIUS,
+            },
+          },
+          {
+            longitude: {
+              gt: longitude - DISTANCE_FILTER_RADIUS,
+              lt: longitude + DISTANCE_FILTER_RADIUS,
+            },
+          },
+        ],
+      },
+    });
+
+    const dropyAround = dropies
+      .filter(dropy => dropy.mediaType !== MediaType.NONE)
+      .map(dropy => {
+        return {
+          id: dropy.id,
+          creationDate: dropy.creationDate,
+          latitude: dropy.latitude,
+          longitude: dropy.longitude,
+          isUserDropy: dropy.emitterId == userId,
+        };
+      });
+
+    return dropyAround;
+  };
 }
 export default DropyService;

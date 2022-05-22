@@ -62,7 +62,21 @@ class DropyController {
     }
   };
 
-  public findAround = async (req: Request, res: Response, next: NextFunction): Promise<void> => {};
+  public findAround = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { userId, latitude, longitude } = req.body;
+
+      if (userId == undefined || latitude == undefined || longitude == undefined) {
+        res.status(400).send('Missing parameters');
+        return;
+      }
+
+      const dropiesAround = await this.dropyService.findAround(userId, latitude, longitude);
+      res.status(200).json(dropiesAround);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default DropyController;
