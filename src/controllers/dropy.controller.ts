@@ -28,15 +28,17 @@ class DropyController {
     try {
       const dropyId = Number(req.params.id);
 
-      const [formField, file] = Object.entries(req.files)[0] as [string, UploadedFile];
+      const requestData = req.files ?? req.body;
 
-      if (!file == undefined) {
-        res.status(400).send('No files were uploaded.');
+      if (requestData == undefined) {
+        res.status(400).send('No form data');
         return;
       }
 
-      if (file.data == undefined) {
-        res.status(400).send('File data corrupted or more than one file sent at once');
+      const [formField, mediaPayload] = Object.entries(requestData)[0] as [string, UploadedFile | string];
+
+      if (mediaPayload == undefined) {
+        res.status(400).send('No payload were uploaded.');
         return;
       }
 
@@ -46,13 +48,21 @@ class DropyController {
         return;
       }
 
-      this.dropyService.createDropyMedia(dropyId, file, mediaType);
+      const isFile = (mediaPayload as UploadedFile).mimetype != undefined;
+      if (isFile && (mediaPayload as UploadedFile).data == undefined) {
+        res.status(400).send('File data corrupted or more than one file sent at once');
+        return;
+      }
+
+      await this.dropyService.createDropyMedia(dropyId, mediaPayload, mediaType);
 
       res.status(200).json(`Media added for dropy with id ${dropyId}`);
     } catch (error) {
       next(error);
     }
   };
+
+  public findAround = async (req: Request, res: Response, next: NextFunction): Promise<void> => {};
 }
 
 export default DropyController;

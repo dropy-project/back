@@ -11,6 +11,7 @@ generator client {
 }
 
 enum MediaType {
+  NONE
   TEXT
   PICTURE
   VIDEO
@@ -18,27 +19,28 @@ enum MediaType {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  uid    String @unique
-  username String @unique
-  displayName String
-  registerDate DateTime @default(now())
-  emittedDropies Dropy[] @relation("emittedDropies")
-  receivedDropies Dropy[] @relation("receivedDropies")
+  id              Int      @id @default(autoincrement())
+  uid             String   @unique
+  username        String   @unique
+  displayName     String
+  registerDate    DateTime @default(now())
+  emittedDropies  Dropy[]  @relation("emittedDropies")
+  receivedDropies Dropy[]  @relation("receivedDropies")
 }
 
 model Dropy {
-  id       Int    @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   creationDate DateTime @default(now())
 
-  emitterId Int
+  emitterId  Int
   receiverId Int?
-  emitter     User   @relation("emittedDropies", fields: [emitterId], references: [id], map: "emitterId")
-  receiver     User?   @relation("receivedDropies", fields: [receiverId], references: [id], map: "receiverId")
+  emitter    User  @relation("emittedDropies", fields: [emitterId], references: [id], map: "emitterId")
+  receiver   User? @relation("receivedDropies", fields: [receiverId], references: [id], map: "receiverId")
 
-  latitude Float
+  latitude  Float
   longitude Float
 
-  filePath String
-  mediaType MediaType
+  filePath  String?
+  mediaData String?
+  mediaType MediaType @default(NONE)
 }
