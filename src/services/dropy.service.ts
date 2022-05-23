@@ -81,21 +81,29 @@ class DropyService {
               lt: longitude + DISTANCE_FILTER_RADIUS,
             },
           },
+          {
+            mediaType: {
+              not: MediaType.NONE,
+            },
+          },
+          {
+            receiver: {
+              is: undefined,
+            },
+          },
         ],
       },
     });
 
-    const dropyAround = dropies
-      .filter(dropy => dropy.mediaType !== MediaType.NONE)
-      .map(dropy => {
-        return {
-          id: dropy.id,
-          creationDate: dropy.creationDate,
-          latitude: dropy.latitude,
-          longitude: dropy.longitude,
-          isUserDropy: dropy.emitterId == userId,
-        };
-      });
+    const dropyAround = dropies.map(dropy => {
+      return {
+        id: dropy.id,
+        creationDate: dropy.creationDate,
+        latitude: dropy.latitude,
+        longitude: dropy.longitude,
+        isUserDropy: dropy.emitterId == userId,
+      };
+    });
 
     return dropyAround;
   };

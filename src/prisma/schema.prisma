@@ -32,10 +32,12 @@ model Dropy {
   id           Int      @id @default(autoincrement())
   creationDate DateTime @default(now())
 
-  emitterId  Int
-  receiverId Int?
   emitter    User  @relation("emittedDropies", fields: [emitterId], references: [id], map: "emitterId")
+  emitterId  Int
+  
+  receiverId Int?
   receiver   User? @relation("receivedDropies", fields: [receiverId], references: [id], map: "receiverId")
+  receiveDate DateTime?
 
   latitude  Float
   longitude Float
