@@ -1,15 +1,11 @@
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import hpp from 'hpp';
-import morgan from 'morgan';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { NODE_ENV, PORT, LOG_FORMAT, ORIGIN, CREDENTIALS } from '@config';
 import { Routes } from '@interfaces/routes.interface';
-import { logger, stream } from '@utils/logger';
 import fileUpload from 'express-fileupload';
 
 class App {
@@ -20,8 +16,7 @@ class App {
   constructor(routes: Routes[]) {
     console.log('CONTRUCTOR');
     this.app = express();
-    this.env = NODE_ENV || 'development';
-    this.port = PORT || 3000;
+    this.port = 3000;
 
     console.log('SETUP APP');
     this.initializeMiddlewares();
@@ -31,10 +26,9 @@ class App {
 
   public listen() {
     this.app.listen(this.port, () => {
-      logger.info(`=================================`);
-      logger.info(`======= ENV: ${this.env} =======`);
-      logger.info(`🚀 App listening on the port ${this.port}`);
-      logger.info(`=================================`);
+      console.log(`==============================`);
+      console.log(`🚀 App listening on the port ${this.port}`);
+      console.log(`==============================`);
     });
   }
 
@@ -43,8 +37,6 @@ class App {
   }
 
   private initializeMiddlewares() {
-    this.app.use(morgan(LOG_FORMAT, { stream }));
-    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
