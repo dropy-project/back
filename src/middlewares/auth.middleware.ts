@@ -12,7 +12,8 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
       next(new HttpException(404, 'Authentication token missing'));
       return;
     }
-    const secretKey = '';
+
+    const secretKey = 'secret';
     const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
     const userUid = verificationResponse.id;
 
@@ -26,6 +27,7 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
       next(new HttpException(401, 'Wrong authentication token'));
     }
   } catch (error) {
+    console.log(error);
     next(new HttpException(401, 'Authentication error'));
   }
 };

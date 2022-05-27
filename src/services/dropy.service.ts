@@ -11,6 +11,12 @@ class DropyService {
   public users = new PrismaClient().user;
 
   public async createDropy(dropyData: DropyDTO): Promise<Dropy> {
+    const user = await this.users.findUnique({ where: { id: dropyData.emitterId } });
+
+    if (user == undefined) {
+      throw new HttpException(404, `User with emitterid ${dropyData.emitterId} not found`);
+    }
+
     const dropy = this.dropies.create({ data: { ...dropyData } });
     return dropy;
   }

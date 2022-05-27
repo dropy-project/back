@@ -1,6 +1,5 @@
 import { sign } from 'jsonwebtoken';
 import { PrismaClient, User } from '@prisma/client';
-import { SECRET_KEY } from '@config';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
 import { UserAuthDTO } from '@/dtos/users.dto';
@@ -52,7 +51,7 @@ class AuthService {
 
   public createToken(user: UserAuthDTO): TokenData {
     const dataStoredInToken: DataStoredInToken = { id: user.uid };
-    const secretKey = SECRET_KEY;
+    const secretKey = 'secret';
     const expiresIn = ONE_MONTH_IN_SECONDS;
 
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
