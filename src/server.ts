@@ -4,8 +4,15 @@ import UsersRoute from '@routes/users.route';
 import validateEnv from '@utils/validateEnv';
 import DropyRoute from './routes/dropy.route';
 
-validateEnv();
+console.log('Entry');
 
-const app = new App([new UsersRoute(), new AuthRoute(), new DropyRoute()]);
+validateEnv();
+console.log('Validate');
+
+// const app = new App([new UsersRoute(), new AuthRoute(), new DropyRoute()]);
+const app = new App([new AuthRoute()]);
+
+console.log('App created');
 
 app.listen();
+console.log('Listen');

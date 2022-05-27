@@ -1,7 +1,6 @@
 import { NextFunction, Response } from 'express';
 import { verify } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-import { SECRET_KEY } from '@config';
+// import { PrismaClient } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
 
@@ -13,19 +12,20 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
       next(new HttpException(404, 'Authentication token missing'));
       return;
     }
-    const secretKey = SECRET_KEY;
+    // const secretKey = SECRET_KEY;
+    const secretKey = '';
     const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
     const userUid = verificationResponse.id;
 
-    const users = new PrismaClient().user;
-    const findUser = await users.findUnique({ where: { uid: userUid } });
+    // const users = new PrismaClient().user;
+    // const findUser = await users.findUnique({ where: { uid: userUid } });
 
-    if (findUser != null) {
-      req.user = findUser;
-      next();
-    } else {
-      next(new HttpException(401, 'Wrong authentication token'));
-    }
+    // if (findUser != null) {
+    //   req.user = findUser;
+    //   next();
+    // } else {
+    //   next(new HttpException(401, 'Wrong authentication token'));
+    // }
   } catch (error) {
     next(new HttpException(401, 'Authentication error'));
   }

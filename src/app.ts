@@ -18,10 +18,12 @@ class App {
   public port: string | number;
 
   constructor(routes: Routes[]) {
+    console.log('CONTRUCTOR');
     this.app = express();
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
 
+    console.log('SETUP APP');
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
