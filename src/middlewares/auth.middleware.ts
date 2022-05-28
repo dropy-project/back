@@ -1,8 +1,8 @@
 import { NextFunction, Response } from 'express';
 import { verify } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
+import client from '@/client';
 
 const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
@@ -17,8 +17,7 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
     const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
     const userUid = verificationResponse.id;
 
-    const users = new PrismaClient().user;
-    const findUser = await users.findUnique({ where: { uid: userUid } });
+    const findUser = await client.user.findUnique({ where: { uid: userUid } });
 
     if (findUser != null) {
       req.user = findUser;

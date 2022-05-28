@@ -1,24 +1,23 @@
 import { sign } from 'jsonwebtoken';
-import { PrismaClient, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
 import { UserAuthDTO } from '@/dtos/users.dto';
+import client from '@/client';
 
 const ONE_MONTH_IN_SECONDS = 2592000;
 
 class AuthService {
-  public users = new PrismaClient().user;
-
   public async register(userData: UserAuthDTO): Promise<User> {
     if (userData.uid == null || userData.displayName == null) {
       throw new HttpException(400, 'No user data provided');
     }
 
-    const findUser: User = await this.users.findUnique({ where: { uid: userData.uid } });
+    const findUser: User = await client.user.findUnique({ where: { uid: userData.uid } });
     if (findUser) throw new HttpException(409, `This uid ${userData.uid} is already registered`);
 
     const username: string = await this.displayNameToUsername(userData.displayName);
-    const createUserData: User = await this.users.create({ data: { ...userData, username: username } });
+    const createUserData: User = await client.user.create({ data: { ...userData, username: username } });
     return createUserData;
   }
 
@@ -28,7 +27,7 @@ class AuthService {
 
     let count = 0;
     let uniqueUsername = cleanedUsername;
-    while (await this.users.findUnique({ where: { username: uniqueUsername } })) {
+    while (await client.user.findUnique({ where: { username: uniqueUsername } })) {
       uniqueUsername = username + count.toString();
       count++;
     }
@@ -40,7 +39,7 @@ class AuthService {
       throw new HttpException(400, 'No user data provided');
     }
 
-    const findUser: User = await this.users.findUnique({ where: { uid: userData.uid } });
+    const findUser: User = await client.user.findUnique({ where: { uid: userData.uid } });
     if (!findUser) throw new HttpException(409, 'No user found with this uid');
 
     const tokenData = this.createToken(findUser);
