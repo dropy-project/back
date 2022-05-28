@@ -15,7 +15,6 @@ class App {
   public port: string | number;
 
   constructor(routes: Routes[]) {
-    console.log('CONTRUCTOR');
     this.app = express();
     this.port = 3000;
 
