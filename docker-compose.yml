@@ -14,6 +14,8 @@ services:
       DATABASE_URL: 'postgresql://postgres:postgres@postgres:5432/postgres'
     networks:
       - back
+    volumes:
+      - ./public:./public
 
   postgres:
     image: postgres:14.1-alpine
