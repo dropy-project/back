@@ -7,6 +7,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Routes } from '@interfaces/routes.interface';
 import fileUpload from 'express-fileupload';
+import morgan from 'morgan';
 
 class App {
   public app: express.Application;
@@ -43,6 +44,7 @@ class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+    this.app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
     this.app.use(
       fileUpload({
