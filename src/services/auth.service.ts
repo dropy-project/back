@@ -50,7 +50,7 @@ class AuthService {
 
   public createToken(user: UserAuthDTO): TokenData {
     const dataStoredInToken: DataStoredInToken = { id: user.uid };
-    const secretKey = 'secret';
+    const secretKey = process.env.SECRET_KEY;
     const expiresIn = ONE_MONTH_IN_SECONDS;
 
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };

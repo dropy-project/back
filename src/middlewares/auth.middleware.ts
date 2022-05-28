@@ -13,7 +13,7 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
       return;
     }
 
-    const secretKey = 'secret';
+    const secretKey = process.env.SECRET_KEY;
     const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
     const userUid = verificationResponse.id;
 
