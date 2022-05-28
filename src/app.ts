@@ -15,11 +15,9 @@ class App {
   public port: string | number;
 
   constructor(routes: Routes[]) {
-    console.log('CONTRUCTOR');
     this.app = express();
     this.port = process.env.PORT || 3000;
 
-    console.log('SETUP APP');
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
