@@ -15,7 +15,7 @@ services:
     networks:
       - back
     volumes:
-      - ./public:./public
+      - ./public:/app/public
 
   postgres:
     image: postgres:14.1-alpine
