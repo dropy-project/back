@@ -18,7 +18,6 @@ class App {
     this.app = express();
     this.port = 3000;
 
-    console.log('SETUP APP');
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
