@@ -37,6 +37,8 @@ services:
       - "5555:5555"
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+    networks:
+      - back
     build:
       context: src/prisma
       dockerfile: Dockerfile
