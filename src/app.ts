@@ -1,13 +1,12 @@
+import { Routes } from '@interfaces/routes.interface';
+
+import fileUpload from 'express-fileupload';
+import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import hpp from 'hpp';
-import swaggerJSDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
-import { Routes } from '@interfaces/routes.interface';
-import fileUpload from 'express-fileupload';
-import morgan from 'morgan';
 
 class App {
   public app: express.Application;
@@ -20,7 +19,6 @@ class App {
 
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
-    this.initializeSwagger();
   }
 
   public listen() {
@@ -31,10 +29,6 @@ class App {
     });
   }
 
-  public getServer() {
-    return this.app;
-  }
-
   private initializeMiddlewares() {
     this.app.use(hpp());
     this.app.use(helmet());
@@ -42,7 +36,7 @@ class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
-    this.app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+    this.app.use(morgan(':date[web] - :method :url :status :res[content-length] - :response-time ms'));
 
     this.app.use(
       fileUpload({
@@ -52,25 +46,13 @@ class App {
   }
 
   private initializeRoutes(routes: Routes[]) {
+    this.app.get('/', function (req, res) {
+      res.send('Dropy API');
+    });
+
     routes.forEach(route => {
       this.app.use('/', route.router);
     });
-  }
-
-  private initializeSwagger() {
-    const options = {
-      swaggerDefinition: {
-        info: {
-          title: 'REST API',
-          version: '1.0.0',
-          description: 'Example docs',
-        },
-      },
-      apis: ['swagger.yaml'],
-    };
-
-    const specs = swaggerJSDoc(options);
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
   }
 }
 
