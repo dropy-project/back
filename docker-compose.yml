@@ -35,6 +35,8 @@ services:
     container_name: prisma
     ports:
       - "5555:5555"
+    depends_on:
+      - postgres
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
     networks:
