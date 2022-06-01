@@ -1,5 +1,4 @@
 import { Routes } from '@interfaces/routes.interface';
-import { PrismaClient } from '@prisma/client';
 
 import fileUpload from 'express-fileupload';
 import morgan from 'morgan';
@@ -11,7 +10,6 @@ import hpp from 'hpp';
 
 class App {
   public app: express.Application;
-  public client: PrismaClient;
   public env: string;
   public port: string | number;
 
