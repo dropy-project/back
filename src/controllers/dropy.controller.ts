@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import DropyService from '@/services/dropy.service';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
+import { nextTick } from 'process';
 
 class DropyController {
   public dropyService = new DropyService();
@@ -73,6 +74,19 @@ class DropyController {
 
       const dropiesAround = await this.dropyService.findAround(userId, latitude, longitude);
       res.status(200).json(dropiesAround);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public retrieveDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { retrieverId, dropyId } = req.body;
+
+      if (retrieverId == undefined || dropyId == undefined) {
+        res.status(400).send('Missing parameters');
+        return;
+      }
     } catch (error) {
       next(error);
     }
