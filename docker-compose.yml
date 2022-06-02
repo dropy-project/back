@@ -31,5 +31,19 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/data
 
+  prisma:
+    container_name: prisma
+    ports:
+      - "5555:5555"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+    networks:
+      - back
+    build:
+      context: src/prisma
+      dockerfile: Dockerfile
+
 networks:
  back:
