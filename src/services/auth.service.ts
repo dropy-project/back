@@ -22,8 +22,11 @@ class AuthService {
   }
 
   public async displayNameToUsername(displayName: string): Promise<string> {
-    const username: string = displayName.toLowerCase();
-    const cleanedUsername = username.replace(/\s/g, '_').replace(/[^\w\s]/gi, '');
+    const username: string = displayName.toLowerCase().trim().normalize('NFD');
+    const cleanedUsername = username
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s/g, '_')
+      .replace(/[^\w\s]/gi, '');
 
     let count = 0;
     let uniqueUsername = cleanedUsername;
