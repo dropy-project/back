@@ -87,6 +87,9 @@ class DropyController {
         res.status(400).send('Missing parameters');
         return;
       }
+
+      const dropy = await this.dropyService.retrieveDropy(retrieverId, dropyId);
+      res.status(200).json(dropy);
     } catch (error) {
       next(error);
     }

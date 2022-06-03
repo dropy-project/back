@@ -111,5 +111,7 @@ class DropyService {
 
     return dropyAround;
   };
+
+  public retrieveDropy = async()
 }
 export default DropyService;
