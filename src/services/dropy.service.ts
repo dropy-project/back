@@ -96,7 +96,7 @@ class DropyService {
             },
           },
           {
-            receiver: {
+            retriever: {
               is: undefined,
             },
           },
@@ -117,6 +117,45 @@ class DropyService {
     return dropyAround;
   };
 
-  public retrieveDropy = async()
+  public retrieveDropy = async (retrieverId: number, dropyId: number) => {
+    const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
+
+    if (dropy == undefined) {
+      throw new HttpException(404, `Dropy with dropyid ${dropyId} not found`);
+    }
+
+    const emitter = await client.user.findUnique({ where: { id: dropy.emitterId } });
+
+    if (emitter == undefined) {
+      throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
+    }
+
+    const retriever = await client.user.findUnique({ where: { id: retrieverId } });
+
+    if (retriever == undefined) {
+      throw new HttpException(404, `User with retrieverid ${retriever} not found`);
+    }
+
+    await client.dropy.update({
+      where: {
+        id: dropy.id,
+      },
+      data: {
+        retrieverId: retrieverId,
+        retrieveDate: new Date(),
+      },
+    });
+  };
+
+  public getDropyMedia = async (dropyId: number): Promise<Dropy> => {
+    const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
+
+    if (dropy == undefined) {
+      throw new HttpException(404, `Dropy with id ${dropyId} not found`);
+    }
+
+    return dropy;
+  };
 }
+
 export default DropyService;

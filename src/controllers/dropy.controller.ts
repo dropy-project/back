@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import DropyService from '@/services/dropy.service';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
-import { nextTick } from 'process';
 
 class DropyController {
   public dropyService = new DropyService();
@@ -88,8 +87,40 @@ class DropyController {
         return;
       }
 
-      const dropy = await this.dropyService.retrieveDropy(retrieverId, dropyId);
-      res.status(200).json(dropy);
+      await this.dropyService.retrieveDropy(retrieverId, dropyId);
+      res.status(200).json(`Retriever with id ${retrieverId} added for dropy with id ${dropyId}`);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getDropyMedia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const dropyId = Number(req.params.id);
+
+      if (dropyId == undefined) {
+        res.status(400).send('Missing parameters');
+        return;
+      }
+
+      const dropy = await this.dropyService.getDropyMedia(dropyId);
+      const mediaType = dropy.mediaType;
+
+      if (mediaType == MediaType.PICTURE || mediaType == MediaType.VIDEO) {
+        if (dropy.filePath == undefined) {
+          res.status(404).send(`Media filePath from dropy with id ${dropyId} not found`);
+        }
+
+        res.status(200).sendFile(dropy.filePath);
+      } else {
+        if (dropy.mediaData == undefined) {
+          res.status(404).send(`Media data from dropy with id ${dropyId} not found`);
+        }
+
+        res.status(200).json(dropy.mediaData);
+
+        // A continuer pour la musique
+      }
     } catch (error) {
       next(error);
     }
