@@ -49,7 +49,12 @@ class DropyService {
 
     if (isFile) {
       const file = mediaPayload as UploadedFile;
-      const filePath = `${process.cwd()}/public/dropiesMedias/${dropyId}`;
+
+      const extensionFile = file.mimetype.split('/').pop();
+
+      const fileName = `${dropy.creationDate.getFullYear()}_${dropy.creationDate.getMonth()}_${dropy.creationDate.getDay()}_${mediaType}_${dropyId}.${extensionFile}`;
+
+      const filePath = `${process.cwd()}/public/dropiesMedias/${fileName}`;
       file.mv(filePath);
       await client.dropy.update({
         where: { id: dropyId },
