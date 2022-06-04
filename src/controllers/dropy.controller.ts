@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import DropyService from '@/services/dropy.service';
+import AuthUtils from '@/utils/auth.utils';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
-import { verify } from 'jsonwebtoken';
-import { DataStoredInToken } from '@/interfaces/auth.interface';
 
 class DropyController {
   public dropyService = new DropyService();
+  public authUtils = new AuthUtils();
 
   public createDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -106,7 +106,7 @@ class DropyController {
 
       const dropy = await this.dropyService.getDropyMedia(dropyId);
 
-      const currentUserId = await this.getUserIdFromToken(req);
+      const currentUserId = await this.authUtils.getUserIdFromToken(req);
 
       if (currentUserId != dropy.retrieverId) {
         res.status(403).send(`User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
@@ -132,19 +132,6 @@ class DropyController {
     } catch (error) {
       next(error);
     }
-  };
-
-  public getUserIdFromToken = async (req: Request): Promise<number> => {
-    const Authorization = req.cookies['Authorization'] || (req.header('Authorization') ? req.header('Authorization').split('Bearer ')[1] : null);
-
-    if (Authorization == null) {
-      return null;
-    }
-
-    const secretKey = process.env.SECRET_KEY;
-    const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
-
-    return verificationResponse.userId;
   };
 }
 
