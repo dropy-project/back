@@ -10,14 +10,13 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
 
     if (Authorization == null) {
       next(new HttpException(404, 'Authentication token missing'));
-      return;
     }
 
     const secretKey = process.env.SECRET_KEY;
     const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
-    const userUid = verificationResponse.id;
+    const userId = verificationResponse.userId;
 
-    const findUser = await client.user.findUnique({ where: { uid: userUid } });
+    const findUser = await client.user.findUnique({ where: { id: userId } });
 
     if (findUser != null) {
       req.user = findUser;

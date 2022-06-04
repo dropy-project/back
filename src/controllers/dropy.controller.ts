@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import DropyService from '@/services/dropy.service';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
+import { verify } from 'jsonwebtoken';
+import { DataStoredInToken } from '@/interfaces/auth.interface';
 
 class DropyController {
   public dropyService = new DropyService();
@@ -100,10 +102,16 @@ class DropyController {
 
       if (dropyId == undefined) {
         res.status(400).send('Missing parameters');
-        return;
       }
 
       const dropy = await this.dropyService.getDropyMedia(dropyId);
+
+      const currentUserId = await this.getUserIdFromToken(req, res);
+
+      if (currentUserId != dropy.retrieverId) {
+        res.status(403).send(`User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
+      }
+
       const mediaType = dropy.mediaType;
 
       if (mediaType == MediaType.PICTURE || mediaType == MediaType.VIDEO) {
@@ -124,6 +132,19 @@ class DropyController {
     } catch (error) {
       next(error);
     }
+  };
+
+  public getUserIdFromToken = async (req: Request, res: Response): Promise<number> => {
+    const Authorization = req.cookies['Authorization'] || (req.header('Authorization') ? req.header('Authorization').split('Bearer ')[1] : null);
+
+    if (Authorization == null) {
+      res.status(404).send('Authentication token missing');
+    }
+
+    const secretKey = process.env.SECRET_KEY;
+    const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
+
+    return verificationResponse.userId;
   };
 }
 
