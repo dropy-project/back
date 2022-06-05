@@ -17,13 +17,13 @@ enum MediaType {
 }
 
 model User {
-  id              Int      @id @default(autoincrement())
-  uid             String   @unique
-  username        String   @unique
-  displayName     String
-  registerDate    DateTime @default(now())
-  emittedDropies  Dropy[]  @relation("emittedDropies")
-  receivedDropies Dropy[]  @relation("receivedDropies")
+  id               Int      @id @default(autoincrement())
+  uid              String   @unique
+  username         String   @unique
+  displayName      String
+  registerDate     DateTime @default(now())
+  emittedDropies   Dropy[]  @relation("emittedDropies")
+  retrievedDropies Dropy[]  @relation("retrievedDropies")
   lastSeenDate    DateTime
   lastSeenLocationLongitude Float
   lastSeenLocationLatitude  Float
@@ -38,9 +38,15 @@ model Dropy {
   emitter   User @relation("emittedDropies", fields: [emitterId], references: [id], map: "emitterId")
   emitterId Int
 
+<<<<<<< HEAD
   receiverId  Int?
   receiver    User?     @relation("receivedDropies", fields: [receiverId], references: [id], map: "receiverId")
   receiveDate DateTime?
+=======
+  retrieverId  Int?
+  retriever    User?     @relation("retrievedDropies", fields: [retrieverId], references: [id], map: "retrieverId")
+  retrieveDate DateTime?
+>>>>>>> 9c63382b7027518f27dde2a48fc3a269e729373d
 
   latitude  Float
   longitude Float

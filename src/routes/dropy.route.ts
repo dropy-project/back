@@ -16,6 +16,8 @@ class DropyRoute implements Routes {
     this.router.post(`${this.path}/add`, authMiddleware, this.dropyController.createDropy);
     this.router.post(`${this.path}/add/:id/media`, authMiddleware, this.dropyController.createDropyMedia);
     this.router.post(`${this.path}/findAround`, authMiddleware, this.dropyController.findAround);
+    this.router.post(`${this.path}/retrieve`, authMiddleware, this.dropyController.retrieveDropy);
+    this.router.get(`${this.path}/:id/media`, authMiddleware, this.dropyController.getDropyMedia);
   }
 }
 
