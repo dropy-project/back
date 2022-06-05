@@ -1,12 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import DropyService from '@/services/dropy.service';
-import AuthUtils from '@/utils/auth.utils';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
+import { getUserIdFromToken } from '@/utils/auth.utils';
 
 class DropyController {
   public dropyService = new DropyService();
-  public authUtils = new AuthUtils();
 
   public createDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -106,7 +105,7 @@ class DropyController {
 
       const dropy = await this.dropyService.getDropyMedia(dropyId);
 
-      const currentUserId = await this.authUtils.getUserIdFromToken(req);
+      const currentUserId = await getUserIdFromToken(req);
 
       if (currentUserId != dropy.retrieverId) {
         res.status(403).send(`User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
