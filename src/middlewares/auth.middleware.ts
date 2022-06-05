@@ -1,23 +1,14 @@
 import { NextFunction, Response } from 'express';
-import { verify } from 'jsonwebtoken';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
+import { RequestWithUser } from '@interfaces/auth.interface';
 import client from '@/client';
+import { getUserIdFromToken } from '@/utils/auth.utils';
 
 const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
-    const Authorization = req.cookies['Authorization'] || (req.header('Authorization') ? req.header('Authorization').split('Bearer ')[1] : null);
+    const userId = await getUserIdFromToken(req);
 
-    if (Authorization == null) {
-      next(new HttpException(404, 'Authentication token missing'));
-      return;
-    }
-
-    const secretKey = process.env.SECRET_KEY;
-    const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
-    const userUid = verificationResponse.id;
-
-    const findUser = await client.user.findUnique({ where: { uid: userUid } });
+    const findUser = await client.user.findUnique({ where: { id: userId } });
 
     if (findUser != null) {
       req.user = findUser;

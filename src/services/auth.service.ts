@@ -51,8 +51,8 @@ class AuthService {
     return { cookie, findUser };
   }
 
-  public createToken(user: UserAuthDTO): TokenData {
-    const dataStoredInToken: DataStoredInToken = { id: user.uid };
+  public createToken(user: User): TokenData {
+    const dataStoredInToken: DataStoredInToken = { userId: user.id };
     const secretKey = process.env.SECRET_KEY;
     const expiresIn = ONE_MONTH_IN_SECONDS;
 

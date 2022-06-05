@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import DropyService from '@/services/dropy.service';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
+import { getUserIdFromToken } from '@/utils/auth.utils';
 
 class DropyController {
   public dropyService = new DropyService();
@@ -73,6 +74,60 @@ class DropyController {
 
       const dropiesAround = await this.dropyService.findAround(userId, latitude, longitude);
       res.status(200).json(dropiesAround);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public retrieveDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { retrieverId, dropyId } = req.body;
+
+      if (retrieverId == undefined || dropyId == undefined) {
+        res.status(400).send('Missing parameters');
+        return;
+      }
+
+      await this.dropyService.retrieveDropy(retrieverId, dropyId);
+      res.status(200).json(`Retriever with id ${retrieverId} added for dropy with id ${dropyId}`);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getDropyMedia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const dropyId = Number(req.params.id);
+
+      if (dropyId == undefined || dropyId == NaN) {
+        res.status(400).send('Missing parameters');
+      }
+
+      const dropy = await this.dropyService.getDropyMedia(dropyId);
+
+      const currentUserId = await getUserIdFromToken(req);
+
+      if (currentUserId != dropy.retrieverId) {
+        res.status(403).send(`User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
+      }
+
+      const mediaType = dropy.mediaType;
+
+      if (mediaType == MediaType.PICTURE || mediaType == MediaType.VIDEO) {
+        if (dropy.filePath == undefined) {
+          res.status(404).send(`Media filePath from dropy with id ${dropyId} not found`);
+        }
+
+        res.status(200).sendFile(dropy.filePath);
+      } else {
+        if (dropy.mediaData == undefined) {
+          res.status(404).send(`Media data from dropy with id ${dropyId} not found`);
+        }
+
+        res.status(200).json(dropy.mediaData);
+
+        // A continuer pour la musique
+      }
     } catch (error) {
       next(error);
     }
