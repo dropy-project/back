@@ -156,6 +156,46 @@ class DropyService {
 
     return dropy;
   };
+
+  public pingDropy = async (userId: number, currentPositionLatitude : number , currentPositionLongitude : number): Promise<Dropy[]> => {
+    const user = await client.user.findUnique({ where: { id: userId } });
+    if (user == undefined) {
+      throw new HttpException(404, `User with id ${userId} not found`);
+    }
+
+
+    const dropies = await client.dropy.findMany({
+      where: {
+        AND: [
+          {
+            latitude: {
+              gt: currentPositionLatitude - DISTANCE_FILTER_RADIUS,
+              lt: currentPositionLatitude + DISTANCE_FILTER_RADIUS,
+            },
+          },
+          {
+            longitude: {
+              gt: currentPositionLongitude - DISTANCE_FILTER_RADIUS,
+              lt: currentPositionLongitude + DISTANCE_FILTER_RADIUS,
+            },
+          },
+          {
+            mediaType: {
+              not: MediaType.NONE,
+            },
+          },
+          {
+            retriever: {
+              is: undefined,
+            },
+          },
+        ],
+      },
+    });
+    //TODO : link to the notification system if size > 0
+    return dropies;
+  };
+
 }
 
 export default DropyService;

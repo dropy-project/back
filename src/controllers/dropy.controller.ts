@@ -15,7 +15,6 @@ class DropyController {
       next(error);
     }
   };
-
   public getDropies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropies = await this.dropyService.getDropies();
@@ -91,6 +90,21 @@ class DropyController {
       await this.dropyService.retrieveDropy(retrieverId, dropyId);
       res.status(200).json(`Retriever with id ${retrieverId} added for dropy with id ${dropyId}`);
     } catch (error) {
+      next(error);
+    }
+  };
+
+  public pingDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const {userId, currentPositionLongitude, currentPositionLatitude} = req.body;
+      //modify the userId and set lastSeenDate to now and lastSeenPositionLongitude and lastSeenPositionLatitude to currentPositionLongitude and currentPositionLatitude
+      if (userId == undefined || currentPositionLongitude == undefined || currentPositionLatitude == undefined) {
+        res.status(400).send('Missing parameters');
+        return;
+      }
+      await this.dropyService.pingDropy(userId, currentPositionLongitude, currentPositionLatitude);
+    }
+    catch(error) {
       next(error);
     }
   };
