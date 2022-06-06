@@ -16,7 +16,7 @@
 ### Variables d'environnement : 
 - DATABASE_URL : l'url de la base de données
 - PORT : port de l'api
-- TOKEN_SECRET_KEY : secret pour encoder le token
+- SECRET_KEY : secret pour encoder le token
 
 ### Visualisation des données de la BD
 - Le port est 5432, le host localhost et le nom de la BD postgres
