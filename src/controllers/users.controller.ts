@@ -14,17 +14,6 @@ class UsersController {
       next(error);
     }
   };
-
-  public getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userId = Number(req.params.id);
-      const findOneUserData: User = await this.userService.findUserById(userId);
-
-      res.status(200).json(findOneUserData);
-    } catch (error) {
-      next(error);
-    }
-  };
 }
 
 export default UsersController;
