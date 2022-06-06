@@ -16,14 +16,5 @@ class UserService {
 
     return findUser;
   }
-
-  public async findUserByUID(userUID: string): Promise<User> {
-    if (userUID == null) throw new HttpException(400, 'the userId parameter is required');
-
-    const findUser: User = await client.user.findUnique({ where: { uid: userUID } });
-    if (!findUser) throw new HttpException(409, 'No user found');
-
-    return findUser;
-  }
 }
 export default UserService;
