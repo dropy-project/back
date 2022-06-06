@@ -157,12 +157,11 @@ class DropyService {
     return dropy;
   };
 
-  public pingDropy = async (userId: number, currentPositionLatitude : number , currentPositionLongitude : number): Promise<Dropy[]> => {
+  public pingDropy = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number): Promise<Dropy[]> => {
     const user = await client.user.findUnique({ where: { id: userId } });
     if (user == undefined) {
       throw new HttpException(404, `User with id ${userId} not found`);
     }
-
 
     const dropies = await client.dropy.findMany({
       where: {
@@ -195,7 +194,6 @@ class DropyService {
     //TODO : link to the notification system if size > 0
     return dropies;
   };
-
 }
 
 export default DropyService;
