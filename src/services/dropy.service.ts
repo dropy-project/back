@@ -156,6 +156,25 @@ class DropyService {
 
     return dropy;
   };
+
+  public getDropy = async (dropyId: number) => {
+    const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
+
+    if (dropy == undefined) {
+      throw new HttpException(404, `Dropy with id ${dropyId} not found`);
+    }
+
+    const customDropy = {
+      id: dropy.id,
+      creationDate: dropy.creationDate,
+      emitterId: dropy.emitterId,
+      emitterDisplayName: (await client.user.findUnique({ where: { id: dropy.emitterId } })).displayName,
+      retrieverId: dropy.retrieverId,
+      retrieverDisplayName: (await client.user.findUnique({ where: { id: dropy.retrieverId } })).displayName,
+    };
+
+    return customDropy;
+  };
 }
 
 export default DropyService;

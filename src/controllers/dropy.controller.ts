@@ -132,6 +132,28 @@ class DropyController {
       next(error);
     }
   };
+
+  public getDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const dropyId = Number(req.params.id);
+
+      if (dropyId == undefined || dropyId == NaN) {
+        res.status(400).send('Missing parameters');
+      }
+
+      const dropy = await this.dropyService.getDropy(dropyId);
+
+      const currentUserId = await getUserIdFromToken(req);
+
+      if (currentUserId != dropy.retrieverId) {
+        res.status(403).send(`User with id ${currentUserId} not allow to get dropy informations with id ${dropy.id}`);
+      }
+
+      res.status(200).json(dropy);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default DropyController;
