@@ -96,8 +96,8 @@ class DropyService {
             },
           },
           {
-            retriever: {
-              is: undefined,
+            retrieverId: {
+              equals: null,
             },
           },
         ],
