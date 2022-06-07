@@ -166,6 +166,7 @@ class DropyService {
 
     const customDropy = {
       id: dropy.id,
+      mediaType: dropy.mediaType,
       creationDate: dropy.creationDate,
       emitterId: dropy.emitterId,
       emitterDisplayName: (await client.user.findUnique({ where: { id: dropy.emitterId } })).displayName,
