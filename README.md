@@ -13,9 +13,12 @@
 - A la racine du projet toujours, lancer : `npm run prisma:migrate`
 - Lancer : `npm run dev`
 
+### Variables d'environnement : 
+- DATABASE_URL : l'url de la base de données
+- PORT : port de l'api
+- SECRET_KEY : secret pour encoder le token
 
 ### Visualisation des données de la BD
-- Les identifiants sont dans le .env
 - Le port est 5432, le host localhost et le nom de la BD postgres
 
 
