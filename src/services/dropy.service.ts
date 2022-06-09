@@ -75,34 +75,7 @@ class DropyService {
       throw new HttpException(404, `User with id ${userId} not found`);
     }
 
-    const dropies = await client.dropy.findMany({
-      where: {
-        AND: [
-          {
-            latitude: {
-              gt: latitude - DISTANCE_FILTER_RADIUS,
-              lt: latitude + DISTANCE_FILTER_RADIUS,
-            },
-          },
-          {
-            longitude: {
-              gt: longitude - DISTANCE_FILTER_RADIUS,
-              lt: longitude + DISTANCE_FILTER_RADIUS,
-            },
-          },
-          {
-            mediaType: {
-              not: MediaType.NONE,
-            },
-          },
-          {
-            retrieverId: {
-              equals: null,
-            },
-          },
-        ],
-      },
-    });
+    const dropies = await DropyService.getDropiesAroundAPosition(latitude, longitude);
 
     const dropyAround = dropies.map(dropy => {
       return {
@@ -157,25 +130,22 @@ class DropyService {
     return dropy;
   };
 
-  public pingDropy = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number): Promise<Dropy[]> => {
-    const user = await client.user.findUnique({ where: { id: userId } });
-    if (user == undefined) {
-      throw new HttpException(404, `User with id ${userId} not found`);
-    }
+  
 
+  public static  getDropiesAroundAPosition = async (latitude: number, longitude: number): Promise<Dropy[]> => {
     const dropies = await client.dropy.findMany({
       where: {
         AND: [
           {
             latitude: {
-              gt: currentPositionLatitude - DISTANCE_FILTER_RADIUS,
-              lt: currentPositionLatitude + DISTANCE_FILTER_RADIUS,
+              gt: longitude - DISTANCE_FILTER_RADIUS,
+              lt: latitude + DISTANCE_FILTER_RADIUS,
             },
           },
           {
             longitude: {
-              gt: currentPositionLongitude - DISTANCE_FILTER_RADIUS,
-              lt: currentPositionLongitude + DISTANCE_FILTER_RADIUS,
+              gt: longitude - DISTANCE_FILTER_RADIUS,
+              lt: latitude + DISTANCE_FILTER_RADIUS,
             },
           },
           {
@@ -191,8 +161,10 @@ class DropyService {
         ],
       },
     });
-    //TODO : link to the notification system if size > 0
     return dropies;
+  }
+
+
   public getDropy = async (dropyId: number) => {
     const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
