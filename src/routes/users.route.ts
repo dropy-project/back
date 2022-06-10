@@ -13,7 +13,7 @@ class UsersRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get(`${this.path}/ping`, authMiddleware, this.usersController.pingDropy);
+    this.router.get(`${this.path}/ping`, authMiddleware, this.usersController.backgroundGeolocationPing);
    }
 }
 

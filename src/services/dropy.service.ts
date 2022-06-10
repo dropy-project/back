@@ -130,8 +130,6 @@ class DropyService {
     return dropy;
   };
 
-  
-
   public static  getDropiesAroundAPosition = async (latitude: number, longitude: number): Promise<Dropy[]> => {
     const dropies = await client.dropy.findMany({
       where: {
@@ -163,7 +161,6 @@ class DropyService {
     });
     return dropies;
   }
-
 
   public getDropy = async (dropyId: number) => {
     const dropy = await client.dropy.findUnique({ where: { id: dropyId } });

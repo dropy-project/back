@@ -13,7 +13,6 @@ enum MediaType {
   PICTURE
   VIDEO
   MUSIC
-
 }
 
 model User {

@@ -9,7 +9,7 @@ class UserService {
     return allUser;
   }
 
-  public pingDropy = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number): Promise<Dropy[]> => {
+  public backgroundGeolocationPing = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number): Promise<Dropy[]> => {
     const user = await client.user.findUnique({ where: { id: userId } });
     if (user == undefined) {
       throw new HttpException(404, `User with id ${userId} not found`);
