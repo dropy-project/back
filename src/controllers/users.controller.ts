@@ -18,7 +18,6 @@ class UsersController {
   public backgroundGeolocationPing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId, currentPositionLongitude, currentPositionLatitude } = req.body;
-      //modify the userId and set lastSeenDate to now and lastSeenPositionLongitude and lastSeenPositionLatitude to currentPositionLongitude and currentPositionLatitude
       if (userId == undefined || currentPositionLongitude == undefined || currentPositionLatitude == undefined) {
         res.status(400).send('Missing parameters');
         return;
