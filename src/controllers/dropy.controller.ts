@@ -94,8 +94,6 @@ class DropyController {
     }
   };
 
- 
-
   public getDropyMedia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
