@@ -25,15 +25,15 @@ class UsersController {
       const userIdUrl = Number(req.params.userId);
 
       if (currentUserId !== userIdUrl) {
-        res.status(401).json({ message: 'You are not authorized to change this user' });
+        res.status(401).json('You are not authorized to change this user');
       }
       if (!deviceToken || deviceToken == undefined) {
-        res.status(400).json({ message: 'Device token is required' });
+        res.status(400).json('Device token is required');
       }
 
       await this.userService.changeDeviceToken(userIdUrl, deviceToken);
 
-      res.status(200).json({ message: 'Device token changed' });
+      res.status(200).json('Device token changed');
     } catch (error) {
       next(error);
     }
