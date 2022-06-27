@@ -130,20 +130,20 @@ class DropyService {
     return dropy;
   };
 
-  public static  getDropiesAroundAPosition = async (latitude: number, longitude: number): Promise<Dropy[]> => {
+  public static getDropiesAroundAPosition = async (latitude: number, longitude: number): Promise<Dropy[]> => {
     const dropies = await client.dropy.findMany({
       where: {
         AND: [
           {
             latitude: {
-              gt: longitude - DISTANCE_FILTER_RADIUS,
+              gt: latitude - DISTANCE_FILTER_RADIUS,
               lt: latitude + DISTANCE_FILTER_RADIUS,
             },
           },
           {
             longitude: {
               gt: longitude - DISTANCE_FILTER_RADIUS,
-              lt: latitude + DISTANCE_FILTER_RADIUS,
+              lt: longitude + DISTANCE_FILTER_RADIUS,
             },
           },
           {
