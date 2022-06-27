@@ -9,7 +9,7 @@ class UserService {
     return allUser;
   }
 
-  public backgroundGeolocationPing = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number): Promise<Dropy[]> => {
+  public backgroundGeolocationPing = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number, timeStamp : Date): Promise<Dropy[]> => {
     const user = await client.user.findUnique({ where: { id: userId } });
     if (user == undefined) {
       throw new HttpException(404, `User with id ${userId} not found`);
@@ -21,7 +21,7 @@ class UserService {
         id: user.id,
       },
       data: {
-        lastSeenDate: new Date(),
+        lastSeenDate: timeStamp,
         lastSeenPositionLatitude: currentPositionLatitude,
         lastSeenPositionLongitude: currentPositionLongitude,
       },
