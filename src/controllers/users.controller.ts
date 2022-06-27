@@ -48,13 +48,11 @@ class UsersController {
       const timeStamp = new Date(req.body.timestamp);
       const userId = Number(req.params.userId);
       const currentUserId = await getUserIdFromToken(req);
-      if (userId == undefined || currentUserId || currentPositionLongitude == undefined || currentPositionLatitude == undefined) {
+      if (userId == undefined || currentUserId == undefined || currentPositionLongitude == undefined || currentPositionLatitude == undefined) {
         res.status(400).send('Missing parameters');
-        return;
       }
       if (userId != currentUserId) {
         res.status(403).send('UserId token invalid');
-        return;
       }
 
       await this.userService.backgroundGeolocationPing(userId, currentPositionLongitude, currentPositionLatitude, timeStamp);
@@ -69,13 +67,13 @@ class UsersController {
       const userIdUrl = Number(req.params.userId);
 
       if (currentUserId !== userIdUrl) {
-        res.status(401).json({ message: 'You are not authorized to change this user' });
+        res.status(401).json('You are not authorized to change this user');
       }
 
       const user = await this.userService.sendPushNotification(userIdUrl);
       let pushNotif = await sendPushNotification([user], "GIT POULE GIT POULE POUUUUUUULE");
       console.log(pushNotif[0])
-      res.status(200).json({ message: "push send" });
+      res.status(200).json("push send");
     } catch (error) {
       next(error);
     }
