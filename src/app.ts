@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import cors from 'cors';
 
 class App {
   public app: express.Application;
@@ -31,6 +32,7 @@ class App {
 
   private initializeMiddlewares() {
     this.app.use(hpp());
+    this.app.use(cors());
     this.app.use(helmet());
     this.app.use(compression());
     this.app.use(express.json());
