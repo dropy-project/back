@@ -2,7 +2,7 @@ import { User } from '@prisma/client';
 import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
 import DropyService from './dropy.service';
-import notification from '../notification';
+import { sendPushNotification } from '../notification';
 
 class UserService {
   public async findAllUser(): Promise<User[]> {
@@ -29,7 +29,7 @@ class UserService {
     });
 
     if (dropies.length > 0) {
-      notification.sendPush([user], "ÇA POUSSE FORT ICI");
+      sendPushNotification([user], "ÇA POUSSE FORT ICI");
     };
 
     return dropies;

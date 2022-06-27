@@ -20,7 +20,7 @@ const settings = {
 
 const push = new PushNotifications(settings);
 
-export function sendPush(users: User[], data: any) {
+export function sendPushNotification(users: User[], data: any) {
 
     let deviceTokens = []
 
