@@ -9,9 +9,12 @@ if (fs.existsSync('./certNotification.p8')) {
 
 const settings = {
     apn: {
-        key: apnKey,
-        keyId: process.env.APN_KEYID || '',
-        teamId: process.env.APN_TEAMID || '',
+        token: {
+            key: apnKey,
+            keyId: process.env.APN_KEYID || '',
+            teamId: process.env.APN_TEAMID || '',
+        },
+        production: false
     },
     gcm: {
         id: process.env.FCM_KEY || '',
@@ -21,18 +24,20 @@ const settings = {
 const push = new PushNotifications(settings);
 
 export function sendPushNotification(users: User[], data: any) {
-
     let deviceTokens = []
 
     for (let user of users) {
-        deviceTokens.push(user.deviceToken)
+        deviceTokens.push(user.deviceToken);
     }
 
     const sentData = {
-        topic: 'com.dropy.app',
-        contentAvailable: true,
-        ...data
+        topic: 'com.dropy.project',
+        title: 'Dropy',
+        body: data,
+        sound: 'default',
+        contentAvailable: true
     }
+
     return new Promise((resolve, reject) => {
         push.send(deviceTokens, sentData).then(resolve).catch(reject);
     });

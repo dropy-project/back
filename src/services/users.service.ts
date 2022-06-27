@@ -53,5 +53,18 @@ class UserService {
     return user;
 
   }
+
+  public sendPushNotification = async (userId: number): Promise<User> => {
+    const user = await client.user.findUnique({ where: { id: userId } });
+    if (user == undefined) {
+      throw new HttpException(404, `User with id ${userId} not found`);
+    }
+
+    if (user.deviceToken == undefined) {
+      throw new HttpException(400, `User with id ${userId} has no device token`);
+    }
+
+    return user;
+  }
 }
 export default UserService;
