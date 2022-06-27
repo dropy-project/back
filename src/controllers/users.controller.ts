@@ -55,6 +55,8 @@ class UsersController {
       }
 
       await this.userService.backgroundGeolocationPing(userId, longitude, latitude, timeStamp);
+
+      res.status(200).send('Ping sucessful')
     } catch (error) {
       next(error);
     }
