@@ -15,6 +15,7 @@ class DropyController {
       next(error);
     }
   };
+
   public getDropies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropies = await this.dropyService.getDropies();
