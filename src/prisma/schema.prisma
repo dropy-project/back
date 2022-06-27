@@ -16,13 +16,16 @@ enum MediaType {
 }
 
 model User {
-  id               Int      @id @default(autoincrement())
-  uid              String   @unique
-  username         String   @unique
-  displayName      String
-  registerDate     DateTime @default(now())
-  emittedDropies   Dropy[]  @relation("emittedDropies")
-  retrievedDropies Dropy[]  @relation("retrievedDropies")
+  id                        Int      @id @default(autoincrement())
+  uid                       String   @unique
+  username                  String   @unique
+  displayName               String
+  registerDate              DateTime @default(now())
+  emittedDropies            Dropy[]  @relation("emittedDropies")
+  retrievedDropies          Dropy[]  @relation("retrievedDropies")
+  lastSeenDate              DateTime
+  lastSeenLocationLongitude Float
+  lastSeenLocationLatitude  Float
 }
 
 model Dropy {

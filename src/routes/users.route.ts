@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
+import authMiddleware from '@/middlewares/auth.middleware';
 import UsersController from '@controllers/users.controller';
 
 class UsersRoute implements Routes {
@@ -11,7 +12,9 @@ class UsersRoute implements Routes {
     this.initializeRoutes();
   }
 
-  private initializeRoutes() { }
+  private initializeRoutes() {
+    this.router.get(`${this.path}/:userId/backgroundGeolocationPing`, authMiddleware, this.usersController.backgroundGeolocationPing);
+   }
 }
 
 export default UsersRoute;
