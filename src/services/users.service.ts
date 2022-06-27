@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { Dropy, User } from '@prisma/client';
 import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
 import DropyService from './dropy.service';
@@ -17,20 +17,20 @@ class UserService {
     }
 
     const dropies = await DropyService.getDropiesAroundAPosition(currentPositionLatitude, currentPositionLongitude);
+
+    console.log(dropies.length)
     await client.user.update({
       where: {
         id: user.id,
       },
       data: {
         lastSeenDate: timeStamp,
-        lastSeenPositionLatitude: currentPositionLatitude,
-        lastSeenPositionLongitude: currentPositionLongitude,
+        lastSeenLocationLatitude: currentPositionLatitude,
+        lastSeenLocationLongitude: currentPositionLongitude,
       },
     });
 
-    if (dropies.length > 0) {
-      sendPushNotification([user], "ÇA POUSSE FORT ICI");
-    };
+    sendPushNotification([user], "ÇA POUSSE FORT ICI");
 
     return dropies;
   }

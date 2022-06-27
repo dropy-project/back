@@ -43,19 +43,18 @@ class UsersController {
 
   public backgroundGeolocationPing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const currentPositionLongitude = req.body.coords.longitude;
-      const currentPositionLatitude = req.body.coords.latitude;
-      const timeStamp = new Date(req.body.timestamp);
+      const { longitude, latitude } = req?.body?.location?.coords;
+      const timeStamp = new Date(req?.body?.location?.timestamp);
       const userId = Number(req.params.userId);
       const currentUserId = await getUserIdFromToken(req);
-      if (userId == undefined || currentUserId == undefined || currentPositionLongitude == undefined || currentPositionLatitude == undefined) {
+      if (userId == undefined || currentUserId == undefined || longitude == undefined || latitude == undefined) {
         res.status(400).send('Missing parameters');
       }
       if (userId != currentUserId) {
         res.status(403).send('UserId token invalid');
       }
 
-      await this.userService.backgroundGeolocationPing(userId, currentPositionLongitude, currentPositionLatitude, timeStamp);
+      await this.userService.backgroundGeolocationPing(userId, longitude, latitude, timeStamp);
     } catch (error) {
       next(error);
     }
