@@ -27,7 +27,7 @@ class UsersController {
       if (currentUserId !== userIdUrl) {
         res.status(401).json({ message: 'You are not authorized to change this user' });
       }
-      if (!deviceToken) {
+      if (!deviceToken || deviceToken == undefined) {
         res.status(400).json({ message: 'Device token is required' });
       }
 
