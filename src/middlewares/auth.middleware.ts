@@ -6,7 +6,7 @@ import { getUserIdFromToken } from '@/utils/auth.utils';
 
 const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
-    const userId = await getUserIdFromToken(req);
+    const userId = await getUserIdFromToken(req.body.authorizationToken);
 
     const findUser = await client.user.findUnique({ where: { id: userId } });
 

@@ -41,7 +41,7 @@ class AuthService {
     return uniqueUsername;
   }
 
-  public async login(userData: UserAuthDTO): Promise<{ cookie: string; findUser: User }> {
+  public async login(userData: UserAuthDTO): Promise<{ cookie: string[]; findUser: User }> {
     if (userData.uid == null) {
       throw new HttpException(400, 'No user data provided');
     }
@@ -51,7 +51,8 @@ class AuthService {
 
     const tokenData = this.createToken(findUser);
     const refreshTokenData = this.createRefreshToken(findUser);
-    const cookie = "Authorization" + this.createCookie(tokenData) + ';RefreshToken' + this.createCookie(refreshTokenData);
+    const cookie = [this.createCookie(tokenData)]
+    cookie.push(this.createCookie(refreshTokenData));
     return { cookie, findUser };
   }
 
@@ -73,21 +74,21 @@ class AuthService {
   
 
   public createCookie(tokenData : TokenData) :string {
-    return `=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`;
+    return `${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`;
   }
 
   
 
-  public async refreshAuthToken(req : Request): Promise<{ cookie: string }> {
-    const refreshToken = req.cookies.refreshToken;
+  public async refreshAuthToken(req : Request): Promise<{ token: string }> {
+    const refreshToken = req.body.refreshToken;
     if (!refreshToken) throw new HttpException(401, 'No refresh token provided');
     const userId = await getUserIdFromToken(refreshToken);
     const user = await client.user.findUnique({ where: { id: userId } });
     if (!user) throw new HttpException(401, 'No user found with this refresh token');
     const tokenData = this.createToken(user);
-    const cookie = this.createCookie(tokenData);
+    const token = this.createCookie(tokenData);
     
-    return { cookie };
+    return { token };
   }
 
 
