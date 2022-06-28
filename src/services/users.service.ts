@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { Dropy, User } from '@prisma/client';
 import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
 import DropyService from './dropy.service';
@@ -9,21 +9,21 @@ class UserService {
     return allUser;
   }
 
-  public backgroundGeolocationPing = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number, timeStamp : Date): Promise<Dropy[]> => {
+  public backgroundGeolocationPing = async (userId: number, currentPositionLongitude: number, currentPositionLatitude: number, timeStamp: Date): Promise<Dropy[]> => {
     const user = await client.user.findUnique({ where: { id: userId } });
     if (user == undefined) {
       throw new HttpException(404, `User with id ${userId} not found`);
     }
 
-    const dropies  =  await DropyService.getDropiesAroundAPosition(currentPositionLatitude, currentPositionLongitude);
+    const dropies = await DropyService.getDropiesAroundAPosition(currentPositionLatitude, currentPositionLongitude, user);
     await client.user.update({
       where: {
         id: user.id,
       },
       data: {
         lastSeenDate: timeStamp,
-        lastSeenPositionLatitude: currentPositionLatitude,
-        lastSeenPositionLongitude: currentPositionLongitude,
+        lastSeenLocationLatitude: currentPositionLatitude,
+        lastSeenLocationLongitude: currentPositionLongitude,
       },
     });
 
