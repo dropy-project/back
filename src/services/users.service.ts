@@ -10,15 +10,14 @@ class UserService {
     return allUser;
   }
 
-  public backgroundGeolocationPing = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number, timeStamp: Date): Promise<Dropy[]> => {
+  public backgroundGeolocationPing = async (userId: number, currentPositionLongitude: number, currentPositionLatitude: number, timeStamp: Date): Promise<Dropy[]> => {
     const user = await client.user.findUnique({ where: { id: userId } });
     if (user == undefined) {
       throw new HttpException(404, `User with id ${userId} not found`);
     }
 
-    const dropies = await DropyService.getDropiesAroundAPosition(currentPositionLatitude, currentPositionLongitude);
+    const dropies = await DropyService.getDropiesAroundAPosition(currentPositionLatitude, currentPositionLongitude, user);
 
-    console.log(dropies.length)
     await client.user.update({
       where: {
         id: user.id,
@@ -30,7 +29,11 @@ class UserService {
       },
     });
 
-    sendPushNotification([user], "ÇA POUSSE FORT ICI");
+    console.log(dropies.length)
+
+    if (dropies.length > 0) {
+      sendPushNotification([user], "ÇA POUSSE FORT ICI");
+    }
 
     return dropies;
   }

@@ -39,8 +39,6 @@ class UsersController {
     }
   }
 
-
-
   public backgroundGeolocationPing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { longitude, latitude } = req?.body?.location?.coords;
@@ -72,8 +70,7 @@ class UsersController {
       }
 
       const user = await this.userService.sendPushNotification(userIdUrl);
-      let pushNotif = await sendPushNotification([user], "GIT POULE GIT POULE POUUUUUUULE");
-      console.log(pushNotif[0])
+      await sendPushNotification([user], "C'est un ping");
       res.status(200).json("push send");
     } catch (error) {
       next(error);

@@ -21,6 +21,7 @@
 - BD_PASSWORD : mot de passe de la base donnée
 - APN_KEYID : keyid pour l'apple push notification
 - APN_TEAMID : teamid pour l'apple push notification
+- FCM_KEY : key pour notification android/google
 
 ### Visualisation des données de la BD
 - Le port est 5432, le host localhost et le nom de la BD postgres

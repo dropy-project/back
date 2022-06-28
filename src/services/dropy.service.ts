@@ -2,7 +2,7 @@ import client from '@/client';
 import { DropyDTO } from '@/dtos/dropy.dto';
 import { HttpException } from '@/exceptions/HttpException';
 import { DropyAround } from '@/interfaces/dropy.interface';
-import { Dropy, MediaType } from '@prisma/client';
+import { Dropy, MediaType, User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 
 const DISTANCE_FILTER_RADIUS = 0.004; // Environ 300m
@@ -130,7 +130,16 @@ class DropyService {
     return dropy;
   };
 
-  public static getDropiesAroundAPosition = async (latitude: number, longitude: number): Promise<Dropy[]> => {
+  public static getDropiesAroundAPosition = async (latitude: number, longitude: number, user: User = undefined): Promise<Dropy[]> => {
+    let excludeCurrentUserDropier = {}
+    if (user != undefined) {
+      excludeCurrentUserDropier = {
+        emitterId: {
+          not: user.id,
+        }
+      }
+    }
+
     const dropies = await client.dropy.findMany({
       where: {
         AND: [
@@ -156,6 +165,7 @@ class DropyService {
               is: undefined,
             },
           },
+          excludeCurrentUserDropier
         ],
       },
     });
