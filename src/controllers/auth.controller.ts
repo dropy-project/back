@@ -38,6 +38,17 @@ class AuthController {
       next(error);
     }
   };
+
+  public refreshAuthToken = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { cookie } = await this.authService.refreshAuthToken(req);
+
+      res.setHeader('Set-Cookie', [cookie]);
+      res.status(200).json('Auth token refreshed');
+    } catch(error) {
+      next(error);
+    }
+  };
 }
 
 export default AuthController;

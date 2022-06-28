@@ -4,8 +4,12 @@ import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
 import { UserAuthDTO } from '@/dtos/users.dto';
 import client from '@/client';
+import { Request } from 'express';
+import { getUserIdFromToken } from '@/utils/auth.utils';
 
 const ONE_MONTH_IN_SECONDS = 2592000;
+
+const ONE_DAY_IN_SECONDS = 86400;
 
 class AuthService {
   public async register(userData: UserAuthDTO): Promise<User> {
@@ -46,7 +50,8 @@ class AuthService {
     if (!findUser) throw new HttpException(409, 'No user found with this uid');
 
     const tokenData = this.createToken(findUser);
-    const cookie = this.createCookie(tokenData);
+    const refreshTokenData = this.createRefreshToken(findUser);
+    const cookie = this.createCookie(tokenData) + '; ' + this.createCookie(refreshTokenData);
 
     return { cookie, findUser };
   }
@@ -54,14 +59,40 @@ class AuthService {
   public createToken(user: User): TokenData {
     const dataStoredInToken: DataStoredInToken = { userId: user.id };
     const secretKey = process.env.SECRET_KEY;
+    const expiresIn = ONE_DAY_IN_SECONDS;
+
+    return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
+  }
+
+  public createRefreshToken(user: User): TokenData {
+    const dataStoredInToken: DataStoredInToken = { userId: user.id };
+    const secretKey = process.env.SECRET_KEY;
     const expiresIn = ONE_MONTH_IN_SECONDS;
 
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
   }
 
-  public createCookie(tokenData: TokenData): string {
-    return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn};`;
+  
+
+  public createCookie(tokenData : TokenData) :string {
+    return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`;
   }
+
+  
+
+  public async refreshAuthToken(req : Request): Promise<{ cookie: string }> {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) throw new HttpException(401, 'No refresh token provided');
+    const userId = await getUserIdFromToken(refreshToken);
+    const user = await client.user.findUnique({ where: { id: userId } });
+    if (!user) throw new HttpException(401, 'No user found with this refresh token');
+    const tokenData = this.createToken(user);
+    const cookie = this.createCookie(tokenData);
+    
+    return { cookie };
+  }
+
+
 }
 
 export default AuthService;
