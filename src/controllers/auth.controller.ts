@@ -23,17 +23,7 @@ class AuthController {
       const userData: UserAuthDTO = req.body;
       const { cookie, findUser } = await this.authService.login(userData);
 
-      res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json(findUser);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public logOut = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-      res.status(200).json('User logged out');
+      res.status(200).json(cookie + findUser);
     } catch (error) {
       next(error);
     }
@@ -43,8 +33,7 @@ class AuthController {
     try {
       const { cookie } = await this.authService.refreshAuthToken(req);
 
-      res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json('Auth token refreshed');
+      res.status(200).json(cookie);
     } catch(error) {
       next(error);
     }

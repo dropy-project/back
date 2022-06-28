@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "lastSeenDate" SET DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "lastSeenLocationLatitude" SET DEFAULT 0,
+ALTER COLUMN "lastSeenLocationLongitude" SET DEFAULT 0;

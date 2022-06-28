@@ -3,14 +3,13 @@ import { Request } from 'express';
 import { verify } from 'jsonwebtoken';
 
 export const getUserIdFromToken = async (req: Request): Promise<number> => {
-  const Authorization = req.cookies['Authorization'] || (req.header('Authorization') ? req.header('Authorization').split('Bearer ')[1] : null);
-
-  if (Authorization == null) {
+  const authorizationToken = req.body;
+  if (authorizationToken == null) {
     return null;
   }
 
   const secretKey = process.env.SECRET_KEY;
-  const verificationResponse = (await verify(Authorization, secretKey)) as DataStoredInToken;
+  const verificationResponse = (await verify(authorizationToken, secretKey)) as DataStoredInToken;
 
   return verificationResponse.userId;
 };

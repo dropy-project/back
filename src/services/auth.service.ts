@@ -51,8 +51,7 @@ class AuthService {
 
     const tokenData = this.createToken(findUser);
     const refreshTokenData = this.createRefreshToken(findUser);
-    const cookie = this.createCookie(tokenData) + '; ' + this.createCookie(refreshTokenData);
-
+    const cookie = "Authorization" + this.createCookie(tokenData) + ';RefreshToken' + this.createCookie(refreshTokenData);
     return { cookie, findUser };
   }
 
@@ -60,7 +59,6 @@ class AuthService {
     const dataStoredInToken: DataStoredInToken = { userId: user.id };
     const secretKey = process.env.SECRET_KEY;
     const expiresIn = ONE_DAY_IN_SECONDS;
-
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
   }
 
@@ -75,7 +73,7 @@ class AuthService {
   
 
   public createCookie(tokenData : TokenData) :string {
-    return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`;
+    return `=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`;
   }
 
   

@@ -23,9 +23,9 @@ model User {
   registerDate              DateTime @default(now())
   emittedDropies            Dropy[]  @relation("emittedDropies")
   retrievedDropies          Dropy[]  @relation("retrievedDropies")
-  lastSeenDate              DateTime
-  lastSeenLocationLongitude Float
-  lastSeenLocationLatitude  Float
+  lastSeenDate              DateTime? @default(now())
+  lastSeenLocationLongitude Float?    @default(0)
+  lastSeenLocationLatitude  Float?    @default(0)
 }
 
 model Dropy {
