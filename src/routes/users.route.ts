@@ -13,7 +13,7 @@ class UsersRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get(`${this.path}/:userId/backgroundGeolocationPing`, authMiddleware, this.usersController.backgroundGeolocationPing);
+    this.router.post(`${this.path}/:userId/backgroundGeolocationPing`, authMiddleware, this.usersController.backgroundGeolocationPing);
   }
 }
 

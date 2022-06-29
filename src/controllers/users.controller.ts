@@ -9,23 +9,26 @@ class UsersController extends Controller {
 
   public backgroundGeolocationPing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const currentPositionLongitude = req.body.coords.longitude;
-      const currentPositionLatitude = req.body.coords.latitude;
-      const timeStamp = new Date(req.body.timestamp);
-      const userId = Number(req.params.userId);
-      const currentUserId = await getUserIdFromToken(req);
+      const { location } = req.body;
+      const { userId } = req.params as unknown as { userId: number };
 
-      if (userId == undefined || currentUserId || currentPositionLongitude == undefined || currentPositionLatitude == undefined) {
-        throw HttpException.MISSING_PARAMETER;
-      }
+      this.checkForNotSet(location?.coords, userId);
 
-      if (userId != currentUserId) {
+      const { timestamp, coords } = location;
+      const { latitude, longitude } = coords;
+
+      this.checkForNotSet(timestamp, latitude, longitude);
+      this.checkForNan(timestamp, latitude, longitude);
+
+      const tokenUserId = await getUserIdFromToken(req);
+
+      if (Number(userId) != tokenUserId) {
         throw HttpException.INVALID_TOKEN;
       }
 
-      await this.userService.backgroundGeolocationPing(userId, currentPositionLongitude, currentPositionLatitude, timeStamp);
+      await this.userService.backgroundGeolocationPing(Number(userId), longitude, latitude, timestamp);
     } catch (error) {
-      this.handleError(error, res, next);
+      next(error);
     }
   };
 }

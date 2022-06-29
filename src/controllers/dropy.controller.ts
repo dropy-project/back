@@ -12,9 +12,8 @@ class DropyController extends Controller {
   public createDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { emitterId, latitude, longitude } = req.body;
-      if (emitterId == null || latitude == null || longitude == null) {
-        throw HttpException.MISSING_PARAMETER;
-      }
+      this.checkForNotSet(emitterId, latitude, longitude);
+      this.checkForNan(emitterId, latitude, longitude);
 
       const dropy = await this.dropyService.createDropy(emitterId, latitude, longitude);
       res.status(200).json(dropy);
@@ -26,16 +25,17 @@ class DropyController extends Controller {
   public createDropyMedia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
+      this.checkForNan(dropyId);
 
       const requestData = req.files ?? req.body;
 
-      if (requestData == null) {
+      if (this.isNotSet(requestData)) {
         throw new HttpException(400, 'No form data found');
       }
 
       const [formField, mediaPayload] = Object.entries(requestData)[0] as [string, UploadedFile | string];
 
-      if (mediaPayload == null) {
+      if (this.isNotSet(formField, mediaPayload)) {
         throw new HttpException(400, 'No payload were uploaded.');
       }
 
@@ -60,10 +60,8 @@ class DropyController extends Controller {
   public findAround = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId, latitude, longitude } = req.body;
-
-      if (userId == undefined || latitude == undefined || longitude == undefined) {
-        throw HttpException.MISSING_PARAMETER;
-      }
+      this.checkForNotSet(userId, latitude, longitude);
+      this.checkForNan(userId, latitude, longitude);
 
       const dropiesAround = await this.dropyService.findAround(userId, latitude, longitude);
       res.status(200).json(dropiesAround);
@@ -75,10 +73,8 @@ class DropyController extends Controller {
   public retrieveDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { retrieverId, dropyId } = req.body;
-
-      if (retrieverId == undefined || dropyId == undefined) {
-        throw HttpException.MISSING_PARAMETER;
-      }
+      this.checkForNotSet(retrieverId, dropyId);
+      this.checkForNan(retrieverId, dropyId);
 
       await this.dropyService.retrieveDropy(retrieverId, dropyId);
       res.status(200).json(`Retriever with id ${retrieverId} added for dropy with id ${dropyId}`);
@@ -90,10 +86,7 @@ class DropyController extends Controller {
   public getDropyMedia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
-
-      if (dropyId == undefined || dropyId == NaN) {
-        throw HttpException.MISSING_PARAMETER;
-      }
+      this.checkForNan(dropyId);
 
       const dropy = await this.dropyService.getDropyById(dropyId);
 
@@ -126,10 +119,7 @@ class DropyController extends Controller {
   public getDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
-
-      if (dropyId == undefined || dropyId == NaN) {
-        throw HttpException.MISSING_PARAMETER;
-      }
+      this.checkForNan(dropyId);
 
       const dropy = await this.dropyService.getDropy(dropyId);
 
@@ -141,7 +131,7 @@ class DropyController extends Controller {
 
       res.status(200).json(dropy);
     } catch (error) {
-      this.handleError(error, res, next);
+      next(error);
     }
   };
 }

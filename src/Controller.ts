@@ -1,12 +1,23 @@
 import { HttpException } from '@/exceptions/HttpException';
-import { NextFunction, Response } from 'express';
 
 export abstract class Controller {
-  protected handleError = (error: unknown, res: Response, next: NextFunction) => {
-    if (error instanceof HttpException) {
-      error.send(res);
-      return;
+  protected isNotSet(...args: unknown[]) {
+    return args.some(arg => arg == null);
+  }
+
+  protected isNan(...args: unknown[]) {
+    return args.some(arg => Number.isNaN(Number(arg)));
+  }
+
+  protected checkForNotSet(...args: unknown[]) {
+    if (this.isNotSet(...args)) {
+      throw HttpException.MISSING_PARAMETER;
     }
-    next(error);
-  };
+  }
+
+  protected checkForNan(...args: unknown[]) {
+    if (this.isNan(...args)) {
+      throw HttpException.INVALID_PARAMETER;
+    }
+  }
 }
