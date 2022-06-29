@@ -1,32 +1,41 @@
 import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
-import { UserAuthDTO } from '@dtos/users.dto';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import AuthService from '@services/auth.service';
+import { Controller } from '../Controller';
+import { HttpException } from '@/exceptions/HttpException';
 
-class AuthController {
+class AuthController extends Controller {
   public authService = new AuthService();
 
   public register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: UserAuthDTO = req.body;
-      const createUserData: User = await this.authService.register(userData);
+      const { uid, displayName } = req.body;
+      if (uid == null || displayName == null) {
+        throw HttpException.MISSING_PARAMETER;
+      }
+
+      const createUserData: User = await this.authService.register(uid, displayName);
 
       res.status(201).json(createUserData);
     } catch (error) {
-      next(error);
+      this.handleError(error, res, next);
     }
   };
 
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: UserAuthDTO = req.body;
-      const { cookie, findUser } = await this.authService.login(userData);
+      const { uid } = req.body;
+      if (uid == null) {
+        throw HttpException.MISSING_PARAMETER;
+      }
+
+      const { cookie, findUser } = await this.authService.login(uid);
 
       res.setHeader('Set-Cookie', [cookie]);
       res.status(200).json(findUser);
     } catch (error) {
-      next(error);
+      this.handleError(error, res, next);
     }
   };
 
@@ -35,7 +44,7 @@ class AuthController {
       res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
       res.status(200).json('User logged out');
     } catch (error) {
-      next(error);
+      this.handleError(error, res, next);
     }
   };
 }

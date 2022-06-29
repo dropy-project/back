@@ -3,23 +3,21 @@ import DropyService from '@/services/dropy.service';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 import { getUserIdFromToken } from '@/utils/auth.utils';
+import { HttpException } from '@/exceptions/HttpException';
+import { Controller } from '../Controller';
 
-class DropyController {
+class DropyController extends Controller {
   public dropyService = new DropyService();
 
   public createDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const dropy = await this.dropyService.createDropy(req.body);
-      res.status(200).json(dropy);
-    } catch (error) {
-      next(error);
-    }
-  };
+      const { emitterId, latitude, longitude } = req.body;
+      if (emitterId == null || latitude == null || longitude == null) {
+        throw HttpException.MISSING_PARAMETER;
+      }
 
-  public getDropies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const dropies = await this.dropyService.getDropies();
-      res.status(200).json(dropies);
+      const dropy = await this.dropyService.createDropy(emitterId, latitude, longitude);
+      res.status(200).json(dropy);
     } catch (error) {
       next(error);
     }
@@ -31,28 +29,24 @@ class DropyController {
 
       const requestData = req.files ?? req.body;
 
-      if (requestData == undefined) {
-        res.status(400).send('No form data');
-        return;
+      if (requestData == null) {
+        throw new HttpException(400, 'No form data found');
       }
 
       const [formField, mediaPayload] = Object.entries(requestData)[0] as [string, UploadedFile | string];
 
-      if (mediaPayload == undefined) {
-        res.status(400).send('No payload were uploaded.');
-        return;
+      if (mediaPayload == null) {
+        throw new HttpException(400, 'No payload were uploaded.');
       }
 
       const mediaType = MediaType[formField.toUpperCase()];
-      if (mediaType == undefined) {
-        res.status(400).send(`Unsuported dropy media type : ${formField}`);
-        return;
+      if (mediaType == null) {
+        throw new HttpException(400, `Unsuported dropy media type : ${formField}`);
       }
 
-      const isFile = (mediaPayload as UploadedFile).mimetype != undefined;
-      if (isFile && (mediaPayload as UploadedFile).data == undefined) {
-        res.status(400).send('File data corrupted or more than one file sent at once');
-        return;
+      const isFile = (mediaPayload as UploadedFile).mimetype != null;
+      if (isFile && (mediaPayload as UploadedFile).data == null) {
+        throw new HttpException(400, 'File data corrupted or more than one file sent at once');
       }
 
       await this.dropyService.createDropyMedia(dropyId, mediaPayload, mediaType);
@@ -68,8 +62,7 @@ class DropyController {
       const { userId, latitude, longitude } = req.body;
 
       if (userId == undefined || latitude == undefined || longitude == undefined) {
-        res.status(400).send('Missing parameters');
-        return;
+        throw HttpException.MISSING_PARAMETER;
       }
 
       const dropiesAround = await this.dropyService.findAround(userId, latitude, longitude);
@@ -84,8 +77,7 @@ class DropyController {
       const { retrieverId, dropyId } = req.body;
 
       if (retrieverId == undefined || dropyId == undefined) {
-        res.status(400).send('Missing parameters');
-        return;
+        throw HttpException.MISSING_PARAMETER;
       }
 
       await this.dropyService.retrieveDropy(retrieverId, dropyId);
@@ -100,33 +92,31 @@ class DropyController {
       const dropyId = Number(req.params.id);
 
       if (dropyId == undefined || dropyId == NaN) {
-        res.status(400).send('Missing parameters');
+        throw HttpException.MISSING_PARAMETER;
       }
 
-      const dropy = await this.dropyService.getDropyMedia(dropyId);
+      const dropy = await this.dropyService.getDropyById(dropyId);
 
       const currentUserId = await getUserIdFromToken(req);
 
       if (currentUserId != dropy.retrieverId) {
-        res.status(403).send(`User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
+        throw new HttpException(403, `User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
       }
 
       const mediaType = dropy.mediaType;
 
       if (mediaType == MediaType.PICTURE || mediaType == MediaType.VIDEO) {
         if (dropy.filePath == undefined) {
-          res.status(404).send(`Media filePath from dropy with id ${dropyId} not found`);
+          throw new HttpException(404, `Media filePath from dropy with id ${dropyId} not found`);
         }
 
         res.status(200).sendFile(dropy.filePath);
       } else {
         if (dropy.mediaData == undefined) {
-          res.status(404).send(`Media data from dropy with id ${dropyId} not found`);
+          throw new HttpException(404, `Media data from dropy with id ${dropyId} not found`);
         }
 
         res.status(200).json(dropy.mediaData);
-
-        // A continuer pour la musique
       }
     } catch (error) {
       next(error);
@@ -138,7 +128,7 @@ class DropyController {
       const dropyId = Number(req.params.id);
 
       if (dropyId == undefined || dropyId == NaN) {
-        res.status(400).send('Missing parameters');
+        throw HttpException.MISSING_PARAMETER;
       }
 
       const dropy = await this.dropyService.getDropy(dropyId);
@@ -146,12 +136,12 @@ class DropyController {
       const currentUserId = await getUserIdFromToken(req);
 
       if (currentUserId != dropy.retrieverId) {
-        res.status(403).send(`User with id ${currentUserId} not allow to get dropy informations with id ${dropy.id}`);
+        throw new HttpException(403, `User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
       }
 
       res.status(200).json(dropy);
     } catch (error) {
-      next(error);
+      this.handleError(error, res, next);
     }
   };
 }

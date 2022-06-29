@@ -14,11 +14,11 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
       req.user = findUser;
       next();
     } else {
-      next(new HttpException(401, 'Wrong authentication token'));
+      res.status(HttpException.INVALID_TOKEN.status).send(HttpException.INVALID_TOKEN.message);
     }
   } catch (error) {
     console.log(error);
-    next(new HttpException(401, 'Authentication error'));
+    res.status(500).send('Authentication error');
   }
 };
 
