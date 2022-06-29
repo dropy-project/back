@@ -1,13 +1,13 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import userService from '@services/users.service';
-import { getUserIdFromToken } from '@/utils/auth.utils';
 import { Controller } from '../Controller';
 import { HttpException } from '@/exceptions/HttpException';
+import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 
 class UsersController extends Controller {
   public userService = new userService();
 
-  public backgroundGeolocationPing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public backgroundGeolocationPing = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { location } = req.body;
       const { userId } = req.params as unknown as { userId: number };
@@ -20,9 +20,7 @@ class UsersController extends Controller {
       this.checkForNotSet(timestamp, latitude, longitude);
       this.checkForNan(timestamp, latitude, longitude);
 
-      const tokenUserId = await getUserIdFromToken(req);
-
-      if (Number(userId) != tokenUserId) {
+      if (Number(userId) != req.user.id) {
         throw HttpException.INVALID_TOKEN;
       }
 

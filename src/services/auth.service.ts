@@ -1,5 +1,5 @@
 import client from '@/client';
-import { sign } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
@@ -47,7 +47,7 @@ class AuthService {
     const secretKey = process.env.SECRET_KEY;
     const expiresIn = ONE_MONTH_IN_SECONDS;
 
-    return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
+    return { expiresIn, token: jwt.sign(dataStoredInToken, secretKey, { expiresIn }) };
   }
 
   public createCookie(tokenData: TokenData): string {

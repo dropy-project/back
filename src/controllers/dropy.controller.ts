@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import DropyService from '@/services/dropy.service';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
-import { getUserIdFromToken } from '@/utils/auth.utils';
 import { HttpException } from '@/exceptions/HttpException';
 import { Controller } from '../Controller';
+import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 
 class DropyController extends Controller {
   public dropyService = new DropyService();
@@ -83,17 +83,15 @@ class DropyController extends Controller {
     }
   };
 
-  public getDropyMedia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getDropyMedia = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
       this.checkForNan(dropyId);
 
       const dropy = await this.dropyService.getDropyById(dropyId);
 
-      const currentUserId = await getUserIdFromToken(req);
-
-      if (currentUserId != dropy.retrieverId) {
-        throw new HttpException(403, `User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
+      if (req.user.id != dropy.retrieverId) {
+        throw new HttpException(403, `User with id ${req.user.id} not allow to retrieve dropy with id ${dropy.id}`);
       }
 
       const mediaType = dropy.mediaType;
@@ -116,17 +114,15 @@ class DropyController extends Controller {
     }
   };
 
-  public getDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
       this.checkForNan(dropyId);
 
       const dropy = await this.dropyService.getDropy(dropyId);
 
-      const currentUserId = await getUserIdFromToken(req);
-
-      if (currentUserId != dropy.retrieverId) {
-        throw new HttpException(403, `User with id ${currentUserId} not allow to retrieve dropy with id ${dropy.id}`);
+      if (req.user.id != dropy.retrieverId) {
+        throw new HttpException(403, `User with id ${req.user.id} not allow to retrieve dropy with id ${dropy.id}`);
       }
 
       res.status(200).json(dropy);
