@@ -9,7 +9,7 @@ class UsersController extends Controller {
   public updateDeviceToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { deviceToken } = req.body;
-      this.checkForNotSet(deviceToken);
+      this.throwIfNotString(deviceToken);
 
       await this.userService.updateDeviceToken(req.user, deviceToken);
 
@@ -23,13 +23,13 @@ class UsersController extends Controller {
     try {
       const { location } = req.body;
 
-      this.checkForNotSet(location?.coords, req.user);
+      this.throwIfNull(location?.coords, req.user);
 
       const { timestamp, coords } = location;
       const { latitude, longitude } = coords;
 
-      this.checkForNotSet(timestamp, latitude, longitude);
-      this.checkForNaN(latitude, longitude);
+      this.throwIfNotString(timestamp);
+      this.throwIfNotNumber(latitude, longitude);
 
       await this.userService.backgroundGeolocationPing(req.user, latitude, longitude, new Date(timestamp));
       res.status(200).json('Success');

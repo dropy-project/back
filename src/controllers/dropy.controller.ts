@@ -12,8 +12,7 @@ class DropyController extends Controller {
   public createDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { latitude, longitude } = req.body;
-      this.checkForNotSet(latitude, longitude);
-      this.checkForNaN(latitude, longitude);
+      this.throwIfNotNumber(latitude, longitude);
 
       const dropy = await this.dropyService.createDropy(req.user, latitude, longitude);
       res.status(200).json(dropy);
@@ -25,18 +24,17 @@ class DropyController extends Controller {
   public createDropyMedia = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
-      this.checkForNotSet(dropyId);
-      this.checkForNaN(dropyId);
+      this.throwIfNotNumber(dropyId);
 
       const requestData = req.files ?? req.body;
 
-      if (this.isNotSet(requestData)) {
+      if (this.isNull(requestData)) {
         throw new HttpException(400, 'No form data found');
       }
 
       const [formField, mediaPayload] = Object.entries(requestData)[0] as [string, UploadedFile | string];
 
-      if (this.isNotSet(formField, mediaPayload)) {
+      if (this.isNull(formField, mediaPayload)) {
         throw new HttpException(400, 'No payload were uploaded.');
       }
 
@@ -61,8 +59,7 @@ class DropyController extends Controller {
   public findAround = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { latitude, longitude } = req.body;
-      this.checkForNotSet(latitude, longitude);
-      this.checkForNaN(latitude, longitude);
+      this.throwIfNotNumber(latitude, longitude);
 
       const dropiesAround = await this.dropyService.findAround(req.user, latitude, longitude);
       res.status(200).json(dropiesAround);
@@ -74,8 +71,7 @@ class DropyController extends Controller {
   public retrieveDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { dropyId } = req.body;
-      this.checkForNotSet(dropyId);
-      this.checkForNaN(dropyId);
+      this.throwIfNotNumber(dropyId);
 
       await this.dropyService.retrieveDropy(req.user, dropyId);
       res.status(200).json(`Retriever with id ${req.user.id} added for dropy with id ${dropyId}`);
@@ -87,8 +83,7 @@ class DropyController extends Controller {
   public getDropyMedia = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
-      this.checkForNotSet(dropyId);
-      this.checkForNaN(dropyId);
+      this.throwIfNotNumber(dropyId);
 
       const dropy = await this.dropyService.getDropyById(dropyId);
 
@@ -119,8 +114,7 @@ class DropyController extends Controller {
   public getDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
-      this.checkForNotSet(dropyId);
-      this.checkForNaN(dropyId);
+      this.throwIfNotNumber(dropyId);
 
       const dropy = await this.dropyService.getDropy(dropyId);
 

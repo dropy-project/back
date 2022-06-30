@@ -9,7 +9,7 @@ class AuthController extends Controller {
   public register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { uid, displayName } = req.body;
-      this.checkForNotSet(uid, displayName);
+      this.throwIfNotString(uid, displayName);
 
       const createUserData: User = await this.authService.register(uid, displayName);
 
@@ -22,7 +22,7 @@ class AuthController extends Controller {
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { uid } = req.body;
-      this.checkForNotSet(uid);
+      this.throwIfNotString(uid);
 
       const { cookie, user } = await this.authService.login(uid);
 

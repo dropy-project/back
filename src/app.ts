@@ -39,6 +39,7 @@ class App {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
     this.app.use(morgan(':date[web] - :method :url :status :res[content-length] - :response-time ms'));
+    this.app.use(this.handleTopLevelErrors);
 
     this.app.use(
       fileUpload({
@@ -55,6 +56,11 @@ class App {
     routes.forEach(route => {
       this.app.use('/', route.router);
     });
+  }
+
+  private handleTopLevelErrors(err, req, res, next) {
+    res.status(400).json(err.message ?? 'Bad request');
+    next();
   }
 }
 
