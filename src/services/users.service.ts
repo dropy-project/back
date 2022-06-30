@@ -24,7 +24,7 @@ class UserService {
     return dropies;
   };
 
-  public changeDeviceToken = async (user: User, deviceToken: string): Promise<void> => {
+  public updateDeviceToken = async (user: User, deviceToken: string): Promise<void> => {
     await client.user.update({
       where: {
         id: user.id,

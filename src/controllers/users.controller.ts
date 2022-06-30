@@ -6,12 +6,12 @@ import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 class UsersController extends Controller {
   public userService = new userService();
 
-  public changeDeviceToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  public updateDeviceToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { deviceToken } = req.body;
       this.checkForNotSet(deviceToken);
 
-      await this.userService.changeDeviceToken(req.user, deviceToken);
+      await this.userService.updateDeviceToken(req.user, deviceToken);
 
       res.status(200).json('Device token changed');
     } catch (error) {
