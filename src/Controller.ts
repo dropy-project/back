@@ -15,7 +15,7 @@ export abstract class Controller {
     }
   }
 
-  protected checkForNan(...args: unknown[]) {
+  protected checkForNaN(...args: unknown[]) {
     if (this.isNan(...args)) {
       throw HttpException.INVALID_PARAMETER;
     }

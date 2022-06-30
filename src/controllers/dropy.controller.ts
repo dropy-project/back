@@ -13,7 +13,7 @@ class DropyController extends Controller {
     try {
       const { latitude, longitude } = req.body;
       this.checkForNotSet(latitude, longitude);
-      this.checkForNan(latitude, longitude);
+      this.checkForNaN(latitude, longitude);
 
       const dropy = await this.dropyService.createDropy(req.user, latitude, longitude);
       res.status(200).json(dropy);
@@ -26,7 +26,7 @@ class DropyController extends Controller {
     try {
       const dropyId = Number(req.params.id);
       this.checkForNotSet(dropyId);
-      this.checkForNan(dropyId);
+      this.checkForNaN(dropyId);
 
       const requestData = req.files ?? req.body;
 
@@ -62,7 +62,7 @@ class DropyController extends Controller {
     try {
       const { latitude, longitude } = req.body;
       this.checkForNotSet(latitude, longitude);
-      this.checkForNan(latitude, longitude);
+      this.checkForNaN(latitude, longitude);
 
       const dropiesAround = await this.dropyService.findAround(req.user, latitude, longitude);
       res.status(200).json(dropiesAround);
@@ -75,7 +75,7 @@ class DropyController extends Controller {
     try {
       const { dropyId } = req.body;
       this.checkForNotSet(dropyId);
-      this.checkForNan(dropyId);
+      this.checkForNaN(dropyId);
 
       await this.dropyService.retrieveDropy(req.user, dropyId);
       res.status(200).json(`Retriever with id ${req.user.id} added for dropy with id ${dropyId}`);
@@ -88,7 +88,7 @@ class DropyController extends Controller {
     try {
       const dropyId = Number(req.params.id);
       this.checkForNotSet(dropyId);
-      this.checkForNan(dropyId);
+      this.checkForNaN(dropyId);
 
       const dropy = await this.dropyService.getDropyById(dropyId);
 
@@ -120,7 +120,7 @@ class DropyController extends Controller {
     try {
       const dropyId = Number(req.params.id);
       this.checkForNotSet(dropyId);
-      this.checkForNan(dropyId);
+      this.checkForNaN(dropyId);
 
       const dropy = await this.dropyService.getDropy(dropyId);
 

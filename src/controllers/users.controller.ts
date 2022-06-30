@@ -16,7 +16,7 @@ class UsersController extends Controller {
       const { latitude, longitude } = coords;
 
       this.checkForNotSet(timestamp, latitude, longitude);
-      this.checkForNan(latitude, longitude);
+      this.checkForNaN(latitude, longitude);
 
       await this.userService.backgroundGeolocationPing(req.user, latitude, longitude, new Date(timestamp));
       res.status(200).json('Success');
