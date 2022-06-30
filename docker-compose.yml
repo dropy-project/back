@@ -7,11 +7,12 @@ services:
       dockerfile: Dockerfile
     container_name: api
     ports:
-      - '127.0.0.1:6666:6666'
+      - '127.0.0.1:${PORT}:${PORT}'
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: 'postgresql://postgres:postgres@postgres:5432/postgres'
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      PORT: "${PORT}"
     networks:
       - back
     volumes:
@@ -23,9 +24,9 @@ services:
     networks:
       - back
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DATABASE: postgres
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
     ports:
       - '127.0.0.1:5432:5432'
     volumes:
@@ -38,7 +39,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
     networks:
       - back
     build:

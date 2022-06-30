@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import cors from 'cors';
 
 class App {
   public app: express.Application;
@@ -31,12 +32,14 @@ class App {
 
   private initializeMiddlewares() {
     this.app.use(hpp());
+    this.app.use(cors());
     this.app.use(helmet());
     this.app.use(compression());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
     this.app.use(morgan(':date[web] - :method :url :status :res[content-length] - :response-time ms'));
+    this.app.use(this.handleTopLevelErrors);
 
     this.app.use(
       fileUpload({
@@ -53,6 +56,11 @@ class App {
     routes.forEach(route => {
       this.app.use('/', route.router);
     });
+  }
+
+  private handleTopLevelErrors(err, req, res, next) {
+    res.status(400).json(err.message ?? 'Bad request');
+    next();
   }
 }
 

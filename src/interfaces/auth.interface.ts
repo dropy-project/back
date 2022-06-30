@@ -10,6 +10,6 @@ export interface TokenData {
   expiresIn: number;
 }
 
-export interface RequestWithUser extends Request {
+export interface AuthenticatedRequest extends Request {
   user: User;
 }

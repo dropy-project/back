@@ -1,16 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
-import { UserAuthDTO } from '@dtos/users.dto';
-import { RequestWithUser } from '@interfaces/auth.interface';
 import AuthService from '@services/auth.service';
+import { Controller } from '../Controller';
 
-class AuthController {
+class AuthController extends Controller {
   public authService = new AuthService();
 
   public register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: UserAuthDTO = req.body;
-      const createUserData: User = await this.authService.register(userData);
+      const { uid, displayName } = req.body;
+      this.throwIfNotString(uid, displayName);
+
+      const createUserData: User = await this.authService.register(uid, displayName);
 
       res.status(201).json(createUserData);
     } catch (error) {
@@ -20,21 +21,25 @@ class AuthController {
 
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: UserAuthDTO = req.body;
-      const { cookie, findUser } = await this.authService.login(userData);
-      let tokenObject = {authorizationToken : cookie[0],refreshToken : cookie[1] ,  user : findUser};
-      res.status(200).json(tokenObject);
+      const { uid } = req.body;
+      this.throwIfNotString(uid);
+
+      const authData = await this.authService.login(uid);
+
+      res.status(200).json(authData);
     } catch (error) {
       next(error);
     }
   };
 
-  public refreshAuthToken = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+  public refreshAuthToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { token } = await this.authService.refreshAuthToken(req);
-      const tokenasjson = {"authorizationToken":token}
-      res.status(200).json(tokenasjson);
-    } catch(error) {
+      const { refreshToken } = req.body;
+      this.throwIfNotString(refreshToken);
+
+      const { token } = await this.authService.refreshAuthToken(refreshToken);
+      res.status(200).json(token);
+    } catch (error) {
       next(error);
     }
   };

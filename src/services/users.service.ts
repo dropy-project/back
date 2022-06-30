@@ -1,34 +1,38 @@
-import { User } from '@prisma/client';
+import { Dropy, User } from '@prisma/client';
 import client from '@/client';
-import { HttpException } from '@/exceptions/HttpException';
 import DropyService from './dropy.service';
+import { sendPushNotificationToUsers } from '../notification';
 
 class UserService {
-  public async findAllUser(): Promise<User[]> {
-    const allUser: User[] = await client.user.findMany();
-    return allUser;
-  }
-
-  public backgroundGeolocationPing = async (userId: number, currentPositionLatitude: number, currentPositionLongitude: number, timeStamp : Date): Promise<Dropy[]> => {
-    const user = await client.user.findUnique({ where: { id: userId } });
-    if (user == undefined) {
-      throw new HttpException(404, `User with id ${userId} not found`);
-    }
-
-    const dropies  =  await DropyService.getDropiesAroundAPosition(currentPositionLatitude, currentPositionLongitude);
+  public backgroundGeolocationPing = async (user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Dropy[]> => {
+    const dropies = await DropyService.getAvailableDropiesAroundLocation(latitude, longitude, user);
     await client.user.update({
       where: {
         id: user.id,
       },
       data: {
         lastSeenDate: timeStamp,
-        lastSeenPositionLatitude: currentPositionLatitude,
-        lastSeenPositionLongitude: currentPositionLongitude,
+        lastSeenLocationLatitude: latitude,
+        lastSeenLocationLongitude: longitude,
       },
     });
 
-    //TODO : link to the notification system if size > 0
+    if (dropies.length > 0) {
+      sendPushNotificationToUsers([user], 'Drop found near your position');
+    }
+
     return dropies;
-  }
+  };
+
+  public updateDeviceToken = async (user: User, deviceToken: string): Promise<void> => {
+    await client.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        deviceToken,
+      },
+    });
+  };
 }
 export default UserService;
