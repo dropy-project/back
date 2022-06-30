@@ -11,7 +11,8 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: 'postgresql://postgres:postgres@postgres:5432/postgres'
+      DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}'
+      PORT: 3000
     networks:
       - back
     volumes:
@@ -23,9 +24,9 @@ services:
     networks:
       - back
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "password:${DB_PASSWORD}" 
-      POSTGRES_DATABASE: postgres
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DATABASE: "${POSTGRES_DATABASE}"
     ports:
       - '127.0.0.1:5432:5432'
     volumes:
@@ -38,7 +39,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}"
     networks:
       - back
     build:

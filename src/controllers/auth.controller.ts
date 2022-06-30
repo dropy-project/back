@@ -1,16 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
-import { UserAuthDTO } from '@dtos/users.dto';
-import { RequestWithUser } from '@interfaces/auth.interface';
 import AuthService from '@services/auth.service';
+import { Controller } from '../Controller';
 
-class AuthController {
+class AuthController extends Controller {
   public authService = new AuthService();
 
   public register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: UserAuthDTO = req.body;
-      const createUserData: User = await this.authService.register(userData);
+      const { uid, displayName } = req.body;
+      this.checkForNotSet(uid, displayName);
+
+      const createUserData: User = await this.authService.register(uid, displayName);
 
       res.status(201).json(createUserData);
     } catch (error) {
@@ -20,20 +21,13 @@ class AuthController {
 
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: UserAuthDTO = req.body;
-      const { cookie, findUser } = await this.authService.login(userData);
+      const { uid } = req.body;
+      this.checkForNotSet(uid);
+
+      const { cookie, user } = await this.authService.login(uid);
 
       res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json(findUser);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public logOut = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-      res.status(200).json('User logged out');
+      res.status(200).json(user);
     } catch (error) {
       next(error);
     }

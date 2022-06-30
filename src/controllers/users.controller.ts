@@ -1,36 +1,17 @@
-import { NextFunction, Request, Response } from 'express';
-import { User } from '@prisma/client';
+import { NextFunction, Response } from 'express';
 import userService from '@services/users.service';
-import { getUserIdFromToken } from '@/utils/auth.utils';
-import { sendPushNotificationToUsers } from '../notification';
+import { Controller } from '../Controller';
+import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 
-class UsersController {
+class UsersController extends Controller {
   public userService = new userService();
 
-  public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public changeDeviceToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findAllUsersData: User[] = await this.userService.findAllUser();
-
-      res.status(200).json(findAllUsersData);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public changeDeviceToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const currentUserId = await getUserIdFromToken(req);
       const { deviceToken } = req.body;
-      const userIdUrl = Number(req.params.userId);
+      this.checkForNotSet(deviceToken);
 
-      if (currentUserId !== userIdUrl) {
-        res.status(401).json('You are not authorized to change this user');
-      }
-      if (!deviceToken || deviceToken == undefined) {
-        res.status(400).json('Device token is required');
-      }
-
-      await this.userService.changeDeviceToken(userIdUrl, deviceToken);
+      await this.userService.changeDeviceToken(req.user, deviceToken);
 
       res.status(200).json('Device token changed');
     } catch (error) {
@@ -38,33 +19,20 @@ class UsersController {
     }
   };
 
-  public backgroundGeolocationPing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public backgroundGeolocationPing = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { longitude, latitude } = req?.body?.location?.coords;
-      const timeStamp = new Date(req?.body?.location?.timestamp);
-      const userId = Number(req.params.userId);
-      const currentUserId = await getUserIdFromToken(req);
-      if (userId == undefined || currentUserId == undefined || longitude == undefined || latitude == undefined) {
-        res.status(400).send('Missing parameters');
-      }
-      if (userId != currentUserId) {
-        res.status(403).send('UserId token invalid');
-      }
+      const { location } = req.body;
 
-      await this.userService.backgroundGeolocationPing(userId, longitude, latitude, timeStamp);
+      this.checkForNotSet(location?.coords, req.user);
 
-      res.status(200).send('Ping sucessful');
-    } catch (error) {
-      next(error);
-    }
-  };
+      const { timestamp, coords } = location;
+      const { latitude, longitude } = coords;
 
-  public sendPushNotification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userIdUrl = Number(req.params.userId);
-      const user = await this.userService.sendPushNotification(userIdUrl);
-      await sendPushNotificationToUsers([user], "C'est un ping");
-      res.status(200).json('push send');
+      this.checkForNotSet(timestamp, latitude, longitude);
+      this.checkForNaN(latitude, longitude);
+
+      await this.userService.backgroundGeolocationPing(req.user, latitude, longitude, new Date(timestamp));
+      res.status(200).json('Success');
     } catch (error) {
       next(error);
     }
