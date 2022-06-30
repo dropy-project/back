@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import DropyService from '@/services/dropy.service';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
@@ -9,20 +9,19 @@ import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 class DropyController extends Controller {
   public dropyService = new DropyService();
 
-  public createDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public createDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { emitterId, latitude, longitude } = req.body;
-      this.checkForNotSet(emitterId, latitude, longitude);
-      this.checkForNan(emitterId, latitude, longitude);
+      const { latitude, longitude } = req.body;
+      this.checkForNan(latitude, longitude);
 
-      const dropy = await this.dropyService.createDropy(emitterId, latitude, longitude);
+      const dropy = await this.dropyService.createDropy(req.user, latitude, longitude);
       res.status(200).json(dropy);
     } catch (error) {
       next(error);
     }
   };
 
-  public createDropyMedia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public createDropyMedia = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
       this.checkForNan(dropyId);
@@ -49,7 +48,7 @@ class DropyController extends Controller {
         throw new HttpException(400, 'File data corrupted or more than one file sent at once');
       }
 
-      await this.dropyService.createDropyMedia(dropyId, mediaPayload, mediaType);
+      await this.dropyService.createDropyMedia(req.user, dropyId, mediaPayload, mediaType);
 
       res.status(200).json(`Media added for dropy with id ${dropyId}`);
     } catch (error) {
@@ -57,27 +56,26 @@ class DropyController extends Controller {
     }
   };
 
-  public findAround = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public findAround = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { userId, latitude, longitude } = req.body;
-      this.checkForNotSet(userId, latitude, longitude);
-      this.checkForNan(userId, latitude, longitude);
+      const { latitude, longitude } = req.body;
+      this.checkForNan(latitude, longitude);
 
-      const dropiesAround = await this.dropyService.findAround(userId, latitude, longitude);
+      const dropiesAround = await this.dropyService.findAround(req.user, latitude, longitude);
       res.status(200).json(dropiesAround);
     } catch (error) {
       next(error);
     }
   };
 
-  public retrieveDropy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public retrieveDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { retrieverId, dropyId } = req.body;
-      this.checkForNotSet(retrieverId, dropyId);
-      this.checkForNan(retrieverId, dropyId);
+      const { dropyId } = req.body;
+      this.checkForNotSet(dropyId);
+      this.checkForNan(dropyId);
 
-      await this.dropyService.retrieveDropy(retrieverId, dropyId);
-      res.status(200).json(`Retriever with id ${retrieverId} added for dropy with id ${dropyId}`);
+      await this.dropyService.retrieveDropy(req.user, dropyId);
+      res.status(200).json(`Retriever with id ${req.user.id} added for dropy with id ${dropyId}`);
     } catch (error) {
       next(error);
     }

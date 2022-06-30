@@ -7,22 +7,20 @@ import { UploadedFile } from 'express-fileupload';
 const DISTANCE_FILTER_RADIUS = 0.004; // Environ 300m
 
 class DropyService {
-  public async createDropy(emitterId, latitude, longitude): Promise<Dropy> {
-    const user = await client.user.findUnique({ where: { id: emitterId } });
-
-    if (user == undefined) {
-      throw new HttpException(404, `User with emitterid ${emitterId} not found`);
-    }
-
-    const dropy = client.dropy.create({ data: { emitterId, latitude, longitude } });
+  public async createDropy(user: User, latitude, longitude): Promise<Dropy> {
+    const dropy = client.dropy.create({ data: { emitterId: user.id, latitude, longitude } });
     return dropy;
   }
 
-  public async createDropyMedia(dropyId: number, mediaPayload: UploadedFile | string, mediaType: MediaType) {
+  public async createDropyMedia(user: User, dropyId: number, mediaPayload: UploadedFile | string, mediaType: MediaType) {
     const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
     if (dropy == undefined) {
       throw new HttpException(404, `Dropy with id ${dropyId} not found`);
+    }
+
+    if (dropy.emitterId != user.id) {
+      throw new HttpException(403, `User is not allowed to add a media for this dropy`);
     }
 
     if (dropy.mediaType !== MediaType.NONE) {
@@ -62,13 +60,7 @@ class DropyService {
     }
   }
 
-  public findAround = async (userId: number, latitude: number, longitude: number): Promise<DropyAround[]> => {
-    const user = await client.user.findUnique({ where: { id: userId } });
-
-    if (user == undefined) {
-      throw new HttpException(404, `User with id ${userId} not found`);
-    }
-
+  public findAround = async (user: User, latitude: number, longitude: number): Promise<DropyAround[]> => {
     const dropies = await DropyService.getAvailableDropiesAroundLocation(latitude, longitude);
 
     const dropiesAround = dropies.map(dropy => {
@@ -77,18 +69,22 @@ class DropyService {
         creationDate: dropy.creationDate,
         latitude: dropy.latitude,
         longitude: dropy.longitude,
-        isUserDropy: dropy.emitterId == userId,
+        isUserDropy: dropy.emitterId == user.id,
       };
     });
 
     return dropiesAround;
   };
 
-  public retrieveDropy = async (retrieverId: number, dropyId: number) => {
+  public retrieveDropy = async (user: User, dropyId: number) => {
     const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
     if (dropy == undefined) {
       throw new HttpException(404, `Dropy with dropyid ${dropyId} not found`);
+    }
+
+    if (dropy.emitterId != null) {
+      throw new HttpException(403, `Dropy with dropyid ${dropyId} has already been retreived`);
     }
 
     const emitter = await client.user.findUnique({ where: { id: dropy.emitterId } });
@@ -97,18 +93,12 @@ class DropyService {
       throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
     }
 
-    const retriever = await client.user.findUnique({ where: { id: retrieverId } });
-
-    if (retriever == undefined) {
-      throw new HttpException(404, `User with retrieverid ${retriever} not found`);
-    }
-
     await client.dropy.update({
       where: {
         id: dropy.id,
       },
       data: {
-        retrieverId: retrieverId,
+        retrieverId: user.id,
         retrieveDate: new Date(),
       },
     });
