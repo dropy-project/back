@@ -6,6 +6,19 @@ import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 class UsersController extends Controller {
   public userService = new userService();
 
+  public updateDeviceToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { deviceToken } = req.body;
+      this.checkForNotSet(deviceToken);
+
+      await this.userService.updateDeviceToken(req.user, deviceToken);
+
+      res.status(200).json('Device token changed');
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public backgroundGeolocationPing = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { location } = req.body;

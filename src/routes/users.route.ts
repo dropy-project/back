@@ -14,6 +14,7 @@ class UsersRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.post(`${this.path}/updateDeviceToken`, authMiddleware, this.usersController.updateDeviceToken);
     this.router.post(`${this.path}/backgroundGeolocationPing`, authMiddleware, this.usersController.backgroundGeolocationPing, errorMiddleware);
   }
 }

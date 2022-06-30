@@ -20,6 +20,7 @@
   "dependencies": {
     "@prisma/client": "^4.0.0",
     "@types/express-fileupload": "^1.2.2",
+    "@types/node-pushnotifications": "^1.0.4",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -29,7 +30,8 @@
     "helmet": "^4.6.0",
     "hpp": "^0.2.3",
     "jsonwebtoken": "^8.5.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "node-pushnotifications": "^2.0.3"
   },
   "devDependencies": {
     "@swc/cli": "^0.1.51",
