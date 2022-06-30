@@ -25,7 +25,11 @@
 
 - Build les conteneurs docker : `docker-compose build`
 
-- Lancer docker-compose : `docker-compose up`
+- Lancer docker-compose : `docker-compose up -d`
+
+- Push la bd dans le conteneur postgres :
+    - `docker exec -it api /bin/bash`
+    - `npx prisma db push` 
 
 ### Effectuer une migration :
 
