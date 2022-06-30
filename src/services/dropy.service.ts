@@ -83,7 +83,7 @@ class DropyService {
       throw new HttpException(404, `Dropy with dropyid ${dropyId} not found`);
     }
 
-    if (dropy.emitterId != null) {
+    if (dropy.retrieverId != null) {
       throw new HttpException(403, `Dropy with dropyid ${dropyId} has already been retreived`);
     }
 
