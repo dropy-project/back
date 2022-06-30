@@ -2,10 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
 import userService from '@services/users.service';
 import { getUserIdFromToken } from '@/utils/auth.utils';
-import { sendPushNotification } from '../notification'
+import { sendPushNotificationToUsers } from '../notification';
 
 class UsersController {
-
   public userService = new userService();
 
   public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -37,7 +36,7 @@ class UsersController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
   public backgroundGeolocationPing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -54,7 +53,7 @@ class UsersController {
 
       await this.userService.backgroundGeolocationPing(userId, longitude, latitude, timeStamp);
 
-      res.status(200).send('Ping sucessful')
+      res.status(200).send('Ping sucessful');
     } catch (error) {
       next(error);
     }
@@ -62,16 +61,10 @@ class UsersController {
 
   public sendPushNotification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const currentUserId = await getUserIdFromToken(req);
       const userIdUrl = Number(req.params.userId);
-
-      if (currentUserId !== userIdUrl) {
-        res.status(401).json('You are not authorized to change this user');
-      }
-
       const user = await this.userService.sendPushNotification(userIdUrl);
-      await sendPushNotification([user], "C'est un ping");
-      res.status(200).json("push send");
+      await sendPushNotificationToUsers([user], "C'est un ping");
+      res.status(200).json('push send');
     } catch (error) {
       next(error);
     }

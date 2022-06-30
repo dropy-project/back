@@ -131,13 +131,13 @@ class DropyService {
   };
 
   public static getDropiesAroundAPosition = async (latitude: number, longitude: number, user: User = undefined): Promise<Dropy[]> => {
-    let excludeCurrentUserDropier = {}
+    let excludeCurrentUserDropier = {};
     if (user != undefined) {
       excludeCurrentUserDropier = {
         emitterId: {
           not: user.id,
-        }
-      }
+        },
+      };
     }
 
     const dropies = await client.dropy.findMany({
@@ -165,12 +165,12 @@ class DropyService {
               is: undefined,
             },
           },
-          excludeCurrentUserDropier
+          excludeCurrentUserDropier,
         ],
       },
     });
     return dropies;
-  }
+  };
 
   public getDropy = async (dropyId: number) => {
     const dropy = await client.dropy.findUnique({ where: { id: dropyId } });

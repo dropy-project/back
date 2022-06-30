@@ -2,7 +2,7 @@ import { Dropy, User } from '@prisma/client';
 import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
 import DropyService from './dropy.service';
-import { sendPushNotification } from '../notification';
+import { sendPushNotificationToUsers } from '../notification';
 
 class UserService {
   public async findAllUser(): Promise<User[]> {
@@ -10,7 +10,12 @@ class UserService {
     return allUser;
   }
 
-  public backgroundGeolocationPing = async (userId: number, currentPositionLongitude: number, currentPositionLatitude: number, timeStamp: Date): Promise<Dropy[]> => {
+  public backgroundGeolocationPing = async (
+    userId: number,
+    currentPositionLongitude: number,
+    currentPositionLatitude: number,
+    timeStamp: Date,
+  ): Promise<Dropy[]> => {
     const user = await client.user.findUnique({ where: { id: userId } });
     if (user == undefined) {
       throw new HttpException(404, `User with id ${userId} not found`);
@@ -29,14 +34,14 @@ class UserService {
       },
     });
 
-    console.log(dropies.length)
+    console.log(dropies.length);
 
     if (dropies.length > 0) {
-      sendPushNotification([user], "ÇA POUSSE FORT ICI");
+      sendPushNotificationToUsers([user], 'ÇA POUSSE FORT ICI');
     }
 
     return dropies;
-  }
+  };
 
   public changeDeviceToken = async (userId: number, deviceToken: string): Promise<User> => {
     const user = await client.user.findUnique({ where: { id: userId } });
@@ -54,8 +59,7 @@ class UserService {
     });
 
     return user;
-
-  }
+  };
 
   public sendPushNotification = async (userId: number): Promise<User> => {
     const user = await client.user.findUnique({ where: { id: userId } });
@@ -68,6 +72,6 @@ class UserService {
     }
 
     return user;
-  }
+  };
 }
 export default UserService;

@@ -20,6 +20,7 @@
   "dependencies": {
     "@prisma/client": "^3.7.0",
     "@types/express-fileupload": "^1.2.2",
+    "@types/node-pushnotifications": "^1.0.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.1",
     "compression": "^1.7.4",
