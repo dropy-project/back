@@ -52,9 +52,9 @@ SECRET_KEY=<secret>
 
 POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<password>
-POSTGRES_DATABASE=<database name>
+POSTGRES_DB=<database name>
 
-DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DATABASE}'
+DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}'
 
 #################-> NOTIFICATIONS
 
