@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { HttpException } from '@exceptions/HttpException';
 
-const errorMiddleware = (error: HttpException, req: Request, res: Response, next: NextFunction) => {
+const errorMiddleware = (error: any, req: Request, res: Response, next: NextFunction) => {
   try {
-    const status: number = error.status || 500;
-    const message: string = error.message || 'Something went wrong';
-
-    console.log(`[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${message}`);
-    res.status(status).json({ message });
+    if (error instanceof HttpException) {
+      res.status(error.status).json(error.message);
+    } else {
+      console.error(`[${req.method}] ${req.path} >> SERVER SIDE ERROR`, error);
+      res.status(500).json('Something went wrong');
+    }
   } catch (error) {
     next(error);
   }

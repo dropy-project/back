@@ -1,38 +1,25 @@
-import { NextFunction, Request, Response } from 'express';
-import { User } from '@prisma/client';
+import { NextFunction, Response } from 'express';
 import userService from '@services/users.service';
-import { getUserIdFromToken } from '@/utils/auth.utils';
+import { Controller } from '../Controller';
+import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 
-class UsersController {
+class UsersController extends Controller {
   public userService = new userService();
 
-  public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public backgroundGeolocationPing = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const findAllUsersData: User[] = await this.userService.findAllUser();
+      const { location } = req.body;
 
-      res.status(200).json(findAllUsersData);
-    } catch (error) {
-      next(error);
-    }
-  };
+      this.checkForNotSet(location?.coords, req.user);
 
-  public backgroundGeolocationPing = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const currentPositionLongitude  = req.body.coords.longitude;
-      const currentPositionLatitude = req.body.coords.latitude;
-      const timeStamp = new Date(req.body.timestamp);
-      const userId = Number(req.params.userId);
-      const currentUserId = await getUserIdFromToken(req);
-      if (userId == undefined || currentUserId ||currentPositionLongitude == undefined || currentPositionLatitude == undefined) {
-        res.status(400).send('Missing parameters');
-        return;
-      }
-      if(userId != currentUserId) {
-        res.status(403).send('UserId token invalid');
-        return;
-      }
+      const { timestamp, coords } = location;
+      const { latitude, longitude } = coords;
 
-      await this.userService.backgroundGeolocationPing(userId, currentPositionLongitude, currentPositionLatitude,timeStamp);
+      this.checkForNotSet(timestamp, latitude, longitude);
+      this.checkForNaN(latitude, longitude);
+
+      await this.userService.backgroundGeolocationPing(req.user, latitude, longitude, new Date(timestamp));
+      res.status(200).json('Success');
     } catch (error) {
       next(error);
     }

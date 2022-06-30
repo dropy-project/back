@@ -1,24 +1,34 @@
+import client from '@/client';
+import { verify } from 'jsonwebtoken';
 import { NextFunction, Response } from 'express';
 import { HttpException } from '@exceptions/HttpException';
-import { RequestWithUser } from '@interfaces/auth.interface';
-import client from '@/client';
-import { getUserIdFromToken } from '@/utils/auth.utils';
+import { DataStoredInToken, AuthenticatedRequest } from '@interfaces/auth.interface';
 
-const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+import errorMiddleware from './error.middleware';
+
+const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = await getUserIdFromToken(req);
+    const authorization = req.cookies['Authorization'] || (req.header('Authorization') ? req.header('Authorization').split('Bearer ')[1] : null);
 
-    const findUser = await client.user.findUnique({ where: { id: userId } });
-
-    if (findUser != null) {
-      req.user = findUser;
-      next();
-    } else {
-      next(new HttpException(401, 'Wrong authentication token'));
+    if (authorization == null) {
+      errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
+      return;
     }
+
+    const secretKey = process.env.SECRET_KEY;
+    const { userId } = (await verify(authorization, secretKey)) as DataStoredInToken;
+
+    const user = await client.user.findUnique({ where: { id: userId } });
+
+    if (user == null) {
+      errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
+      return;
+    }
+
+    req.user = user;
+    next();
   } catch (error) {
-    console.log(error);
-    next(new HttpException(401, 'Authentication error'));
+    errorMiddleware(error, req, res, next);
   }
 };
 
