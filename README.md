@@ -1,25 +1,69 @@
-## Setup projet : 
+## Dropy backend : 
 
 ### Préconditions : 
-- Installer Docker : `sudo apt install docker` pour MacOS installer Docker desktop
-- Avoir une version de Node correcte
-- Installer un client Postgres quelconque (Exemple : Beekeeper studio)
+- Node ^16
+
+- Docker
 
 ### Installation : 
-- Clone le projet
-- Installer les dépendances via : `npm i`
-- Lancer la BD Locale via : `sudo docker-compose up postgres` ne pas oublier le postgres à la fin !
-- Télécharger les deux .env sur Discord channel : env-back et les ajouter à la racine du projet
-- A la racine du projet toujours, lancer : `npm run prisma:migrate`
-- Lancer : `npm run dev`
+
+- Setup le fichier .env
+
+- Installer les dépendances : `npm i`
+
+- A la racine du projet toujours, lancer : `npm run prisma:generate`
+
+### Lancer en développement :
+
+- Lancer la BD locale via : `sudo docker-compose up postgres`
+
+- Lancer le serveur node (API) : `npm run dev`
+
+### Lancer en production :
+
+- Vérifier le .env
+
+- Build les conteneurs docker : `docker-compose build`
+
+- Lancer docker-compose : `docker-compose up`
+
+### Effectuer une migration :
+
+> Si le chema de la BD doit être modifié
+
+- En production
+    - lancer docker-compose `docker-compose up`
+    - entrer dans le conteneur de l'API : `docker exec -it api /bin/bash`
+    - effectuer la migration : `npm run prisma:migrate`
+
+- En développement
+    - lancer la base de donnée `docker-compose up postgres`
+    - effectuer la migration : `npm run prisma:migrate`
 
 ### Variables d'environnement : 
-- DATABASE_URL : l'url de la base de données
-- PORT : port de l'api
-- SECRET_KEY : secret pour encoder le token
+```
+#################-> API
 
-### Visualisation des données de la BD
-- Le port est 5432, le host localhost et le nom de la BD postgres
+PORT=3000
+
+SECRET_KEY=<secret>
+
+#################-> POSTGRES
+
+POSTGRES_USER=<user>
+POSTGRES_PASSWORD=<password>
+POSTGRES_DATABASE=<database name>
+
+DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DATABASE}'
+
+#################-> NOTIFICATIONS
+
+APN_KEYID=<apple push notification>
+APN_TEAMID=<apple push notification>
+FCM_KEY=<firebase cloud messaing token>
+
+#################
+```
 
 
 
