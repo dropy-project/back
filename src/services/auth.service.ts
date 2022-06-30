@@ -32,14 +32,14 @@ class AuthService {
     return uniqueUsername;
   }
 
-  public async login(uid: string): Promise<{ cookie: string; findUser: User }> {
-    const findUser: User = await client.user.findUnique({ where: { uid } });
-    if (!findUser) throw new HttpException(409, 'No user found with this uid');
+  public async login(uid: string): Promise<{ cookie: string; user: User }> {
+    const user: User = await client.user.findUnique({ where: { uid } });
+    if (!user) throw new HttpException(409, 'No user found with this uid');
 
-    const tokenData = this.createToken(findUser);
+    const tokenData = this.createToken(user);
     const cookie = this.createCookie(tokenData);
 
-    return { cookie, findUser };
+    return { cookie, user };
   }
 
   public createToken(user: User): TokenData {

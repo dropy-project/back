@@ -12,6 +12,7 @@ class DropyController extends Controller {
   public createDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { latitude, longitude } = req.body;
+      this.checkForNotSet(latitude, longitude);
       this.checkForNan(latitude, longitude);
 
       const dropy = await this.dropyService.createDropy(req.user, latitude, longitude);
@@ -24,6 +25,7 @@ class DropyController extends Controller {
   public createDropyMedia = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
+      this.checkForNotSet(dropyId);
       this.checkForNan(dropyId);
 
       const requestData = req.files ?? req.body;
@@ -59,6 +61,7 @@ class DropyController extends Controller {
   public findAround = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { latitude, longitude } = req.body;
+      this.checkForNotSet(latitude, longitude);
       this.checkForNan(latitude, longitude);
 
       const dropiesAround = await this.dropyService.findAround(req.user, latitude, longitude);
@@ -84,6 +87,7 @@ class DropyController extends Controller {
   public getDropyMedia = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
+      this.checkForNotSet(dropyId);
       this.checkForNan(dropyId);
 
       const dropy = await this.dropyService.getDropyById(dropyId);
@@ -115,6 +119,7 @@ class DropyController extends Controller {
   public getDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const dropyId = Number(req.params.id);
+      this.checkForNotSet(dropyId);
       this.checkForNan(dropyId);
 
       const dropy = await this.dropyService.getDropy(dropyId);
