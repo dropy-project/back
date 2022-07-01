@@ -44,6 +44,7 @@ class UserService {
             id: userId,
           },
         },
+        closed: false,
       },
       include: {
         users: true,
