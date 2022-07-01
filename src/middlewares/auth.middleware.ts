@@ -8,7 +8,7 @@ import errorMiddleware from './error.middleware';
 
 const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const authorization = req.cookies['Authorization'] || (req.header('Authorization') ? req.header('Authorization').split('Bearer ')[1] : null);
+    const authorization = req.header('Authorization');
 
     if (authorization == null) {
       errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
