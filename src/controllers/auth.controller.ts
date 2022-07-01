@@ -24,10 +24,21 @@ class AuthController extends Controller {
       const { uid } = req.body;
       this.throwIfNotString(uid);
 
-      const { cookie, user } = await this.authService.login(uid);
+      const authData = await this.authService.login(uid);
 
-      res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json(user);
+      res.status(200).json(authData);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public refreshAuthToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { refreshToken } = req.body;
+      this.throwIfNotString(refreshToken);
+
+      const { token } = await this.authService.refreshAuthToken(refreshToken);
+      res.status(200).json(token);
     } catch (error) {
       next(error);
     }

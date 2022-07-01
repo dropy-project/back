@@ -6,6 +6,8 @@ import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
 
 const ONE_MONTH_IN_SECONDS = 2592000;
 
+const ONE_DAY_IN_SECONDS = 86400;
+
 class AuthService {
   public async register(uid, displayName): Promise<User> {
     const findUser: User = await client.user.findUnique({ where: { uid: uid } });
@@ -32,26 +34,30 @@ class AuthService {
     return uniqueUsername;
   }
 
-  public async login(uid: string): Promise<{ cookie: string; user: User }> {
+  public async login(uid: string) {
     const user: User = await client.user.findUnique({ where: { uid } });
     if (!user) throw new HttpException(409, 'No user found with this uid');
 
-    const tokenData = this.createToken(user);
-    const cookie = this.createCookie(tokenData);
+    const authTokenData = this.createUserToken(user, ONE_DAY_IN_SECONDS);
+    const refreshTokenData = this.createUserToken(user, ONE_MONTH_IN_SECONDS);
 
-    return { cookie, user };
+    return { authTokenData, refreshTokenData, user };
   }
 
-  public createToken(user: User): TokenData {
+  public async refreshAuthToken(refreshToken: string) {
+    const secretKey = process.env.SECRET_KEY;
+    const { userId } = (await jwt.verify(refreshToken, secretKey)) as DataStoredInToken;
+
+    const user = await client.user.findUnique({ where: { id: userId } });
+    const token = this.createUserToken(user, ONE_DAY_IN_SECONDS);
+
+    return { token };
+  }
+
+  private createUserToken(user: User, expiresIn: number): TokenData {
     const dataStoredInToken: DataStoredInToken = { userId: user.id };
     const secretKey = process.env.SECRET_KEY;
-    const expiresIn = ONE_MONTH_IN_SECONDS;
-
     return { expiresIn, token: jwt.sign(dataStoredInToken, secretKey, { expiresIn }) };
-  }
-
-  public createCookie(tokenData: TokenData): string {
-    return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn};`;
   }
 }
 
