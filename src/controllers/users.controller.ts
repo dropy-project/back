@@ -37,6 +37,15 @@ class UsersController extends Controller {
       next(error);
     }
   };
+
+  public conversations = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const conversations = await this.userService.conversations(req.user.id);
+      res.status(200).json(conversations);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default UsersController;

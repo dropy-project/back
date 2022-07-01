@@ -102,6 +102,13 @@ class DropyService {
         retrieveDate: new Date(),
       },
     });
+
+    await client.chatConversation.create({
+      data: {
+        users: { connect: [{ id: user.id }, { id: emitter.id }] },
+        dropy: { connect: { id: dropy.id } },
+      },
+    });
   };
 
   public getDropyById = async (dropyId: number): Promise<Dropy> => {
