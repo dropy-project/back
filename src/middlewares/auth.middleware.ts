@@ -1,5 +1,5 @@
 import client from '@/client';
-import { verify } from 'jsonwebtoken';
+import { JsonWebTokenError, verify } from 'jsonwebtoken';
 import { NextFunction, Response } from 'express';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, AuthenticatedRequest } from '@interfaces/auth.interface';
@@ -28,7 +28,11 @@ const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: Ne
     req.user = user;
     next();
   } catch (error) {
-    errorMiddleware(error, req, res, next);
+    if (error instanceof JsonWebTokenError) {
+      errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
+    } else {
+      errorMiddleware(error, req, res, next);
+    }
   }
 };
 
