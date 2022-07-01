@@ -8,6 +8,7 @@ import express from 'express';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import cors from 'cors';
+import { startSocket } from './sockets/dropy.socket';
 
 class App {
   public app: express.Application;
@@ -20,6 +21,8 @@ class App {
 
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
+
+    startSocket();
   }
 
   public listen() {

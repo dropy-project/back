@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 import DropyService from '@/services/dropy.service';
-import { MediaType } from '@prisma/client';
+import { MediaType, User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 import { HttpException } from '@/exceptions/HttpException';
 import { Controller } from '../Controller';
@@ -9,15 +9,16 @@ import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 class DropyController extends Controller {
   public dropyService = new DropyService();
 
-  public createDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  public createDropy = async (body, user: User): Promise<Number> => {
     try {
-      const { latitude, longitude } = req.body;
+      const { latitude, longitude } = body;
       this.throwIfNotNumber(latitude, longitude);
 
-      const dropy = await this.dropyService.createDropy(req.user, latitude, longitude);
-      res.status(200).json(dropy);
+      const dropy = await this.dropyService.createDropy(user, latitude, longitude);
+      return dropy.id;
     } catch (error) {
-      next(error);
+      // TODO error handling ??
+      console.error(error);
     }
   };
 
@@ -68,15 +69,15 @@ class DropyController extends Controller {
     }
   };
 
-  public retrieveDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  public retrieveDropy = async (body, user: User): Promise<void> => {
     try {
-      const { dropyId } = req.body;
+      const { dropyId } = body;
       this.throwIfNotNumber(dropyId);
 
-      await this.dropyService.retrieveDropy(req.user, dropyId);
-      res.status(200).json(`Retriever with id ${req.user.id} added for dropy with id ${dropyId}`);
+      await this.dropyService.retrieveDropy(user, dropyId);
+      console.log(`Retriever with id ${user.id} added for dropy with id ${dropyId}`);
     } catch (error) {
-      next(error);
+      console.log('');
     }
   };
 

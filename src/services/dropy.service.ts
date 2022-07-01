@@ -172,6 +172,28 @@ class DropyService {
 
     return customDropy;
   };
+
+  public findAll = async (user: User): Promise<DropyAround[]> => {
+    const dropies = await client.dropy.findMany({
+      where: {
+        retrieverId: {
+          equals: null,
+        },
+      },
+    });
+
+    const dropiesAround = dropies.map(dropy => {
+      return {
+        id: dropy.id,
+        creationDate: dropy.creationDate,
+        latitude: dropy.latitude,
+        longitude: dropy.longitude,
+        emitterId: dropy.emitterId,
+      };
+    });
+
+    return dropiesAround;
+  };
 }
 
 export default DropyService;
