@@ -2,16 +2,23 @@ import client from '@/client';
 import { JsonWebTokenError, verify } from 'jsonwebtoken';
 import { NextFunction, Response } from 'express';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, AuthenticatedRequest } from '@interfaces/auth.interface';
+import { DataStoredInToken, AuthenticatedRequest, AuthenticatedSocket } from '@interfaces/auth.interface';
 
 import errorMiddleware from './error.middleware';
+import { Socket } from 'socket.io';
 
-const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const authMiddleware = async (req: AuthenticatedRequest | AuthenticatedSocket, res: Response | null, next: NextFunction) => {
+  const isSocket = req instanceof Socket;
   try {
-    const authorization = req.header('Authorization');
+    let authorization = null;
+    if (isSocket) {
+      authorization = req.handshake.headers.authorization;
+    } else {
+      authorization = req.header('Authorization');
+    }
 
     if (authorization == null) {
-      errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
+      if (!isSocket) errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
       return;
     }
 
@@ -21,7 +28,7 @@ const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: Ne
     const user = await client.user.findUnique({ where: { id: userId } });
 
     if (user == null) {
-      errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
+      if (!isSocket) errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
       return;
     }
 
@@ -29,8 +36,15 @@ const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: Ne
     next();
   } catch (error) {
     if (error instanceof JsonWebTokenError) {
+      if (isSocket) {
+        return;
+      }
       errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
     } else {
+      if (isSocket) {
+        console.error(`[Socket authentication] >> SERVER SIDE ERROR`, error);
+        return;
+      }
       errorMiddleware(error, req, res, next);
     }
   }

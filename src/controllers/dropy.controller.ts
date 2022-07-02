@@ -1,133 +1,90 @@
 import { NextFunction, Response } from 'express';
-import DropyService from '@/services/dropy.service';
-import { MediaType, User } from '@prisma/client';
+import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 import { HttpException } from '@/exceptions/HttpException';
-import { Controller } from '../Controller';
 import { AuthenticatedRequest } from '@/interfaces/auth.interface';
+import * as dropyService from '@/services/dropy.service';
+import * as utils from '@/utils/controller.utils';
 
-class DropyController extends Controller {
-  public dropyService = new DropyService();
+export async function createDropyMedia(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const dropyId = Number(req.params.id);
+    utils.throwIfNotNumber(dropyId);
 
-  public createDropy = async (body, user: User): Promise<Number> => {
-    try {
-      const { latitude, longitude } = body;
-      this.throwIfNotNumber(latitude, longitude);
+    const requestData = req.files ?? req.body;
 
-      const dropy = await this.dropyService.createDropy(user, latitude, longitude);
-      return dropy.id;
-    } catch (error) {
-      // TODO error handling ??
-      console.error(error);
+    if (utils.isNull(requestData)) {
+      throw new HttpException(400, 'No form data found');
     }
-  };
 
-  public createDropyMedia = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const dropyId = Number(req.params.id);
-      this.throwIfNotNumber(dropyId);
+    const [formField, mediaPayload] = Object.entries(requestData)[0] as [string, UploadedFile | string];
 
-      const requestData = req.files ?? req.body;
-
-      if (this.isNull(requestData)) {
-        throw new HttpException(400, 'No form data found');
-      }
-
-      const [formField, mediaPayload] = Object.entries(requestData)[0] as [string, UploadedFile | string];
-
-      if (this.isNull(formField, mediaPayload)) {
-        throw new HttpException(400, 'No payload were uploaded.');
-      }
-
-      const mediaType = MediaType[formField.toUpperCase()];
-      if (mediaType == null) {
-        throw new HttpException(400, `Unsuported dropy media type : ${formField}`);
-      }
-
-      const isFile = (mediaPayload as UploadedFile).mimetype != null;
-      if (isFile && (mediaPayload as UploadedFile).data == null) {
-        throw new HttpException(400, 'File data corrupted or more than one file sent at once');
-      }
-
-      await this.dropyService.createDropyMedia(req.user, dropyId, mediaPayload, mediaType);
-
-      res.status(200).json(`Media added for dropy with id ${dropyId}`);
-    } catch (error) {
-      next(error);
+    if (utils.isNull(formField, mediaPayload)) {
+      throw new HttpException(400, 'No payload were uploaded.');
     }
-  };
 
-  public findAround = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { latitude, longitude } = req.body;
-      this.throwIfNotNumber(latitude, longitude);
-
-      const dropiesAround = await this.dropyService.findAround(req.user, latitude, longitude);
-      res.status(200).json(dropiesAround);
-    } catch (error) {
-      next(error);
+    const mediaType = MediaType[formField.toUpperCase()];
+    if (mediaType == null) {
+      throw new HttpException(400, `Unsuported dropy media type : ${formField}`);
     }
-  };
 
-  public retrieveDropy = async (body, user: User): Promise<void> => {
-    try {
-      const { dropyId } = body;
-      this.throwIfNotNumber(dropyId);
-
-      await this.dropyService.retrieveDropy(user, dropyId);
-      console.log(`Retriever with id ${user.id} added for dropy with id ${dropyId}`);
-    } catch (error) {
-      console.log('');
+    const isFile = (mediaPayload as UploadedFile).mimetype != null;
+    if (isFile && (mediaPayload as UploadedFile).data == null) {
+      throw new HttpException(400, 'File data corrupted or more than one file sent at once');
     }
-  };
 
-  public getDropyMedia = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const dropyId = Number(req.params.id);
-      this.throwIfNotNumber(dropyId);
+    await dropyService.createDropyMedia(req.user, dropyId, mediaPayload, mediaType);
 
-      const dropy = await this.dropyService.getDropyById(dropyId);
-
-      if (req.user.id != dropy.retrieverId) {
-        throw new HttpException(403, `User with id ${req.user.id} not allow to retrieve dropy with id ${dropy.id}`);
-      }
-
-      const mediaType = dropy.mediaType;
-
-      if (mediaType == MediaType.PICTURE || mediaType == MediaType.VIDEO) {
-        if (dropy.filePath == undefined) {
-          throw new HttpException(404, `Media filePath from dropy with id ${dropyId} not found`);
-        }
-
-        res.status(200).sendFile(dropy.filePath);
-      } else {
-        if (dropy.mediaData == undefined) {
-          throw new HttpException(404, `Media data from dropy with id ${dropyId} not found`);
-        }
-
-        res.status(200).json(dropy.mediaData);
-      }
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public getDropy = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const dropyId = Number(req.params.id);
-      this.throwIfNotNumber(dropyId);
-
-      const dropy = await this.dropyService.getDropy(dropyId);
-
-      if (req.user.id != dropy.retrieverId) {
-        throw new HttpException(403, `User with id ${req.user.id} not allow to retrieve dropy with id ${dropy.id}`);
-      }
-
-      res.status(200).json(dropy);
-    } catch (error) {
-      next(error);
-    }
-  };
+    res.status(200).json(`Media added for dropy with id ${dropyId}`);
+  } catch (error) {
+    next(error);
+  }
 }
 
-export default DropyController;
+export async function getDropyMedia(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const dropyId = Number(req.params.id);
+    utils.throwIfNotNumber(dropyId);
+
+    const dropy = await dropyService.getDropyById(dropyId);
+
+    if (req.user.id != dropy.retrieverId) {
+      throw new HttpException(403, `User with id ${req.user.id} not allow to retrieve dropy with id ${dropy.id}`);
+    }
+
+    const mediaType = dropy.mediaType;
+
+    if (mediaType == MediaType.PICTURE || mediaType == MediaType.VIDEO) {
+      if (dropy.filePath == undefined) {
+        throw new HttpException(404, `Media filePath from dropy with id ${dropyId} not found`);
+      }
+
+      res.status(200).sendFile(dropy.filePath);
+    } else {
+      if (dropy.mediaData == undefined) {
+        throw new HttpException(404, `Media data from dropy with id ${dropyId} not found`);
+      }
+
+      res.status(200).json(dropy.mediaData);
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getDropy(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const dropyId = Number(req.params.id);
+    utils.throwIfNotNumber(dropyId);
+
+    const dropy = await dropyService.getDropy(dropyId);
+
+    if (req.user.id != dropy.retrieverId) {
+      throw new HttpException(403, `User with id ${req.user.id} not allow to retrieve dropy with id ${dropy.id}`);
+    }
+
+    res.status(200).json(dropy);
+  } catch (error) {
+    next(error);
+  }
+}

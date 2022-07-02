@@ -1,22 +1,15 @@
 import { Router } from 'express';
-import AuthController from '@controllers/auth.controller';
-import { Routes } from '@interfaces/routes.interface';
 import errorMiddleware from '@/middlewares/error.middleware';
+import * as authController from '@controllers/auth.controller';
 
-class AuthRoute implements Routes {
-  public path = '/';
-  public router = Router();
-  public authController = new AuthController();
+const path = '/';
 
-  constructor() {
-    this.initializeRoutes();
-  }
+export function getRouter() {
+  const router = Router();
 
-  private initializeRoutes() {
-    this.router.post(`${this.path}register`, this.authController.register, errorMiddleware);
-    this.router.post(`${this.path}login`, this.authController.logIn, errorMiddleware);
-    this.router.post(`${this.path}refresh`, this.authController.refreshAuthToken, errorMiddleware);
-  }
+  router.post(`${path}register`, authController.register, errorMiddleware);
+  router.post(`${path}login`, authController.logIn, errorMiddleware);
+  router.post(`${path}refresh`, authController.refreshAuthToken, errorMiddleware);
+
+  return router;
 }
-
-export default AuthRoute;

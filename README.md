@@ -48,7 +48,8 @@
 ```
 #################-> API
 
-PORT=3000
+API_PORT=3000
+SOCKET_API=4000
 
 SECRET_KEY=<secret>
 

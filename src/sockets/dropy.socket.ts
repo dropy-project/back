@@ -1,69 +1,63 @@
-import { Server, Socket } from 'socket.io';
-import { NextFunction, Response } from 'express';
+import { Server } from 'socket.io';
 import { DropyAround } from '@/interfaces/dropy.interface';
-import DropyService from '@/services/dropy.service';
-import DropyController from '@/controllers/dropy.controller';
-import { verify } from 'jsonwebtoken';
-import { DataStoredInToken } from '@/interfaces/auth.interface';
-import client from '@/client';
-import { User } from '@prisma/client';
+import { AuthenticatedSocket } from '@/interfaces/auth.interface';
+import { NextFunction } from 'express';
+import { HttpException } from '@/exceptions/HttpException';
+import { logStartedService } from '@/utils/logs.utils';
 
-interface ExtendedSocket extends Socket {
-  user: User;
-}
+import authMiddleware from '@/middlewares/auth.middleware';
+import * as dropySocketController from '@controllers/sockets/dropy.socket.controller';
 
-export function startSocket() {
-  const io = new Server(4000);
-  const dropyController = new DropyController();
+export function startSocket(port: number) {
+  const io = new Server(port);
 
-  io.use(async (socket: ExtendedSocket, next: NextFunction) => {
-    const authorization = socket.handshake.headers.authorization;
+  io.use((socket, next: NextFunction) => authMiddleware(socket as AuthenticatedSocket, null, next));
 
-    if (authorization == null) {
-      return;
-    }
+  logStartedService('Dropy Socket', port);
 
-    const secretKey = process.env.SECRET_KEY;
-    const { userId } = (await verify(authorization, secretKey)) as DataStoredInToken;
-
-    const user = await client.user.findUnique({ where: { id: userId } });
-
-    if (user == null) {
-      return;
-    }
-
-    socket.user = user;
-    next();
-  });
-
-  const dropyService = new DropyService();
-
-  console.log('Start socket');
-
-  const findAll = async (user: User): Promise<DropyAround[]> => {
+  const findDropiesAround = async (): Promise<DropyAround[]> => {
     try {
-      const dropies = await dropyService.findAll(user);
+      const dropies = await dropySocketController.findDropiesAround();
       return dropies;
     } catch (error) {
       return [];
     }
   };
 
-  io.on('connection', async (socket: ExtendedSocket) => {
+  io.on('connection', async (socket: AuthenticatedSocket) => {
     console.log(`New connection ${socket.user.displayName} - ${socket.id}`);
 
-    socket.emit('all_dropies_around', await findAll(socket.user));
+    socket.emit('all_dropies_around', await findDropiesAround());
 
     socket.on('dropy_created', async (body, createdCb) => {
-      const dropyId = await dropyController.createDropy(body, socket.user);
-      createdCb(dropyId);
-      io.emit('all_dropies_around', await findAll(socket.user));
+      try {
+        const dropyId = await dropySocketController.createDropy(body, socket.user);
+        createdCb({
+          status: 200,
+          data: dropyId,
+        });
+        io.emit('all_dropies_around', await findDropiesAround());
+      } catch (error) {
+        handleError(error, createdCb);
+      }
     });
 
     socket.on('dropy_retreived', async (dropyId, retreivedCb) => {
-      await dropyController.retrieveDropy(dropyId, socket.user);
-      retreivedCb();
-      io.emit('all_dropies_around', await findAll(socket.user));
+      try {
+        await dropySocketController.retrieveDropy(dropyId, socket.user);
+        retreivedCb({ status: 200 });
+        io.emit('all_dropies_around', await findDropiesAround());
+      } catch (error) {
+        handleError(error, retreivedCb);
+      }
     });
   });
+}
+
+function handleError(error, callback) {
+  if (error instanceof HttpException) {
+    callback({ status: error.status, error: error });
+  } else {
+    callback({ status: 500, error: 'Internal server error' });
+  }
 }
