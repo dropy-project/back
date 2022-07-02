@@ -45,6 +45,6 @@ const findDropiesAround = async (): Promise<DropyAround[]> => {
     const dropies = await dropySocketController.findDropiesAround();
     return dropies;
   } catch (error) {
-    return [];
+    handleError(error, null);
   }
 };

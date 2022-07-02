@@ -6,6 +6,7 @@ import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 
 import authMiddleware from '@/middlewares/auth.middleware';
 import { HttpException } from '@/exceptions/HttpException';
+import { SocketResponse } from '@/interfaces/socket.interface';
 
 const socketPort = Number(process.env.SOCKET_PORT) || 4000;
 
@@ -17,10 +18,11 @@ logStartedService('Dropy Socket', socketPort);
 
 export default io;
 
-export function handleError(error, callback) {
+export function handleError(error, callback: (error: SocketResponse) => void | null) {
   if (error instanceof HttpException) {
-    callback({ status: error.status, error: error });
+    callback && callback({ status: error.status, error: error.message });
   } else {
-    callback({ status: 500, error: 'Internal server error' });
+    console.error(`[Socket error] >> SERVER SIDE ERROR`, error);
+    callback && callback({ status: 500, error: 'Internal server error' });
   }
 }
