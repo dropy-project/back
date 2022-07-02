@@ -1,23 +1,16 @@
 import { Router } from 'express';
-import { Routes } from '@interfaces/routes.interface';
-import authMiddleware from '@/middlewares/auth.middleware';
-import UsersController from '@controllers/users.controller';
+import * as usersController from '@controllers/users.controller';
 import errorMiddleware from '@/middlewares/error.middleware';
+import authMiddleware from '@/middlewares/auth.middleware';
 
-class UsersRoute implements Routes {
-  public path = '/user';
-  public router = Router();
-  public usersController = new UsersController();
+const path = '/user';
 
-  constructor() {
-    this.initializeRoutes();
-  }
+export function getRouter() {
+  const router = Router();
 
-  private initializeRoutes() {
-    this.router.post(`${this.path}/updateDeviceToken`, authMiddleware, this.usersController.updateDeviceToken, errorMiddleware);
-    this.router.post(`${this.path}/backgroundGeolocationPing`, authMiddleware, this.usersController.backgroundGeolocationPing, errorMiddleware);
-    this.router.get(`${this.path}/conversations`, authMiddleware, this.usersController.conversations, errorMiddleware);
-  }
+  router.post(`${path}/updateDeviceToken`, authMiddleware as any, usersController.updateDeviceToken, errorMiddleware);
+  router.post(`${path}/backgroundGeolocationPing`, authMiddleware as any, usersController.backgroundGeolocationPing, errorMiddleware);
+  router.get(`${this.path}/conversations`, authMiddleware as any, usersController.conversations, errorMiddleware);
+
+  return router;
 }
-
-export default UsersRoute;

@@ -1,5 +1,3 @@
 import { Dropy } from '@prisma/client';
 
-export interface DropyAround extends Pick<Dropy, 'id' | 'creationDate' | 'latitude' | 'longitude'> {
-  isUserDropy: boolean;
-}
+export type DropyAround = Pick<Dropy, 'id' | 'creationDate' | 'latitude' | 'longitude'>;
