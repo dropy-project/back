@@ -1,26 +1,16 @@
 import { Router } from 'express';
-import { Routes } from '@interfaces/routes.interface';
 import authMiddleware from '@/middlewares/auth.middleware';
-import DropyController from '@/controllers/dropy.controller';
 import errorMiddleware from '@/middlewares/error.middleware';
+import * as dropyController from '@controllers/dropy.controller';
 
-class DropyRoute implements Routes {
-  public path = '/dropy';
-  public router = Router();
-  public dropyController = new DropyController();
+const path = '/dropy';
 
-  constructor() {
-    this.initializeRoutes();
-  }
+export function getRouter() {
+  const router = Router();
 
-  private initializeRoutes() {
-    this.router.post(`${this.path}/add`, authMiddleware, this.dropyController.createDropy, errorMiddleware);
-    this.router.post(`${this.path}/add/:id/media`, authMiddleware, this.dropyController.createDropyMedia, errorMiddleware);
-    this.router.post(`${this.path}/findAround`, authMiddleware, this.dropyController.findAround, errorMiddleware);
-    this.router.post(`${this.path}/retrieve`, authMiddleware, this.dropyController.retrieveDropy, errorMiddleware);
-    this.router.get(`${this.path}/:id/media`, authMiddleware, this.dropyController.getDropyMedia, errorMiddleware);
-    this.router.get(`${this.path}/:id`, authMiddleware, this.dropyController.getDropy, errorMiddleware);
-  }
+  router.post(`${path}/add/:id/media`, authMiddleware as any, dropyController.createDropyMedia, errorMiddleware);
+  router.get(`${path}/:id/media`, authMiddleware as any, dropyController.getDropyMedia, errorMiddleware);
+  router.get(`${path}/:id`, authMiddleware as any, dropyController.getDropy, errorMiddleware);
+
+  return router;
 }
-
-export default DropyRoute;

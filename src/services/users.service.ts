@@ -1,38 +1,35 @@
 import { Dropy, User } from '@prisma/client';
-import client from '@/client';
-import DropyService from './dropy.service';
+import { getAvailableDropiesAroundLocation } from '@/services/dropy.service';
 import { sendPushNotificationToUsers } from '../notification';
+import client from '@/prisma/client';
 
-class UserService {
-  public backgroundGeolocationPing = async (user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Dropy[]> => {
-    const dropies = await DropyService.getAvailableDropiesAroundLocation(latitude, longitude, user);
-    await client.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        lastSeenDate: timeStamp,
-        lastSeenLocationLatitude: latitude,
-        lastSeenLocationLongitude: longitude,
-      },
-    });
+export async function backgroundGeolocationPing(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Dropy[]> {
+  const dropies = await getAvailableDropiesAroundLocation(latitude, longitude, user);
+  await client.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      lastSeenDate: timeStamp,
+      lastSeenLocationLatitude: latitude,
+      lastSeenLocationLongitude: longitude,
+    },
+  });
 
-    if (dropies.length > 0) {
-      sendPushNotificationToUsers([user], 'Drop found near your position');
-    }
+  if (dropies.length > 0) {
+    sendPushNotificationToUsers([user], 'Drop found near your position');
+  }
 
-    return dropies;
-  };
-
-  public updateDeviceToken = async (user: User, deviceToken: string): Promise<void> => {
-    await client.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        deviceToken,
-      },
-    });
-  };
+  return dropies;
 }
-export default UserService;
+
+export async function updateDeviceToken(user: User, deviceToken: string): Promise<void> {
+  await client.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      deviceToken,
+    },
+  });
+}

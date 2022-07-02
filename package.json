@@ -31,7 +31,8 @@
     "hpp": "^0.2.3",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
-    "node-pushnotifications": "^2.0.3"
+    "node-pushnotifications": "^2.0.3",
+    "socket.io": "^4.5.1"
   },
   "devDependencies": {
     "@swc/cli": "^0.1.51",
