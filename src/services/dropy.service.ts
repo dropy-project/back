@@ -1,4 +1,4 @@
-import client from '@/client';
+import client from '@/prisma/client';
 import { HttpException } from '@/exceptions/HttpException';
 import { DropyAround } from '@/interfaces/dropy.interface';
 import { Dropy, MediaType, User } from '@prisma/client';

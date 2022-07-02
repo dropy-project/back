@@ -1,4 +1,4 @@
-import client from '@/client';
+import client from '@/prisma/client';
 import { JsonWebTokenError, verify } from 'jsonwebtoken';
 import { NextFunction, Response } from 'express';
 import { HttpException } from '@exceptions/HttpException';

@@ -1,7 +1,7 @@
 import { Dropy, User } from '@prisma/client';
 import { getAvailableDropiesAroundLocation } from '@/services/dropy.service';
 import { sendPushNotificationToUsers } from '../notification';
-import client from '@/client';
+import client from '@/prisma/client';
 
 export async function backgroundGeolocationPing(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Dropy[]> {
   const dropies = await getAvailableDropiesAroundLocation(latitude, longitude, user);

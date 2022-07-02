@@ -19,12 +19,11 @@ dotenv.config();
 const app: express.Application = express();
 
 const apiPort = Number(process.env.API_PORT) || 3000;
-const socketPort = Number(process.env.SOCKET_PORT) || 4000;
 
 initializeMiddleWares();
 initializeRoutes();
 
-dropySocket.startSocket(socketPort);
+dropySocket.startSocket();
 
 app.listen(apiPort, () => {
   logStartedService('API', apiPort);
