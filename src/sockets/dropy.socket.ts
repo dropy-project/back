@@ -1,13 +1,21 @@
 import { DropyAround } from '@/interfaces/dropy.interface';
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
+import { NextFunction } from 'express';
 
 import io, { createSocketError } from './socket';
 
-import * as dropySocketController from '@controllers/sockets/dropy.socket.controller';
 import { SocketCallback, SocketResponse } from '@/interfaces/socket.interface';
+import * as dropySocketController from '@controllers/sockets/dropy.socket.controller';
+import authMiddleware from '@/middlewares/auth.middleware';
 
 export function startSocket() {
-  io.of('/dropy').on('connection', async (socket: AuthenticatedSocket) => {
+  const dropySocket = io.of('/dropy');
+
+  dropySocket.use((socket, next: NextFunction) => {
+    authMiddleware(socket as AuthenticatedSocket, null, next);
+  });
+
+  dropySocket.on('connection', async (socket: AuthenticatedSocket) => {
     console.log(`New socket connection ${socket.user.displayName} - ${socket.id}`);
 
     socket.emit('all_dropies_around', await findDropiesAround());
