@@ -18,11 +18,11 @@ logStartedService('Dropy Socket', socketPort);
 
 export default io;
 
-export function handleError(error, callback: (error: SocketResponse) => void | null) {
+export function createSocketError(error): SocketResponse<null> {
   if (error instanceof HttpException) {
-    callback && callback({ status: error.status, error: error.message });
+    return { status: error.status, error: error.message };
   } else {
     console.error(`[Socket error] >> SERVER SIDE ERROR`, error);
-    callback && callback({ status: 500, error: 'Internal server error' });
+    return { status: 500, error: 'Internal server error' };
   }
 }

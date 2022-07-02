@@ -1,9 +1,10 @@
 import { DropyAround } from '@/interfaces/dropy.interface';
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 
-import io, { handleError } from './socket';
+import io, { createSocketError } from './socket';
 
 import * as dropySocketController from '@controllers/sockets/dropy.socket.controller';
+import { SocketCallback, SocketResponse } from '@/interfaces/socket.interface';
 
 export function startSocket() {
   io.of('/dropy').on('connection', async (socket: AuthenticatedSocket) => {
@@ -11,40 +12,43 @@ export function startSocket() {
 
     socket.emit('all_dropies_around', await findDropiesAround());
 
-    socket.on('dropy_created', async (body, createdCb) => {
+    socket.on('dropy_created', async (body: unknown, callback: SocketCallback<Number>) => {
       try {
         const dropyId = await dropySocketController.createDropy(body, socket.user);
 
-        createdCb({
+        callback({
           status: 200,
           data: dropyId,
         });
 
         io.emit('all_dropies_around', await findDropiesAround());
       } catch (error) {
-        handleError(error, createdCb);
+        callback(createSocketError(error));
       }
     });
 
-    socket.on('dropy_retreived', async (dropyId, retreivedCb) => {
+    socket.on('dropy_retreived', async (dropyId: Number, callback: SocketCallback<null>) => {
       try {
         await dropySocketController.retrieveDropy(dropyId, socket.user);
 
-        retreivedCb({ status: 200 });
+        callback({ status: 200 });
 
         io.emit('all_dropies_around', await findDropiesAround());
       } catch (error) {
-        handleError(error, retreivedCb);
+        callback(createSocketError(error));
       }
     });
   });
 }
 
-const findDropiesAround = async (): Promise<DropyAround[]> => {
+const findDropiesAround = async (): Promise<SocketResponse<DropyAround[]>> => {
   try {
     const dropies = await dropySocketController.findDropiesAround();
-    return dropies;
+    return {
+      status: 200,
+      data: dropies,
+    };
   } catch (error) {
-    handleError(error, null);
+    return createSocketError(error);
   }
 };

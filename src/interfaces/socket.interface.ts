@@ -1,5 +1,7 @@
-export interface SocketResponse {
+export interface SocketResponse<T> {
   status: number;
-  data?: any;
+  data?: T;
   error?: string;
 }
+
+export type SocketCallback<T> = (response: SocketResponse<T>) => void;
