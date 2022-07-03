@@ -12,6 +12,8 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import cors from 'cors';
 import * as dropySocket from './sockets/dropy.socket';
+import * as chatSocket from './sockets/chat.socket';
+
 import { logStartedService } from './utils/logs.utils';
 
 dotenv.config();
@@ -24,6 +26,7 @@ initializeMiddleWares();
 initializeRoutes();
 
 dropySocket.startSocket();
+chatSocket.startSocket();
 
 app.listen(apiPort, () => {
   logStartedService('API', apiPort);

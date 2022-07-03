@@ -63,7 +63,7 @@ export async function conversations(userId: number): Promise<UserConversation[]>
       lastMessageDate: lastMessage?.date ?? null,
       user: {
         userId: otherUser.id,
-        username: otherUser.username,
+        displayName: otherUser.displayName,
       },
     };
   });

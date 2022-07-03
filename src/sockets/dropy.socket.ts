@@ -16,7 +16,7 @@ export function startSocket() {
   });
 
   dropySocket.on('connection', async (socket: AuthenticatedSocket) => {
-    console.log(`New socket connection ${socket.user.displayName} - ${socket.id}`);
+    console.log(`[Dropy Socket] new connection ${socket.user.displayName} - ${socket.id}`);
 
     socket.emit('all_dropies_around', await findDropiesAround());
 
