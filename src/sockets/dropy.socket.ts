@@ -29,7 +29,7 @@ export function startSocket() {
           data: dropyId,
         });
 
-        io.emit('all_dropies_around', await findDropiesAround());
+        dropySocket.emit('all_dropies_around', await findDropiesAround());
       } catch (error) {
         callback(createSocketError(error));
       }
@@ -41,7 +41,7 @@ export function startSocket() {
 
         callback({ status: 200 });
 
-        io.emit('all_dropies_around', await findDropiesAround());
+        dropySocket.emit('all_dropies_around', await findDropiesAround());
       } catch (error) {
         callback(createSocketError(error));
       }

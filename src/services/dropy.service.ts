@@ -92,6 +92,7 @@ export async function retrieveDropy(user: User, dropyId: number) {
     throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
   }
 
+  // check si la conv existe déjà avec ces user
   await client.chatConversation.create({
     data: {
       users: { connect: [{ id: user.id }, { id: emitter.id }] },
