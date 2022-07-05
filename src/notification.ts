@@ -23,15 +23,15 @@ const push = new PushNotifications({
   },
 });
 
-export async function sendPushNotificationToUsers(users: User[], body: string) {
+export async function sendPushNotificationToUsers(users: User[], body: string, title = 'Dropy') {
   const tokens = users.filter(user => user.deviceToken != null).map(user => user.deviceToken);
-  return await sendPushNotifications(tokens, body);
+  return await sendPushNotifications(tokens, body, title);
 }
 
-export async function sendPushNotifications(tokens: string[], body: string) {
+export async function sendPushNotifications(tokens: string[], body: string, title = 'Dropy') {
   return await push.send(tokens, {
     topic: 'com.dropy.project',
-    title: 'Dropy',
+    title: title,
     body,
     sound: 'default',
     contentAvailable: true,

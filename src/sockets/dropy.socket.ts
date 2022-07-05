@@ -16,7 +16,7 @@ export function startSocket() {
   });
 
   dropySocket.on('connection', async (socket: AuthenticatedSocket) => {
-    console.log(`New socket connection ${socket.user.displayName} - ${socket.id}`);
+    console.log(`[Dropy Socket] new connection ${socket.user.displayName} - ${socket.id}`);
 
     socket.emit('all_dropies_around', await findDropiesAround());
 
@@ -29,7 +29,7 @@ export function startSocket() {
           data: dropyId,
         });
 
-        io.emit('all_dropies_around', await findDropiesAround());
+        dropySocket.emit('all_dropies_around', await findDropiesAround());
       } catch (error) {
         callback(createSocketError(error));
       }
@@ -41,7 +41,7 @@ export function startSocket() {
 
         callback({ status: 200 });
 
-        io.emit('all_dropies_around', await findDropiesAround());
+        dropySocket.emit('all_dropies_around', await findDropiesAround());
       } catch (error) {
         callback(createSocketError(error));
       }

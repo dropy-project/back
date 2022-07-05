@@ -10,7 +10,7 @@ const ONE_DAY_IN_SECONDS = 86400;
 
 export async function register(uid, displayName): Promise<User> {
   const findUser: User = await client.user.findUnique({ where: { uid: uid } });
-  if (findUser) throw new HttpException(409, `This uid ${uid} is already registered`);
+  if (findUser) throw new HttpException(409, `This uid is already registered`);
 
   const username: string = await displayNameToUsername(displayName);
   const createUserData: User = await client.user.create({ data: { displayName, uid, username } });

@@ -34,3 +34,12 @@ export async function backgroundGeolocationPing(req: AuthenticatedRequest, res: 
     next(error);
   }
 }
+
+export async function conversations(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const conversations = await userService.conversations(req.user.id);
+    res.status(200).json(conversations);
+  } catch (error) {
+    next(error);
+  }
+}

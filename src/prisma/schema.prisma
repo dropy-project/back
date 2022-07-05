@@ -16,17 +16,23 @@ enum MediaType {
 }
 
 model User {
-  id                        Int      @id @default(autoincrement())
-  uid                       String   @unique
-  username                  String   @unique
-  displayName               String
-  registerDate              DateTime @default(now())
-  emittedDropies            Dropy[]  @relation("emittedDropies")
-  retrievedDropies          Dropy[]  @relation("retrievedDropies")
+  id  Int    @id @default(autoincrement())
+  uid String @unique
+
+  username     String   @unique
+  displayName  String
+  registerDate DateTime @default(now())
+  deviceToken String?
+
+  emittedDropies   Dropy[] @relation("emittedDropies")
+  retrievedDropies Dropy[] @relation("retrievedDropies")
+
   lastSeenDate              DateTime @default(now())
   lastSeenLocationLongitude Float    @default(0)
   lastSeenLocationLatitude  Float    @default(0)
-  deviceToken               String?
+
+  conversations ChatConversation[]
+  chatMessages ChatMessage[]
 }
 
 model Dropy {
@@ -37,13 +43,42 @@ model Dropy {
   emitterId Int
 
   retrieverId  Int?
-  retriever    User?     @relation("retrievedDropies", fields: [retrieverId], references: [id], map: "retrieverId")
+  retriever    User? @relation("retrievedDropies", fields: [retrieverId], references: [id], map: "retrieverId")
   retrieveDate DateTime?
 
   latitude  Float
   longitude Float
 
-  filePath  String?
-  mediaData String?
-  mediaType MediaType @default(NONE)
+  filePath         String?
+  mediaData        String?
+  mediaType        MediaType          @default(NONE)
+
+  chatConversations ChatConversation[]
+}
+
+model ChatConversation {
+  id           Int      @id @default(autoincrement())
+  creationDate DateTime @default(now())
+  closed       Boolean  @default(false)
+
+  users User[]
+
+  dropy   Dropy @relation(fields: [dropyId], references: [id])
+  dropyId Int
+
+  messages ChatMessage[]
+}
+
+model ChatMessage {
+  id   Int      @id @default(autoincrement())
+  date DateTime @default(now())
+
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id])
+  conversationId Int
+
+  sender   User @relation(fields: [senderId], references: [id])
+  senderId Int
+
+  content            String
+  read               Boolean @default(false)
 }
