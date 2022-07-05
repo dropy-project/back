@@ -1,3 +1,5 @@
+import { DropyAround } from './dropy.interface';
+
 export interface UserConversation {
   id: number;
   user: {
@@ -13,7 +15,7 @@ export interface UserConversation {
 export interface ChatMessage {
   id: number;
   date: Date;
-  content: string;
+  content: string | DropyAround;
   read: boolean;
   sender: {
     displayName: string;

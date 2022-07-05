@@ -3,6 +3,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import { DropyAround } from '@/interfaces/dropy.interface';
 import { Dropy, MediaType, User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
+import { sendPushNotificationToUsers } from '@/notification';
 
 const DISTANCE_FILTER_RADIUS = 0.004; // Environ 300m
 
@@ -102,23 +103,28 @@ export async function retrieveDropy(user: User, dropyId: number) {
     },
   });
 
-  const chatConversation = await client.chatConversation.findFirst({
+  const chatConversations = await client.chatConversation.findFirst({
     where: {
-      AND:[
-        users: {
-          some: { id: { equals: user.id } },
+      users: {
+        every: {
+          OR: [
+            {
+              id: user.id,
+            },
+            {
+              id: emitter.id,
+            },
+          ],
         },
-        users: {
-          some: { id: { equals: dropy.emitterId } },
-        },
-      ]
+      },
     },
   });
 
-  if (chatConversation != null) {
-    // update la conv, rajouter le dropy à la conv
+  console.log('CONV FOUND: ', chatConversations);
+
+  if (chatConversations != null) {
     await client.chatConversation.update({
-      where: { id: chatConversation.id },
+      where: { id: chatConversations.id },
       data: {
         dropies: {
           connect: {
@@ -127,13 +133,29 @@ export async function retrieveDropy(user: User, dropyId: number) {
         },
       },
     });
-  } else {
-    await client.chatConversation.create({
+
+    await client.chatMessage.create({
       data: {
-        users: { connect: [{ id: user.id }, { id: emitter.id }] },
-        dropy: { connect: { id: dropy.id } },
+        senderId: user.id,
+        conversationId: chatConversations.id,
+        dropyId: dropy.id,
       },
     });
+  } else {
+    const newConversation = await client.chatConversation.create({
+      data: {
+        users: { connect: [{ id: user.id }, { id: emitter.id }] },
+        dropies: { connect: { id: dropy.id } },
+      },
+    });
+    await client.chatMessage.create({
+      data: {
+        senderId: user.id,
+        conversationId: newConversation.id,
+        dropyId: dropy.id,
+      },
+    });
+    sendPushNotificationToUsers([emitter], `Start chating with him`, `${user.displayName} just found your dropy !`);
   }
 }
 

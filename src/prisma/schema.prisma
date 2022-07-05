@@ -22,7 +22,7 @@ model User {
   username     String   @unique
   displayName  String
   registerDate DateTime @default(now())
-  deviceToken String?
+  deviceToken  String?
 
   emittedDropies   Dropy[] @relation("emittedDropies")
   retrievedDropies Dropy[] @relation("retrievedDropies")
@@ -32,7 +32,7 @@ model User {
   lastSeenLocationLatitude  Float    @default(0)
 
   conversations ChatConversation[]
-  chatMessages ChatMessage[]
+  chatMessages  ChatMessage[]
 }
 
 model Dropy {
@@ -43,18 +43,20 @@ model Dropy {
   emitterId Int
 
   retrieverId  Int?
-  retriever    User? @relation("retrievedDropies", fields: [retrieverId], references: [id], map: "retrieverId")
+  retriever    User?     @relation("retrievedDropies", fields: [retrieverId], references: [id], map: "retrieverId")
   retrieveDate DateTime?
 
   latitude  Float
   longitude Float
 
-  filePath         String?
-  mediaData        String?
-  mediaType        MediaType          @default(NONE)
+  filePath  String?
+  mediaData String?
+  mediaType MediaType @default(NONE)
 
-  chatConversation ChatConversation @relation("dropy", fields: [chatConversationId], references: [id], map: "chatConversationId")
-  chatConversationId Int
+  chatConversation   ChatConversation? @relation(fields: [chatConversationId], references: [id])
+  chatConversationId Int?
+
+  chatMessage        ChatMessage[]
 }
 
 model ChatConversation {
@@ -64,8 +66,7 @@ model ChatConversation {
 
   users User[]
 
-  dropy   Dropy[] @relation("dropy")
-  dropyId Int
+  dropies Dropy[]
 
   messages ChatMessage[]
 }
@@ -80,6 +81,9 @@ model ChatMessage {
   sender   User @relation(fields: [senderId], references: [id])
   senderId Int
 
-  content            String
-  read               Boolean @default(false)
+  content String?
+  dropy   Dropy?  @relation(fields: [dropyId], references: [id])
+
+  read    Boolean @default(false)
+  dropyId Int?
 }
