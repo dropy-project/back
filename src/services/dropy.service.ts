@@ -209,7 +209,10 @@ export async function getAvailableDropiesAroundLocation(latitude: number, longit
 }
 
 export async function getDropy(dropyId: number) {
-  const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
+  const dropy = await client.dropy.findUnique({
+    where: { id: dropyId },
+    include: { emitter: true, retriever: true },
+  });
 
   if (dropy == undefined) {
     throw new HttpException(404, `Dropy with id ${dropyId} not found`);
@@ -220,9 +223,10 @@ export async function getDropy(dropyId: number) {
     mediaType: dropy.mediaType,
     creationDate: dropy.creationDate,
     emitterId: dropy.emitterId,
-    emitterDisplayName: (await client.user.findUnique({ where: { id: dropy.emitterId } })).displayName,
+    emitterDisplayName: dropy.emitter.displayName,
     retrieverId: dropy.retrieverId,
-    retrieverDisplayName: (await client.user.findUnique({ where: { id: dropy.retrieverId } })).displayName,
+    retrieverDisplayName: dropy.retriever.displayName,
+    conversationId: dropy.chatConversationId,
   };
 
   return customDropy;
