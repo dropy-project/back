@@ -92,14 +92,6 @@ export async function retrieveDropy(user: User, dropyId: number) {
     throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
   }
 
-  // check si la conv existe déjà avec ces user
-  await client.chatConversation.create({
-    data: {
-      users: { connect: [{ id: user.id }, { id: emitter.id }] },
-      dropy: { connect: { id: dropy.id } },
-    },
-  });
-
   await client.dropy.update({
     where: {
       id: dropy.id,
@@ -109,6 +101,40 @@ export async function retrieveDropy(user: User, dropyId: number) {
       retrieveDate: new Date(),
     },
   });
+
+  const chatConversation = await client.chatConversation.findFirst({
+    where: {
+      AND:[
+        users: {
+          some: { id: { equals: user.id } },
+        },
+        users: {
+          some: { id: { equals: dropy.emitterId } },
+        },
+      ]
+    },
+  });
+
+  if (chatConversation != null) {
+    // update la conv, rajouter le dropy à la conv
+    await client.chatConversation.update({
+      where: { id: chatConversation.id },
+      data: {
+        dropies: {
+          connect: {
+            id: dropy.id,
+          },
+        },
+      },
+    });
+  } else {
+    await client.chatConversation.create({
+      data: {
+        users: { connect: [{ id: user.id }, { id: emitter.id }] },
+        dropy: { connect: { id: dropy.id } },
+      },
+    });
+  }
 }
 
 export async function getDropyById(dropyId: number): Promise<Dropy> {

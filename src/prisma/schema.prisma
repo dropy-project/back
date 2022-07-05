@@ -53,7 +53,8 @@ model Dropy {
   mediaData        String?
   mediaType        MediaType          @default(NONE)
 
-  chatConversations ChatConversation[]
+  chatConversation ChatConversation @relation("dropy", fields: [chatConversationId], references: [id], map: "chatConversationId")
+  chatConversationId Int
 }
 
 model ChatConversation {
@@ -63,7 +64,7 @@ model ChatConversation {
 
   users User[]
 
-  dropy   Dropy @relation(fields: [dropyId], references: [id])
+  dropy   Dropy[] @relation("dropy")
   dropyId Int
 
   messages ChatMessage[]
