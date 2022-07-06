@@ -48,7 +48,8 @@ export async function getDropyMedia(req: AuthenticatedRequest, res: Response, ne
 
     const dropy = await dropyService.getDropyById(dropyId);
 
-    if (req.user.id != dropy.retrieverId) {
+    const isAllowed = req.user.id === dropy.emitterId || req.user.id === dropy.retrieverId;
+    if (!isAllowed) {
       throw new HttpException(403, `User with id ${req.user.id} not allow to retrieve dropy with id ${dropy.id}`);
     }
 

@@ -8,11 +8,11 @@ export async function getAllMessages(conversationId: number): Promise<ChatMessag
     where: {
       conversationId: conversationId,
     },
-    include: { sender: true },
+    include: { sender: true, dropy: true },
   });
 
   return chatMessages.map(message => ({
-    content: message.content,
+    content: message.content ?? message.dropy,
     date: message.date,
     read: message.read,
     id: message.id,
