@@ -93,70 +93,14 @@ export async function retrieveDropy(user: User, dropyId: number) {
     throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
   }
 
-  await client.dropy.update({
-    where: {
-      id: dropy.id,
-    },
-    data: {
-      retrieverId: user.id,
-      retrieveDate: new Date(),
-    },
+  const newDropy = await client.dropy.update({
+    where: { id: dropy.id },
+    data: { retriever: { connect: { id: user.id } }, retrieveDate: new Date() },
   });
 
-  const chatConversations = await client.chatConversation.findFirst({
-    where: {
-      users: {
-        every: {
-          OR: [
-            {
-              id: user.id,
-            },
-            {
-              id: emitter.id,
-            },
-          ],
-        },
-      },
-    },
-  });
+  await createOrUpdateChatConversation(newDropy);
 
-  console.log('CONV FOUND: ', chatConversations);
-
-  if (chatConversations != null) {
-    await client.chatConversation.update({
-      where: { id: chatConversations.id },
-      data: {
-        dropies: {
-          connect: {
-            id: dropy.id,
-          },
-        },
-      },
-    });
-
-    await client.chatMessage.create({
-      data: {
-        senderId: user.id,
-        conversationId: chatConversations.id,
-        dropyId: dropy.id,
-      },
-    });
-  } else {
-    const newConversation = await client.chatConversation.create({
-      data: {
-        users: { connect: [{ id: user.id }, { id: emitter.id }] },
-        dropies: { connect: { id: dropy.id } },
-      },
-    });
-    await client.chatMessage.create({
-      data: {
-        senderId: user.id,
-        conversationId: newConversation.id,
-        dropyId: dropy.id,
-      },
-    });
-    sendPushNotificationToUsers([emitter], `Start chating with him`, `${user.displayName} just found your dropy !`);
-  }
+  sendPushNotificationToUsers([emitter], `Start chating with him`, `${user.displayName} just found your drop !`);
 }
 
 export async function getDropyById(dropyId: number): Promise<Dropy> {
@@ -253,3 +197,41 @@ export async function findDropiesAround(): Promise<DropyAround[]> {
 
   return dropiesAround;
 }
+
+const createOrUpdateChatConversation = async (dropy: Dropy): Promise<void> => {
+  const existingConversation = await client.chatConversation.findFirst({
+    where: {
+      users: {
+        every: {
+          OR: [{ id: dropy.retrieverId }, { id: dropy.emitterId }],
+        },
+      },
+    },
+  });
+
+  const sendDropyAsMessage = async (conversationId: number) => {
+    await client.chatMessage.create({
+      data: {
+        senderId: dropy.emitterId,
+        conversationId: conversationId,
+        dropyId: dropy.id,
+      },
+    });
+  };
+
+  if (existingConversation != null) {
+    await client.chatConversation.update({
+      where: { id: existingConversation.id },
+      data: { dropies: { connect: { id: dropy.id } } },
+    });
+    await sendDropyAsMessage(existingConversation.id);
+  } else {
+    const newConversation = await client.chatConversation.create({
+      data: {
+        users: { connect: [{ id: dropy.retrieverId }, { id: dropy.emitterId }] },
+        dropies: { connect: { id: dropy.id } },
+      },
+    });
+    await sendDropyAsMessage(newConversation.id);
+  }
+};
