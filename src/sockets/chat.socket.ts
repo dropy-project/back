@@ -31,6 +31,11 @@ export function startSocket() {
       }
     });
 
+    socket.on('leave_conversation', conversationId => {
+      console.log(`[Chat socket] left conversation ${conversationId}`);
+      socket.leave(`conversation-${conversationId}`);
+    });
+
     socket.on('message_sent', async (body, callback: SocketCallback<number>) => {
       console.log(`[Chat socket] message sent`);
 

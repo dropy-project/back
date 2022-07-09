@@ -1,9 +1,9 @@
 import client from '@/prisma/client';
 import { HttpException } from '@/exceptions/HttpException';
 import { DropyAround } from '@/interfaces/dropy.interface';
-import { Dropy, MediaType, User } from '@prisma/client';
+import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
-import { sendPushNotificationToUsers } from '@/notification';
+import { sendPushNotification } from '@/notification';
 
 const DISTANCE_FILTER_RADIUS = 0.004; // Environ 300m
 
@@ -98,9 +98,15 @@ export async function retrieveDropy(user: User, dropyId: number) {
     data: { retriever: { connect: { id: user.id } }, retrieveDate: new Date() },
   });
 
-  await createOrUpdateChatConversation(newDropy);
+  const conversation = await createOrUpdateChatConversation(newDropy);
 
-  sendPushNotificationToUsers([emitter], `Start chating with him`, `${user.displayName} just found your drop !`);
+  sendPushNotification({
+    user: emitter,
+    title: `${user.displayName} just found your drop !`,
+    body: 'Start chating with him !',
+    sound: 'message_sound.mp3',
+    payload: conversation,
+  });
 }
 
 export async function getDropyById(dropyId: number): Promise<Dropy> {
@@ -198,7 +204,7 @@ export async function findDropiesAround(): Promise<DropyAround[]> {
   return dropiesAround;
 }
 
-const createOrUpdateChatConversation = async (dropy: Dropy): Promise<void> => {
+const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConversation> => {
   const existingConversation = await client.chatConversation.findFirst({
     where: {
       users: {
@@ -225,6 +231,7 @@ const createOrUpdateChatConversation = async (dropy: Dropy): Promise<void> => {
       data: { dropies: { connect: { id: dropy.id } } },
     });
     await sendDropyAsMessage(existingConversation.id);
+    return existingConversation;
   } else {
     const newConversation = await client.chatConversation.create({
       data: {
@@ -233,5 +240,6 @@ const createOrUpdateChatConversation = async (dropy: Dropy): Promise<void> => {
       },
     });
     await sendDropyAsMessage(newConversation.id);
+    return newConversation;
   }
 };
