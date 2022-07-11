@@ -228,7 +228,7 @@ const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConvers
   if (existingConversation != null) {
     await client.chatConversation.update({
       where: { id: existingConversation.id },
-      data: { dropies: { connect: { id: dropy.id } } },
+      data: { dropies: { connect: { id: dropy.id } } , closed: false},
     });
     await sendDropyAsMessage(existingConversation.id);
     return existingConversation;

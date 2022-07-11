@@ -37,6 +37,29 @@ export function startSocket() {
       socket.leave(`conversation-${conversationId}`);
     });
 
+    socket.on('close_conversation', async (conversationId, callback: SocketCallback<null>) => {
+      console.log(`[Chat socket] close conversation :  ${conversationId}`);
+      chatController.closeConversation(conversationId);
+      try {
+        const chatConversation = await chatController.getConversation(socket.user, body);
+        const usersToEmit = await getConversationSocketUsers(chatConversation.users);
+        usersToEmit.forEach((socket: AuthenticatedSocket) => {
+          chatSocket.to(socket.id).emit('conversation_closed', {
+            status: 200,
+            data: {
+              id: chatConversation.id,
+            },
+          });
+          callback({
+            status: 200,
+            data: null,
+          });
+        });
+      } catch (error) {
+        callback(createSocketError(error));
+      }
+    });
+
     socket.on('message_sent', async (body, callback: SocketCallback<number>) => {
       console.log(`[Chat socket] message sent`);
 

@@ -23,6 +23,13 @@ export async function getAllMessages(conversationId: number): Promise<ChatMessag
   }));
 }
 
+export async function closeConversation(conversationId: number): Promise<void> {
+  await client.chatConversation.update({
+    where: { id: conversationId },
+    data: { closed: true },
+  });
+}
+
 export async function addMessage(user: User, connectedUsers: User[], content: string, conversationId: number): Promise<ChatMessage> {
   const message = await client.chatMessage.create({
     data: {
