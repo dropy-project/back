@@ -23,11 +23,6 @@ export async function getAllMessages(conversationId: number): Promise<ChatMessag
   }));
 }
 export async function getMessages(conversationId: number, offset: number, limit: number): Promise<ChatMessage[]> {
-  const totalMessages = await client.chatMessage.count({
-    where: {
-      conversationId: conversationId,
-    },
-  });
   const skip = offset * limit;
   const chatMessages = await client.chatMessage.findMany({
     where: {
