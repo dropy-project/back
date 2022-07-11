@@ -36,7 +36,7 @@ export async function getMessages(conversationId: number, offset: number, limit:
     take: limit,
   });
 
-  return chatMessages.map(message => ({
+  return chatMessages.reverse().map(message => ({
     content: message.content ?? message.dropy,
     date: message.date,
     read: message.read,
