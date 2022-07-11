@@ -5,6 +5,7 @@ import authMiddleware from '@/middlewares/auth.middleware';
 import { ChatMessage } from '@/interfaces/chat.interface';
 import { SocketCallback } from '@/interfaces/socket.interface';
 import * as chatController from '@/controllers/sockets/chat.socket.controller';
+import { callbackify } from 'util';
 
 export function startSocket() {
   const chatSocket = io.of('/chat');
@@ -23,9 +24,21 @@ export function startSocket() {
         socket.join(`conversation-${conversationId}`);
         callback({
           status: 200,
-          data: await chatController.getAllMessages(conversationId),
         });
         socket.broadcast.emit('request_status');
+      } catch (error) {
+        callback(createSocketError(error));
+      }
+    });
+
+    socket.on('list_messages', async (body, callback : SocketCallback<ChatMessages>) => {
+      console.log(`[Chat socket] list messages`);
+      try{
+        const messages = await chatController.listMessages(body);
+        callback({
+          status: 200,
+          data: messages,
+        });
       } catch (error) {
         callback(createSocketError(error));
       }
