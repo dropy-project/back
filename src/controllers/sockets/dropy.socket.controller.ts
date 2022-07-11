@@ -4,12 +4,11 @@ import { DropyAround } from '@/interfaces/dropy.interface';
 import * as dropyService from '@/services/dropy.service';
 import * as utils from '@/utils/controller.utils';
 
-export async function createDropy(body, user: User): Promise<Number> {
+export async function createDropy(body, user: User): Promise<DropyAround> {
   const { latitude, longitude } = body;
   utils.throwIfNotNumber(latitude, longitude);
 
-  const dropy = await dropyService.createDropy(user, latitude, longitude);
-  return dropy.id;
+  return await dropyService.createDropy(user, latitude, longitude);
 }
 
 export async function findDropiesAround(): Promise<DropyAround[]> {
@@ -17,10 +16,12 @@ export async function findDropiesAround(): Promise<DropyAround[]> {
   return dropiesAround;
 }
 
-export async function retrieveDropy(body, user: User): Promise<void> {
+export async function retrieveDropy(body, user: User): Promise<Number> {
   const { dropyId } = body;
   utils.throwIfNotNumber(dropyId);
 
   await dropyService.retrieveDropy(user, dropyId);
   console.log(`Retriever with id ${user.id} added for dropy with id ${dropyId}`);
+
+  return dropyId;
 }

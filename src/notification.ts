@@ -1,6 +1,19 @@
-import PushNotifications from 'node-pushnotifications';
+import PushNotifications, { Result } from 'node-pushnotifications';
 import fs from 'fs';
 import { User } from '@prisma/client';
+
+export interface Notification {
+  user: User;
+  title: string;
+  body: string;
+  payload?: any;
+  sound?: 'dropy_sound.mp3' | 'message_sound.mp3';
+  badge?: number;
+}
+
+export interface BatchedNotification extends Omit<Notification, 'user'> {
+  users: User[];
+}
 
 let apnKey;
 if (fs.existsSync('./certNotification.p8')) {
@@ -16,24 +29,35 @@ const push = new PushNotifications({
       keyId: process.env.APN_KEYID || '',
       teamId: process.env.APN_TEAMID || '',
     },
-    production: false,
+    production: process.env.NODE_ENV === 'production',
   },
   gcm: {
     id: process.env.FCM_KEY || '',
   },
 });
 
-export async function sendPushNotificationToUsers(users: User[], body: string, title = 'Dropy') {
-  const tokens = users.filter(user => user.deviceToken != null).map(user => user.deviceToken);
-  return await sendPushNotifications(tokens, body, title);
-}
+export async function sendPushNotification(notification: Notification | BatchedNotification): Promise<Result[]> {
+  const tokens = [];
 
-export async function sendPushNotifications(tokens: string[], body: string, title = 'Dropy') {
-  return await push.send(tokens, {
+  const single = notification as Notification;
+  const batched = notification as BatchedNotification;
+
+  if (batched.users != undefined) {
+    batched.users.forEach(user => {
+      tokens.push(user.deviceToken);
+    });
+  } else if (single.user != undefined) {
+    tokens.push(single.user.deviceToken);
+  }
+
+  const results = await push.send(tokens, {
     topic: 'com.dropy.project',
-    title: title,
-    body,
-    sound: 'default',
+    title: notification.title,
+    body: notification.body,
+    sound: notification.sound ?? 'default',
+    badge: notification.badge,
     contentAvailable: true,
+    clickAction: notification.payload ? JSON.stringify(notification.payload) : undefined,
   });
+  return results;
 }

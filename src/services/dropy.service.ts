@@ -1,8 +1,9 @@
 import client from '@/prisma/client';
 import { HttpException } from '@/exceptions/HttpException';
 import { DropyAround } from '@/interfaces/dropy.interface';
-import { Dropy, MediaType, User } from '@prisma/client';
+import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
+import { sendPushNotification } from '@/notification';
 
 const DISTANCE_FILTER_RADIUS = 0.004; // Environ 300m
 
@@ -92,22 +93,19 @@ export async function retrieveDropy(user: User, dropyId: number) {
     throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
   }
 
-  // check si la conv existe déjà avec ces user
-  await client.chatConversation.create({
-    data: {
-      users: { connect: [{ id: user.id }, { id: emitter.id }] },
-      dropy: { connect: { id: dropy.id } },
-    },
+  const newDropy = await client.dropy.update({
+    where: { id: dropy.id },
+    data: { retriever: { connect: { id: user.id } }, retrieveDate: new Date() },
   });
 
-  await client.dropy.update({
-    where: {
-      id: dropy.id,
-    },
-    data: {
-      retrieverId: user.id,
-      retrieveDate: new Date(),
-    },
+  const conversation = await createOrUpdateChatConversation(newDropy);
+
+  sendPushNotification({
+    user: emitter,
+    title: `${user.displayName} just found your drop !`,
+    body: 'Start chating with him !',
+    sound: 'message_sound.mp3',
+    payload: conversation,
   });
 }
 
@@ -161,7 +159,10 @@ export async function getAvailableDropiesAroundLocation(latitude: number, longit
 }
 
 export async function getDropy(dropyId: number) {
-  const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
+  const dropy = await client.dropy.findUnique({
+    where: { id: dropyId },
+    include: { emitter: true, retriever: true },
+  });
 
   if (dropy == undefined) {
     throw new HttpException(404, `Dropy with id ${dropyId} not found`);
@@ -172,9 +173,10 @@ export async function getDropy(dropyId: number) {
     mediaType: dropy.mediaType,
     creationDate: dropy.creationDate,
     emitterId: dropy.emitterId,
-    emitterDisplayName: (await client.user.findUnique({ where: { id: dropy.emitterId } })).displayName,
+    emitterDisplayName: dropy.emitter.displayName,
     retrieverId: dropy.retrieverId,
-    retrieverDisplayName: (await client.user.findUnique({ where: { id: dropy.retrieverId } })).displayName,
+    retrieverDisplayName: dropy.retriever.displayName,
+    conversationId: dropy.chatConversationId,
   };
 
   return customDropy;
@@ -201,3 +203,43 @@ export async function findDropiesAround(): Promise<DropyAround[]> {
 
   return dropiesAround;
 }
+
+const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConversation> => {
+  const existingConversation = await client.chatConversation.findFirst({
+    where: {
+      users: {
+        every: {
+          OR: [{ id: dropy.retrieverId }, { id: dropy.emitterId }],
+        },
+      },
+    },
+  });
+
+  const sendDropyAsMessage = async (conversationId: number) => {
+    await client.chatMessage.create({
+      data: {
+        senderId: dropy.emitterId,
+        conversationId: conversationId,
+        dropyId: dropy.id,
+      },
+    });
+  };
+
+  if (existingConversation != null) {
+    await client.chatConversation.update({
+      where: { id: existingConversation.id },
+      data: { dropies: { connect: { id: dropy.id } } },
+    });
+    await sendDropyAsMessage(existingConversation.id);
+    return existingConversation;
+  } else {
+    const newConversation = await client.chatConversation.create({
+      data: {
+        users: { connect: [{ id: dropy.retrieverId }, { id: dropy.emitterId }] },
+        dropies: { connect: { id: dropy.id } },
+      },
+    });
+    await sendDropyAsMessage(newConversation.id);
+    return newConversation;
+  }
+};

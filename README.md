@@ -46,6 +46,9 @@
 
 ### Variables d'environnement : 
 ```
+
+NODE_ENV=<production|development>
+
 #################-> API
 
 API_PORT=3000
