@@ -28,11 +28,13 @@ export async function getMessages(conversationId: number, offset: number, limit:
       conversationId: conversationId,
     },
   });
-  const skip = totalMessages - offset * limit;
-
+  const skip = offset * limit;
   const chatMessages = await client.chatMessage.findMany({
     where: {
       conversationId: conversationId,
+    },
+    orderBy: {
+      date: 'desc',
     },
     include: { sender: true, dropy: true },
     skip: skip,

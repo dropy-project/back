@@ -31,10 +31,10 @@ export function startSocket() {
       }
     });
 
-    socket.on('list_messages', async (body, callback : SocketCallback<ChatMessages>) => {
+    socket.on('list_messages', async (body, callback: SocketCallback<ChatMessage[]>) => {
       console.log(`[Chat socket] list messages`);
       try{
-        const messages = await chatController.listMessages(body);
+        const messages = await chatController.getMessages(body);
         callback({
           status: 200,
           data: messages,
