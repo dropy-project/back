@@ -10,6 +10,16 @@ export async function getAllMessages(conversationId: number): Promise<ChatMessag
   return allMessages;
 }
 
+export async function getMessages(body): Promise<ChatMessage[]> {
+  const { conversationId, offset, limit } = body;
+  throwIfNotNumber(conversationId);
+  throwIfNotNumber(offset);
+  throwIfNotNumber(limit);
+
+  const messages = await chatService.getMessages(conversationId, offset, limit);
+  return messages;
+}
+
 export async function addMessage(user: User, connectedUsers: User[], body): Promise<ChatMessage> {
   const { content, conversationId } = body;
   throwIfNotString(content);

@@ -24,9 +24,21 @@ export function startSocket() {
         socket.join(`conversation-${conversationId}`);
         callback({
           status: 200,
-          data: await chatController.getAllMessages(conversationId),
         });
         socket.broadcast.emit('request_status');
+      } catch (error) {
+        callback(createSocketError(error));
+      }
+    });
+
+    socket.on('list_messages', async (body, callback: SocketCallback<ChatMessage[]>) => {
+      console.log(`[Chat socket] list messages`);
+      try {
+        const messages = await chatController.getMessages(body);
+        callback({
+          status: 200,
+          data: messages,
+        });
       } catch (error) {
         callback(createSocketError(error));
       }
