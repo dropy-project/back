@@ -2,9 +2,10 @@ import io, { createSocketError } from './socket';
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 import { NextFunction } from 'express';
 import authMiddleware from '@/middlewares/auth.middleware';
-import { ChatMessage } from '@/interfaces/chat.interface';
+import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
 import { SocketCallback } from '@/interfaces/socket.interface';
 import * as chatController from '@/controllers/sockets/chat.socket.controller';
+import { User } from '@prisma/client';
 
 export function startSocket() {
   const chatSocket = io.of('/chat');
@@ -43,13 +44,36 @@ export function startSocket() {
 
       try {
         const message = await chatController.addMessage(socket.user, connectedUsers, body);
-        callback({
-          status: 200,
-          data: message.id,
-        });
+        const chatConversation = await chatController.getConversation(socket.user, body);
         socket.broadcast.emit('message_sent', {
           status: 200,
           data: message,
+        });
+
+        const usersToEmit = await getConversationSocketUsers(chatConversation.users);
+
+        usersToEmit.forEach((socket: AuthenticatedSocket) => {
+          const otherUser = chatConversation.users.find((u: User) => u.id !== socket.user.id);
+
+          chatSocket.to(socket.id).emit('conversation_updated', {
+            status: 200,
+            data: {
+              id: chatConversation.id,
+              isOnline: true,
+              isRead: false,
+              lastMessagePreview: message?.content ?? null,
+              lastMessageDate: message?.date ?? null,
+              user: {
+                userId: otherUser.id,
+                displayName: otherUser.displayName,
+              },
+            },
+          });
+        });
+
+        callback({
+          status: 200,
+          data: message.id,
         });
       } catch (error) {
         callback(createSocketError(error));
@@ -62,11 +86,24 @@ export function startSocket() {
         data: userStatus,
       });
     });
+
+    socket.on('list_conversations', async (callback: SocketCallback<UserConversation[]>) => {
+      const userConversations = await chatController.getAllUserConversations(socket.user);
+      callback({
+        status: 200,
+        data: userConversations,
+      });
+    });
   });
 
   async function getRoomConnectedUsers(roomId: number) {
     const sockets = await chatSocket.in(`conversation-${roomId}`).fetchSockets();
     const connectedUsers = sockets.map(socket => (socket as unknown as AuthenticatedSocket).user);
     return connectedUsers;
+  }
+
+  async function getConversationSocketUsers(users: User[]) {
+    const sockets = await chatSocket.fetchSockets();
+    return sockets.filter((socket: unknown) => users.some(user => user.id === (socket as AuthenticatedSocket).user.id));
   }
 }

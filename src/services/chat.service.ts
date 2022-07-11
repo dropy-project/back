@@ -1,6 +1,6 @@
 import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
 import client from '@/prisma/client';
-import { User } from '@prisma/client';
+import { ChatConversation, User } from '@prisma/client';
 import { sendPushNotification } from '../notification';
 
 export async function getAllMessages(conversationId: number): Promise<ChatMessage[]> {
@@ -65,4 +65,38 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
       id: user.id,
     },
   };
+}
+
+export async function getUserConversation(user: User, conversationId: number): Promise<ChatConversation & { users: User[] }> {
+  return await client.chatConversation.findFirst({
+    where: { id: conversationId },
+    include: { users: true },
+  });
+}
+
+export async function getAllUserConversations(user: User): Promise<UserConversation[]> {
+  const userConversations = await client.chatConversation.findMany({
+    where: {
+      users: { some: { id: user.id } },
+      closed: false,
+    },
+    include: { users: true, messages: true },
+  });
+
+  return userConversations.map(conv => {
+    const otherUser = conv.users.find((u: User) => u.id !== user.id);
+    const lastMessage = conv.messages.at(-1);
+
+    return {
+      id: conv.id,
+      isOnline: true,
+      isRead: lastMessage?.read ?? false,
+      lastMessagePreview: lastMessage?.content ?? null,
+      lastMessageDate: lastMessage?.date ?? null,
+      user: {
+        userId: otherUser.id,
+        displayName: otherUser.displayName,
+      },
+    };
+  });
 }

@@ -1,7 +1,7 @@
-import { ChatMessage } from '@/interfaces/chat.interface';
+import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
 import * as chatService from '@/services/chat.service';
 import { throwIfNotNumber, throwIfNotString } from '@/utils/controller.utils';
-import { User } from '@prisma/client';
+import { ChatConversation, User } from '@prisma/client';
 
 export async function getAllMessages(conversationId: number): Promise<ChatMessage[]> {
   throwIfNotNumber(conversationId);
@@ -17,4 +17,15 @@ export async function addMessage(user: User, connectedUsers: User[], body): Prom
 
   const message = chatService.addMessage(user, connectedUsers, content, conversationId);
   return message;
+}
+
+export async function getConversation(user: User, body): Promise<ChatConversation & { users: User[] }> {
+  const { conversationId } = body;
+  throwIfNotNumber(conversationId);
+
+  return chatService.getUserConversation(user, conversationId);
+}
+
+export async function getAllUserConversations(user: User): Promise<UserConversation[]> {
+  return await chatService.getAllUserConversations(user);
 }
