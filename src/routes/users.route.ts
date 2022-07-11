@@ -10,7 +10,6 @@ export function getRouter() {
 
   router.post(`${path}/updateDeviceToken`, authMiddleware as any, usersController.updateDeviceToken, errorMiddleware);
   router.post(`${path}/backgroundGeolocationPing`, authMiddleware as any, usersController.backgroundGeolocationPing, errorMiddleware);
-  router.get(`${path}/conversations`, authMiddleware as any, usersController.conversations, errorMiddleware);
 
   return router;
 }

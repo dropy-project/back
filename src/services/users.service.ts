@@ -1,4 +1,4 @@
-import { ChatMessage, Dropy, User } from '@prisma/client';
+import { Dropy, User } from '@prisma/client';
 import { getAvailableDropiesAroundLocation } from '@/services/dropy.service';
 import { sendPushNotification } from '../notification';
 import client from '@/prisma/client';
@@ -52,39 +52,5 @@ export async function updateDeviceToken(user: User, deviceToken: string): Promis
     data: {
       deviceToken,
     },
-  });
-}
-
-export async function conversations(userId: number): Promise<UserConversation[]> {
-  const userConversations = await client.chatConversation.findMany({
-    where: {
-      users: {
-        some: {
-          id: userId,
-        },
-      },
-      closed: false,
-    },
-    include: {
-      users: true,
-      messages: true,
-    },
-  });
-
-  return userConversations.map(conv => {
-    const otherUser = conv.users.find((u: User) => u.id !== userId);
-    const lastMessage: ChatMessage = conv.messages.at(-1);
-
-    return {
-      id: conv.id,
-      isOnline: true,
-      isRead: lastMessage?.read ?? false,
-      lastMessagePreview: lastMessage?.content ?? null,
-      lastMessageDate: lastMessage?.date ?? null,
-      user: {
-        userId: otherUser.id,
-        displayName: otherUser.displayName,
-      },
-    };
   });
 }
