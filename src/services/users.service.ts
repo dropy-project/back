@@ -42,8 +42,6 @@ export async function checkTimeAndDistanceBetweenNotifications(user: User, latit
   return distance > DISTANCE_FILTER_RADIUS || timeDifferenceInMinutes > TIME_FILTER_MINUTES;
 }
 
-
-
 export async function updateDeviceToken(user: User, deviceToken: string): Promise<void> {
   await client.user.update({
     where: {
