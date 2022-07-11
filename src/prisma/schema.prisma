@@ -27,9 +27,10 @@ model User {
   emittedDropies   Dropy[] @relation("emittedDropies")
   retrievedDropies Dropy[] @relation("retrievedDropies")
 
-  lastSeenDate              DateTime @default(now())
-  lastSeenLocationLongitude Float    @default(0)
-  lastSeenLocationLatitude  Float    @default(0)
+  lastGeolocationPingDate              DateTime? 
+  lastGeolocationPingLatitude  Float?  
+  lastGeolocationPingLongitude Float?    
+  
 
   conversations ChatConversation[]
   chatMessages  ChatMessage[]
