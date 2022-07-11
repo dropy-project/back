@@ -22,18 +22,13 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
     },
   });
 
-<<<<<<< HEAD
   if (dropies.length > 0 && sendNotification) {
-    sendPushNotificationToUsers([user], 'Drop found near your position');
-=======
-  if (dropies.length > 0) {
     sendPushNotification({
       user,
       title: 'Drop found near your position!',
       body: 'Open the app to see it',
       sound: 'dropy_sound.mp3',
     });
->>>>>>> main
   }
 
   return dropies;
