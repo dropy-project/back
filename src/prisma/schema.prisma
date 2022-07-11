@@ -28,8 +28,9 @@ model User {
   retrievedDropies Dropy[] @relation("retrievedDropies")
 
   lastGeolocationPingDate              DateTime? 
+  lastGeolocationPingLatitude  Float?  
   lastGeolocationPingLongitude Float?    
-  lastGeolocationPingLatitude  Float?    
+  
 
   conversations ChatConversation[]
   chatMessages ChatMessage[]
