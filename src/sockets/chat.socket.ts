@@ -64,8 +64,8 @@ export function startSocket() {
 
         const usersToEmit = await getConversationSocketUsers(chatConversation.users);
 
-        usersToEmit.forEach((socket: AuthenticatedSocket) => {
-          const otherUser = chatConversation.users.find((u: User) => u.id !== socket.user.id);
+        usersToEmit.forEach(socket => {
+          const otherUser = chatConversation.users.find((u: User) => u.id !== (socket as unknown as AuthenticatedSocket).user.id);
 
           chatSocket.to(socket.id).emit('conversation_updated', {
             status: 200,
