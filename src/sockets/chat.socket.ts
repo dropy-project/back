@@ -6,6 +6,7 @@ import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
 import { SocketCallback } from '@/interfaces/socket.interface';
 import * as chatController from '@/controllers/sockets/chat.socket.controller';
 import { User } from '@prisma/client';
+import * as userController from '@controllers/users.controller';
 
 export function startSocket() {
   const chatSocket = io.of('/chat');
@@ -16,6 +17,8 @@ export function startSocket() {
 
   chatSocket.on('connection', async (socket: AuthenticatedSocket) => {
     console.log(`[Chat socket] new connection ${socket.user.displayName} - ${socket.id}`);
+
+    userController.changeOnlineStatus(socket.user, true);
 
     socket.on('join_conversation', async (conversationId: number, callback: SocketCallback<ChatMessage[]>) => {
       console.log(`[Chat socket] join conversation ${conversationId}`);
@@ -105,6 +108,10 @@ export function startSocket() {
         status: 200,
         data: userConversations,
       });
+    });
+
+    socket.on('disconnecting', reason => {
+      userController.changeOnlineStatus(socket.user, false);
     });
   });
 

@@ -114,7 +114,7 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
 
     return {
       id: conv.id,
-      isOnline: true,
+      isOnline: otherUser.isOnline,
       isRead: lastMessage?.read ?? false,
       lastMessagePreview: lastMessage?.content ?? null,
       lastMessageDate: lastMessage?.date ?? null,

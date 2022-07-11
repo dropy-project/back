@@ -2,7 +2,6 @@ import { Dropy, User } from '@prisma/client';
 import { getAvailableDropiesAroundLocation } from '@/services/dropy.service';
 import { sendPushNotification } from '../notification';
 import client from '@/prisma/client';
-import { UserConversation } from '@/interfaces/chat.interface';
 import { getDistanceFromLatLonInMeters } from '@/utils/notification.utils';
 
 const DISTANCE_FILTER_RADIUS = 50;
@@ -49,6 +48,14 @@ export async function updateDeviceToken(user: User, deviceToken: string): Promis
     },
     data: {
       deviceToken,
+    },
+  });
+}
+export async function changeOnlineStatus(user: User, status: boolean): Promise<void> {
+  await client.user.update({
+    where: { id: user.id },
+    data: {
+      isOnline: status,
     },
   });
 }
