@@ -56,6 +56,8 @@ SOCKET_API=4000
 
 SECRET_KEY=<secret>
 
+SECRET_ENCRYPTION_KEY=<encryption key>
+
 #################-> POSTGRES
 
 POSTGRES_USER=<user>
