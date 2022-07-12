@@ -5,7 +5,7 @@ import { logStartedService } from '@/utils/logs.utils';
 import { HttpException } from '@/exceptions/HttpException';
 import { SocketResponse } from '@/interfaces/socket.interface';
 
-const socketPort = Number(process.env.SOCKET_PORT) || 4000;
+const socketPort = 4000;
 
 const io = new Server(socketPort);
 

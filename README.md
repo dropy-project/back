@@ -73,6 +73,9 @@ APN_TEAMID=<apple push notification>
 FCM_KEY=<firebase cloud messaing token>
 
 #################
+
+PRISMA_PORT=5555
+
 ```
 
 
