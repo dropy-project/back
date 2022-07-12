@@ -5,7 +5,6 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    container_name: api
     ports:
       - '127.0.0.1:${API_PORT}:3000'
       - '127.0.0.1:${SOCKET_PORT}:4000'
@@ -23,7 +22,6 @@ services:
 
   postgres:
     image: postgres:14.1-alpine
-    container_name: postgres
     networks:
       - back
     environment:
@@ -35,7 +33,6 @@ services:
       - ./data:/var/lib/postgresql/data
 
   prisma:
-    container_name: prisma
     ports:
       - "127.0.0.1:${PRISMA_PORT}:5555"
     depends_on:
