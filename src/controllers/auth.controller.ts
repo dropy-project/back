@@ -10,7 +10,7 @@ export async function versionCheck(req: Request, res: Response, next: NextFuncti
     const frontServerVersion = req.params.serverVersion;
     utils.throwIfNotString(frontServerVersion);
 
-    const minimumVersion = versionsJSON.MINIMUM_VERSION;
+    const minimumVersion = versionsJSON.minimumCompatibleVersion;
 
     if (frontServerVersion >= minimumVersion) {
       res.status(200).json('Correct current version');
