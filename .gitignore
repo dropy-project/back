@@ -134,3 +134,5 @@ dist
 public
 data
 certNotification.p8
+
+.DS_Store

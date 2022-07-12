@@ -57,7 +57,7 @@ export function startSocket() {
       try {
         const message = await chatController.addMessage(socket.user, connectedUsers, body);
         const chatConversation = await chatController.getConversation(socket.user, body);
-        socket.broadcast.emit('message_sent', {
+        socket.broadcast.to(`conversation-${body.conversationId}`).emit('message_sent', {
           status: 200,
           data: message,
         });
