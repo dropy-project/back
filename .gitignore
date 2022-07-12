@@ -136,3 +136,4 @@ data
 certNotification.p8
 
 .DS_Store
+.echo
