@@ -24,6 +24,8 @@ services:
     image: postgres:14.1-alpine
     networks:
       - back
+    ports:
+      - "127.0.0.1:5432:5432"
     environment:
       TZ: Europe/Paris
       POSTGRES_USER: "${POSTGRES_USER}"
