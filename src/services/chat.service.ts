@@ -1,5 +1,6 @@
 import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
 import client from '@/prisma/client';
+import { decryptMessage } from '@/utils/encrypt';
 import { ChatConversation, User } from '@prisma/client';
 import { sendPushNotification } from '../notification';
 
@@ -12,6 +13,31 @@ export async function getAllMessages(conversationId: number): Promise<ChatMessag
   });
 
   return chatMessages.map(message => ({
+    content: message.content ?? message.dropy,
+    date: message.date,
+    read: message.read,
+    id: message.id,
+    sender: {
+      displayName: message.sender.displayName,
+      id: message.sender.id,
+    },
+  }));
+}
+export async function getMessages(conversationId: number, offset: number, limit: number): Promise<ChatMessage[]> {
+  const skip = offset * limit;
+  const chatMessages = await client.chatMessage.findMany({
+    where: {
+      conversationId: conversationId,
+    },
+    orderBy: {
+      date: 'desc',
+    },
+    include: { sender: true, dropy: true },
+    skip: skip,
+    take: limit,
+  });
+
+  return chatMessages.reverse().map(message => ({
     content: message.content ?? message.dropy,
     date: message.date,
     read: message.read,
@@ -51,7 +77,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
   sendPushNotification({
     users: disconnectedUsers,
     title: user.displayName,
-    body: content,
+    body: decryptMessage(content),
     sound: 'message_sound.mp3',
     payload: {
       id: conversation.id,
@@ -74,7 +100,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
   };
 }
 
-export async function getUserConversation(user: User, conversationId: number): Promise<ChatConversation & { users: User[] }> {
+export async function getUserConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
   return await client.chatConversation.findFirst({
     where: { id: conversationId },
     include: { users: true },

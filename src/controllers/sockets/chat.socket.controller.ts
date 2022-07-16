@@ -12,8 +12,17 @@ export async function getAllMessages(conversationId: number): Promise<ChatMessag
 
 export async function closeConversation(conversationId: number): Promise<void> {
   throwIfNotNumber(conversationId);
-
   chatService.closeConversation(conversationId);
+}
+
+export async function getMessages(body): Promise<ChatMessage[]> {
+  const { conversationId, offset, limit } = body;
+  throwIfNotNumber(conversationId);
+  throwIfNotNumber(offset);
+  throwIfNotNumber(limit);
+
+  const messages = await chatService.getMessages(conversationId, offset, limit);
+  return messages;
 }
 
 export async function addMessage(user: User, connectedUsers: User[], body): Promise<ChatMessage> {
@@ -29,7 +38,7 @@ export async function getConversation(user: User, body): Promise<ChatConversatio
   const { conversationId } = body;
   throwIfNotNumber(conversationId);
 
-  return chatService.getUserConversation(user, conversationId);
+  return chatService.getUserConversationByIdWithUsers(conversationId);
 }
 
 export async function getAllUserConversations(user: User): Promise<UserConversation[]> {

@@ -17,6 +17,10 @@ export async function createDropyMedia(req: AuthenticatedRequest, res: Response,
       throw new HttpException(400, 'No form data found');
     }
 
+    if (utils.isNull(Object.entries(requestData)[0])) {
+      throw new HttpException(400, 'Empty form data');
+    }
+
     const [formField, mediaPayload] = Object.entries(requestData)[0] as [string, UploadedFile | string];
 
     if (utils.isNull(formField, mediaPayload)) {

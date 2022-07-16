@@ -20,7 +20,7 @@ dotenv.config();
 
 const app: express.Application = express();
 
-const apiPort = Number(process.env.API_PORT) || 3000;
+const apiPort = 3000;
 
 initializeMiddleWares();
 initializeRoutes();

@@ -24,9 +24,21 @@ export function startSocket() {
         socket.join(`conversation-${conversationId}`);
         callback({
           status: 200,
-          data: await chatController.getAllMessages(conversationId),
         });
         socket.broadcast.emit('request_status');
+      } catch (error) {
+        callback(createSocketError(error));
+      }
+    });
+
+    socket.on('list_messages', async (body, callback: SocketCallback<ChatMessage[]>) => {
+      console.log(`[Chat socket] list messages`);
+      try {
+        const messages = await chatController.getMessages(body);
+        callback({
+          status: 200,
+          data: messages,
+        });
       } catch (error) {
         callback(createSocketError(error));
       }
@@ -41,9 +53,9 @@ export function startSocket() {
       console.log(`[Chat socket] close conversation :  ${conversationId}`);
       chatController.closeConversation(conversationId);
       try {
-        const chatConversation = await chatController.getConversation(socket.user, body);
+        const chatConversation = await chatController.getConversation(socket.user, conversationId);
         const usersToEmit = await getConversationSocketUsers(chatConversation.users);
-        usersToEmit.forEach((socket: AuthenticatedSocket) => {
+        usersToEmit.forEach(socket => {
           chatSocket.to(socket.id).emit('conversation_closed', {
             status: 200,
             data: {
@@ -68,15 +80,15 @@ export function startSocket() {
       try {
         const message = await chatController.addMessage(socket.user, connectedUsers, body);
         const chatConversation = await chatController.getConversation(socket.user, body);
-        socket.broadcast.emit('message_sent', {
+        socket.broadcast.to(`conversation-${body.conversationId}`).emit('message_sent', {
           status: 200,
           data: message,
         });
 
         const usersToEmit = await getConversationSocketUsers(chatConversation.users);
 
-        usersToEmit.forEach((socket: AuthenticatedSocket) => {
-          const otherUser = chatConversation.users.find((u: User) => u.id !== socket.user.id);
+        usersToEmit.forEach(socket => {
+          const otherUser = chatConversation.users.find((u: User) => u.id !== (socket as unknown as AuthenticatedSocket).user.id);
 
           chatSocket.to(socket.id).emit('conversation_updated', {
             status: 200,

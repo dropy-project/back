@@ -2,6 +2,25 @@ import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
 import * as authService from '@services/auth.service';
 import * as utils from '@/utils/controller.utils';
+import versionsJSON from '../../versions.json';
+import { HttpException } from '@/exceptions/HttpException';
+
+export async function versionCheck(req: Request, res: Response, next: NextFunction) {
+  try {
+    const frontServerVersion = req.params.serverVersion;
+    utils.throwIfNotString(frontServerVersion);
+
+    const minimumVersion = versionsJSON.minimumCompatibleVersion;
+
+    if (frontServerVersion >= minimumVersion) {
+      res.status(200).json('Correct current version');
+    } else {
+      throw new HttpException(418, `Current version outdated`);
+    }
+  } catch (error) {
+    next(error);
+  }
+}
 
 export async function register(req: Request, res: Response, next: NextFunction) {
   try {
