@@ -56,6 +56,8 @@ SOCKET_API=4000
 
 SECRET_KEY=<secret>
 
+SECRET_ENCRYPTION_KEY=<encryption key>
+
 #################-> POSTGRES
 
 POSTGRES_USER=<user>
@@ -71,6 +73,9 @@ APN_TEAMID=<apple push notification>
 FCM_KEY=<firebase cloud messaing token>
 
 #################
+
+PRISMA_PORT=5555
+
 ```
 
 

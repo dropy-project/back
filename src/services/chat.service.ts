@@ -1,5 +1,6 @@
 import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
 import client from '@/prisma/client';
+import { decryptMessage } from '@/utils/encrypt';
 import { ChatConversation, User } from '@prisma/client';
 import { sendPushNotification } from '../notification';
 
@@ -69,7 +70,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
   sendPushNotification({
     users: disconnectedUsers,
     title: user.displayName,
-    body: content,
+    body: decryptMessage(content),
     sound: 'message_sound.mp3',
     payload: {
       id: conversation.id,
