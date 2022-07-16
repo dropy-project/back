@@ -8,12 +8,21 @@ const DISTANCE_FILTER_RADIUS = 50;
 const TIME_FILTER_MINUTES = 60 * 24;
 
 export async function backgroundGeolocationPing(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Dropy[]> {
-  const dropies = await getAvailableDropiesAroundLocation(latitude, longitude, user);
-  const sendNotification = await checkTimeAndDistanceBetweenNotifications(user, latitude, longitude, timeStamp);
+  const dropiesAround = await getAvailableDropiesAroundLocation(latitude, longitude, user);
+
+  console.log();
+  console.log('-------------------');
+  console.log(`[BACKGROUND PING] - ${user.displayName}`);
+  console.log(`${latitude} , ${longitude}`);
+
+  const canSendNotification = await checkTimeAndDistanceBetweenNotifications(user, latitude, longitude, timeStamp);
+
+  console.log(`Dropies around : ${dropiesAround.length}`);
+  console.log(`Send notification : ${canSendNotification}`);
+  console.log('-------------------');
+
   await client.user.update({
-    where: {
-      id: user.id,
-    },
+    where: { id: user.id },
     data: {
       lastGeolocationPingDate: timeStamp,
       lastGeolocationPingLatitude: latitude,
@@ -21,7 +30,7 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
     },
   });
 
-  if (dropies.length > 0 && sendNotification) {
+  if (dropiesAround.length > 0 && canSendNotification) {
     sendPushNotification({
       user,
       title: 'Drop found near your position!',
@@ -30,15 +39,20 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
     });
   }
 
-  return dropies;
+  return dropiesAround;
 }
 
 export async function checkTimeAndDistanceBetweenNotifications(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Boolean> {
   const { lastGeolocationPingDate, lastGeolocationPingLatitude, lastGeolocationPingLongitude } = user;
   if (lastGeolocationPingDate == null || lastGeolocationPingLatitude == null || lastGeolocationPingLongitude == null) return true;
+
   const distance = getDistanceFromLatLonInMeters(latitude, longitude, lastGeolocationPingLatitude, lastGeolocationPingLongitude);
+  console.log(`Distance from last ping : ${distance}m`);
+
   const timeDifference = timeStamp.getTime() - lastGeolocationPingDate.getTime();
   const timeDifferenceInMinutes = timeDifference / (1000 * 60);
+  console.log(`Time from last ping : ${timeDifferenceInMinutes}m`);
+
   return distance > DISTANCE_FILTER_RADIUS || timeDifferenceInMinutes > TIME_FILTER_MINUTES;
 }
 
