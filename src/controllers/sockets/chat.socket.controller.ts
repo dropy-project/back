@@ -39,3 +39,9 @@ export async function getConversation(user: User, body): Promise<ChatConversatio
 export async function getAllUserConversations(user: User): Promise<UserConversation[]> {
   return await chatService.getAllUserConversations(user);
 }
+
+export async function getLastMessage(conversationId: number): Promise<ChatMessage> {
+  throwIfNotNumber(conversationId);
+
+  return await chatService.getLastMessage(conversationId);
+}

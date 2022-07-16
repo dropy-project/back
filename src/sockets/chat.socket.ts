@@ -19,6 +19,7 @@ export function startSocket() {
     console.log(`[Chat socket] new connection ${socket.user.displayName} - ${socket.id}`);
 
     userController.changeOnlineStatus(socket.user, true);
+    sendConnectionStatus(socket, socket.user);
 
     socket.on('join_conversation', async (conversationId: number, callback: SocketCallback<ChatMessage[]>) => {
       console.log(`[Chat socket] join conversation ${conversationId}`);
@@ -114,6 +115,29 @@ export function startSocket() {
       userController.changeOnlineStatus(socket.user, false);
     });
   });
+
+  async function sendConnectionStatus(socket: AuthenticatedSocket, user: User) {
+    const userConversations = await chatController.getAllUserConversations(socket.user);
+    userConversations.forEach(async (conversation: UserConversation) => {
+      const usersToEmit = await getConversationSocketUsers(conversation.users);
+      usersToEmit.forEach(socket => {
+        chatSocket.to(socket.id).emit('conversation_updated', {
+          status: 200,
+          data: {
+            id: conversation.id,
+            isOnline: user.isOnline,
+            isRead: false,
+            lastMessagePreview: message?.content ?? null,
+              lastMessageDate: message?.date ?? null,
+            user: {
+              userId: user.id,
+              displayName: user.displayName,
+            },
+          },
+        });
+      });
+    });
+  }
 
   async function getRoomConnectedUsers(roomId: number) {
     const sockets = await chatSocket.in(`conversation-${roomId}`).fetchSockets();

@@ -126,3 +126,16 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
     };
   });
 }
+
+export function getLastMessage(conversationId: number): Promise<ChatMessage> {
+  const lastMessage = client.chatMessage.findFirst({
+    where: {
+      conversationId: conversationId,
+    },
+    orderBy: {
+      date: 'desc',
+    },
+    include: { sender: true, dropy: true },
+  });
+  return lastMessage;
+}
