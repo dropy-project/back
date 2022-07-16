@@ -49,6 +49,13 @@ export async function getMessages(conversationId: number, offset: number, limit:
   }));
 }
 
+export async function closeConversation(conversationId: number): Promise<void> {
+  await client.chatConversation.update({
+    where: { id: conversationId },
+    data: { closed: true },
+  });
+}
+
 export async function addMessage(user: User, connectedUsers: User[], content: string, conversationId: number): Promise<ChatMessage> {
   const message = await client.chatMessage.create({
     data: {
@@ -93,7 +100,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
   };
 }
 
-export async function getUserConversation(user: User, conversationId: number): Promise<ChatConversation & { users: User[] }> {
+export async function getConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
   return await client.chatConversation.findFirst({
     where: { id: conversationId },
     include: { users: true },
