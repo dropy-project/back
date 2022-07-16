@@ -6,6 +6,7 @@ import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
 import { SocketCallback } from '@/interfaces/socket.interface';
 import * as chatController from '@/controllers/sockets/chat.socket.controller';
 import { User } from '@prisma/client';
+import { throwIfNotNumber } from '@/utils/controller.utils';
 
 export function startSocket() {
   const chatSocket = io.of('/chat');
@@ -50,22 +51,23 @@ export function startSocket() {
     });
 
     socket.on('close_conversation', async (conversationId, callback: SocketCallback<null>) => {
-      console.log(`[Chat socket] close conversation :  ${conversationId}`);
-      chatController.closeConversation(conversationId);
+      console.log(`[Chat socket] close conversation : ${conversationId}`);
       try {
-        const chatConversation = await chatController.getConversation(socket.user, conversationId);
-        const usersToEmit = await getConversationSocketUsers(chatConversation.users);
+        await chatController.closeConversation(conversationId);
+
+        const chatConversation = await chatController.getConversationByIdWithUsers(conversationId);
+        const usersToEmit = await getUsersSockets(chatConversation.users);
+
         usersToEmit.forEach(socket => {
-          chatSocket.to(socket.id).emit('conversation_closed', {
+          chatSocket.to(socket.id).emit('close_conversation', {
             status: 200,
-            data: {
-              id: chatConversation.id,
-            },
+            data: { id: chatConversation.id },
           });
-          callback({
-            status: 200,
-            data: null,
-          });
+        });
+
+        callback({
+          status: 200,
+          data: null,
         });
       } catch (error) {
         callback(createSocketError(error));
@@ -75,20 +77,23 @@ export function startSocket() {
     socket.on('message_sent', async (body, callback: SocketCallback<number>) => {
       console.log(`[Chat socket] message sent`);
 
-      const connectedUsers = await getRoomConnectedUsers(body.conversationId);
-
+      const { conversationId } = body;
       try {
+        throwIfNotNumber(conversationId);
+
+        const connectedUsers = await getRoomConnectedUsers(conversationId);
         const message = await chatController.addMessage(socket.user, connectedUsers, body);
-        const chatConversation = await chatController.getConversation(socket.user, body);
-        socket.broadcast.to(`conversation-${body.conversationId}`).emit('message_sent', {
+        const chatConversation = await chatController.getConversationByIdWithUsers(conversationId);
+
+        socket.broadcast.to(`conversation-${conversationId}`).emit('message_sent', {
           status: 200,
           data: message,
         });
 
-        const usersToEmit = await getConversationSocketUsers(chatConversation.users);
+        const usersToEmit = await getUsersSockets(chatConversation.users);
 
         usersToEmit.forEach(socket => {
-          const otherUser = chatConversation.users.find((u: User) => u.id !== (socket as unknown as AuthenticatedSocket).user.id);
+          const otherUser = chatConversation.users.find((u: User) => u.id !== socket.user.id);
 
           chatSocket.to(socket.id).emit('conversation_updated', {
             status: 200,
@@ -137,8 +142,15 @@ export function startSocket() {
     return connectedUsers;
   }
 
-  async function getConversationSocketUsers(users: User[]) {
+  async function getUsersSockets(users: User[]): Promise<AuthenticatedSocket[]> {
     const sockets = await chatSocket.fetchSockets();
-    return sockets.filter((socket: unknown) => users.some(user => user.id === (socket as AuthenticatedSocket).user.id));
+
+    const remoteSockets = sockets.filter((socket: unknown) => {
+      return users.some(user => user.id === (socket as AuthenticatedSocket).user.id);
+    });
+
+    return remoteSockets.map(socket => {
+      return socket as unknown as AuthenticatedSocket;
+    });
   }
 }

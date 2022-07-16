@@ -100,7 +100,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
   };
 }
 
-export async function getUserConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
+export async function getConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
   return await client.chatConversation.findFirst({
     where: { id: conversationId },
     include: { users: true },

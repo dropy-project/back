@@ -12,10 +12,11 @@ export async function getAllMessages(conversationId: number): Promise<ChatMessag
 
 export async function closeConversation(conversationId: number): Promise<void> {
   throwIfNotNumber(conversationId);
-  chatService.closeConversation(conversationId);
+
+  return await chatService.closeConversation(conversationId);
 }
 
-export async function getMessages(body): Promise<ChatMessage[]> {
+export async function getMessages(body: { conversationId: number; offset: number; limit: number }): Promise<ChatMessage[]> {
   const { conversationId, offset, limit } = body;
   throwIfNotNumber(conversationId);
   throwIfNotNumber(offset);
@@ -25,7 +26,7 @@ export async function getMessages(body): Promise<ChatMessage[]> {
   return messages;
 }
 
-export async function addMessage(user: User, connectedUsers: User[], body): Promise<ChatMessage> {
+export async function addMessage(user: User, connectedUsers: User[], body: { content: string; conversationId: number }): Promise<ChatMessage> {
   const { content, conversationId } = body;
   throwIfNotString(content);
   throwIfNotNumber(conversationId);
@@ -34,11 +35,10 @@ export async function addMessage(user: User, connectedUsers: User[], body): Prom
   return message;
 }
 
-export async function getConversation(user: User, body): Promise<ChatConversation & { users: User[] }> {
-  const { conversationId } = body;
+export async function getConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
   throwIfNotNumber(conversationId);
 
-  return chatService.getUserConversationByIdWithUsers(conversationId);
+  return chatService.getConversationByIdWithUsers(conversationId);
 }
 
 export async function getAllUserConversations(user: User): Promise<UserConversation[]> {
