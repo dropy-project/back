@@ -21,21 +21,24 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
   console.log(`Send notification : ${canSendNotification}`);
   console.log('-------------------');
 
-  await client.user.update({
-    where: { id: user.id },
-    data: {
-      lastGeolocationPingDate: timeStamp,
-      lastGeolocationPingLatitude: latitude,
-      lastGeolocationPingLongitude: longitude,
-    },
-  });
+  
 
   if (dropiesAround.length > 0 && canSendNotification) {
+    console.log('Send notification and save into the database');
     sendPushNotification({
       user,
       title: 'Drop found near your position!',
       body: 'Open the app to see it',
       sound: 'dropy_sound.mp3',
+    });
+    
+    await client.user.update({
+      where: { id: user.id },
+      data: {
+        lastGeolocationPingDate: timeStamp,
+        lastGeolocationPingLatitude: latitude,
+        lastGeolocationPingLongitude: longitude,
+      },
     });
   }
 
