@@ -37,5 +37,5 @@ export async function backgroundGeolocationPing(req: AuthenticatedRequest, res: 
 }
 
 export async function changeOnlineStatus(user: User, status: boolean): Promise<void> {
-  userService.changeOnlineStatus(user, status);
+  await userService.changeOnlineStatus(user, status);
 }
