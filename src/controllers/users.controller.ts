@@ -2,6 +2,7 @@ import { NextFunction, Response } from 'express';
 import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 import * as userService from '@services/users.service';
 import * as utils from '@/utils/controller.utils';
+import { User } from '@prisma/client';
 
 export async function updateDeviceToken(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -33,4 +34,8 @@ export async function backgroundGeolocationPing(req: AuthenticatedRequest, res: 
   } catch (error) {
     next(error);
   }
+}
+
+export async function changeOnlineStatus(user: User, status: boolean): Promise<void> {
+  await userService.changeOnlineStatus(user, status);
 }

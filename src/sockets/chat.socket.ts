@@ -2,10 +2,11 @@ import io, { createSocketError } from './socket';
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 import { NextFunction } from 'express';
 import authMiddleware from '@/middlewares/auth.middleware';
-import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
+import { UserMessage, UserConversation } from '@/interfaces/chat.interface';
 import { SocketCallback } from '@/interfaces/socket.interface';
 import * as chatController from '@/controllers/sockets/chat.socket.controller';
-import { User } from '@prisma/client';
+import { ChatConversation, User } from '@prisma/client';
+import * as userController from '@controllers/users.controller';
 import { throwIfNotNumber } from '@/utils/controller.utils';
 
 export function startSocket() {
@@ -18,21 +19,29 @@ export function startSocket() {
   chatSocket.on('connection', async (socket: AuthenticatedSocket) => {
     console.log(`[Chat socket] new connection ${socket.user.displayName} - ${socket.id}`);
 
-    socket.on('join_conversation', async (conversationId: number, callback: SocketCallback<ChatMessage[]>) => {
+    sendConnectionStatus(socket, true);
+
+    socket.on('join_conversation', async (conversationId: number, callback: SocketCallback<UserMessage[]>) => {
       console.log(`[Chat socket] join conversation ${conversationId}`);
 
       try {
-        socket.join(`conversation-${conversationId}`);
+        await socket.join(`conversation-${conversationId}`);
         callback({
           status: 200,
         });
-        socket.broadcast.emit('request_status');
+        const conversation = await chatController.getConversationByIdWithUsers(conversationId);
+        const otherUser = conversation.users.find((u: User) => u.id !== socket.user.id);
+
+        socket.emit('user_status', {
+          status: 200,
+          data: otherUser.isOnline,
+        });
       } catch (error) {
         callback(createSocketError(error));
       }
     });
 
-    socket.on('list_messages', async (body, callback: SocketCallback<ChatMessage[]>) => {
+    socket.on('list_messages', async (body, callback: SocketCallback<UserMessage[]>) => {
       console.log(`[Chat socket] list messages`);
       try {
         const messages = await chatController.getMessages(body);
@@ -99,7 +108,7 @@ export function startSocket() {
             status: 200,
             data: {
               id: chatConversation.id,
-              isOnline: true,
+              isOnline: socket.user.isOnline,
               isRead: false,
               lastMessagePreview: message?.content ?? null,
               lastMessageDate: message?.date ?? null,
@@ -120,13 +129,6 @@ export function startSocket() {
       }
     });
 
-    socket.on('user_status', async (userStatus: boolean) => {
-      socket.broadcast.emit('user_status', {
-        status: 200,
-        data: userStatus,
-      });
-    });
-
     socket.on('list_conversations', async (callback: SocketCallback<UserConversation[]>) => {
       const userConversations = await chatController.getAllUserConversations(socket.user);
       callback({
@@ -134,10 +136,49 @@ export function startSocket() {
         data: userConversations,
       });
     });
+
+    socket.on('disconnecting', async () => {
+      console.log(`User disconnected ${socket.user.displayName}`);
+      sendConnectionStatus(socket, false);
+    });
   });
 
-  async function getRoomConnectedUsers(roomId: number) {
-    const sockets = await chatSocket.in(`conversation-${roomId}`).fetchSockets();
+  async function sendConnectionStatus(socket: AuthenticatedSocket, connected: boolean) {
+    await userController.changeOnlineStatus(socket.user, connected);
+    const userConversations = await chatController.getAllChatConversations(socket.user);
+
+    userConversations.forEach(async (conversation: ChatConversation & { users: User[] }) => {
+      const message = await chatController.getLastMessage(conversation.id);
+      const usersToEmit = await getUsersSockets(conversation.users);
+
+      chatSocket.to(`conversation-${conversation.id}`).emit('user_status', {
+        status: 200,
+        data: connected,
+      });
+
+      usersToEmit.forEach(socket => {
+        const otherUser = conversation.users.find((u: User) => u.id !== socket.user.id);
+
+        chatSocket.to(socket.id).emit('conversation_updated', {
+          status: 200,
+          data: {
+            id: conversation.id,
+            isOnline: connected,
+            isRead: false,
+            lastMessagePreview: message?.content ?? null,
+            lastMessageDate: message?.date ?? null,
+            user: {
+              userId: otherUser.id,
+              displayName: otherUser.displayName,
+            },
+          },
+        });
+      });
+    });
+  }
+
+  async function getRoomConnectedUsers(conversationId: number): Promise<User[]> {
+    const sockets = await chatSocket.in(`conversation-${conversationId}`).fetchSockets();
     const connectedUsers = sockets.map(socket => (socket as unknown as AuthenticatedSocket).user);
     return connectedUsers;
   }

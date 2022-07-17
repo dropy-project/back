@@ -1,10 +1,10 @@
-import { ChatMessage, UserConversation } from '@/interfaces/chat.interface';
+import { UserMessage, UserConversation } from '@/interfaces/chat.interface';
 import client from '@/prisma/client';
 import { decryptMessage } from '@/utils/encrypt';
-import { ChatConversation, User } from '@prisma/client';
+import { ChatConversation, ChatMessage, User } from '@prisma/client';
 import { sendPushNotification } from '../notification';
 
-export async function getAllMessages(conversationId: number): Promise<ChatMessage[]> {
+export async function getAllMessages(conversationId: number): Promise<UserMessage[]> {
   const chatMessages = await client.chatMessage.findMany({
     where: {
       conversationId: conversationId,
@@ -23,7 +23,7 @@ export async function getAllMessages(conversationId: number): Promise<ChatMessag
     },
   }));
 }
-export async function getMessages(conversationId: number, offset: number, limit: number): Promise<ChatMessage[]> {
+export async function getMessages(conversationId: number, offset: number, limit: number): Promise<UserMessage[]> {
   const skip = offset * limit;
   const chatMessages = await client.chatMessage.findMany({
     where: {
@@ -56,7 +56,7 @@ export async function closeConversation(conversationId: number): Promise<void> {
   });
 }
 
-export async function addMessage(user: User, connectedUsers: User[], content: string, conversationId: number): Promise<ChatMessage> {
+export async function addMessage(user: User, connectedUsers: User[], content: string, conversationId: number): Promise<UserMessage> {
   const message = await client.chatMessage.create({
     data: {
       conversationId: conversationId,
@@ -108,21 +108,22 @@ export async function getConversationByIdWithUsers(conversationId: number): Prom
 }
 
 export async function getAllUserConversations(user: User): Promise<UserConversation[]> {
-  const userConversations = await client.chatConversation.findMany({
+  const chatConversations = await client.chatConversation.findMany({
     where: {
       users: { some: { id: user.id } },
       closed: false,
     },
-    include: { users: true, messages: true },
+    include: { users: true },
   });
 
-  return userConversations.map(conv => {
+  const userConversations: UserConversation[] = [];
+  for (const conv of chatConversations) {
     const otherUser = conv.users.find((u: User) => u.id !== user.id);
-    const lastMessage = conv.messages.at(-1);
+    const lastMessage = await getLastMessage(conv.id);
 
-    return {
+    userConversations.push({
       id: conv.id,
-      isOnline: true,
+      isOnline: otherUser.isOnline,
       isRead: lastMessage?.read ?? false,
       lastMessagePreview: lastMessage?.content ?? null,
       lastMessageDate: lastMessage?.date ?? null,
@@ -130,6 +131,28 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
         userId: otherUser.id,
         displayName: otherUser.displayName,
       },
-    };
+    });
+  }
+
+  return userConversations;
+}
+
+export function getLastMessage(conversationId: number): Promise<ChatMessage> {
+  const lastMessage = client.chatMessage.findFirst({
+    where: { conversationId },
+    orderBy: { date: 'desc' },
+    include: { sender: true, dropy: true },
   });
+  return lastMessage;
+}
+
+export async function getAllChatConversations(user: User): Promise<ChatConversation[]> {
+  const conversations = await client.chatConversation.findMany({
+    where: {
+      users: { some: { id: user.id } },
+      closed: false,
+    },
+    include: { users: true },
+  });
+  return conversations;
 }

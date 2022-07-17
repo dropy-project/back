@@ -52,3 +52,11 @@ export async function updateDeviceToken(user: User, deviceToken: string): Promis
     },
   });
 }
+export async function changeOnlineStatus(user: User, status: boolean): Promise<void> {
+  await client.user.update({
+    where: { id: user.id },
+    data: {
+      isOnline: status,
+    },
+  });
+}

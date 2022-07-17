@@ -12,7 +12,7 @@ export interface UserConversation {
   isRead: boolean;
 }
 
-export interface ChatMessage {
+export interface UserMessage {
   id: number;
   date: Date;
   content: string | DropyAround;
