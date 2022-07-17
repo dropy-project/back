@@ -1,4 +1,4 @@
-import { Dropy, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { getAvailableDropiesAroundLocation } from '@/services/dropy.service';
 import { sendPushNotification } from '../notification';
 import client from '@/prisma/client';
@@ -7,7 +7,7 @@ import { getDistanceFromLatLonInMeters } from '@/utils/notification.utils';
 const DISTANCE_FILTER_RADIUS = 50;
 const TIME_FILTER_MINUTES = 60 * 24;
 
-export async function backgroundGeolocationPing(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Dropy[]> {
+export async function backgroundGeolocationPing(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<void> {
   const dropiesAround = await getAvailableDropiesAroundLocation(latitude, longitude, user);
 
   console.log();
@@ -17,21 +17,24 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
 
   const canSendNotification = await checkTimeAndDistanceBetweenNotifications(user, latitude, longitude, timeStamp);
 
+  const nearDropies = dropiesAround.filter(dropy => {
+    return getDistanceFromLatLonInMeters(latitude, longitude, dropy.latitude, dropy.longitude) <= DISTANCE_FILTER_RADIUS;
+  });
+
   console.log(`Dropies around : ${dropiesAround.length}`);
+  console.log(`Dropies around : ${nearDropies.length}`);
   console.log(`Send notification : ${canSendNotification}`);
   console.log('-------------------');
 
-  
-
-  if (dropiesAround.length > 0 && canSendNotification) {
+  if (nearDropies.length > 0 && canSendNotification) {
     console.log('Send notification and save into the database');
-    sendPushNotification({
+    await sendPushNotification({
       user,
       title: 'Drop found near your position!',
       body: 'Open the app to see it',
       sound: 'dropy_sound.mp3',
     });
-    
+
     await client.user.update({
       where: { id: user.id },
       data: {
@@ -41,8 +44,6 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
       },
     });
   }
-
-  return dropiesAround;
 }
 
 export async function checkTimeAndDistanceBetweenNotifications(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Boolean> {
