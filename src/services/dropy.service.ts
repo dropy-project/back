@@ -84,7 +84,7 @@ export async function retrieveDropy(user: User, dropyId: number) {
   }
 
   if (dropy.retrieverId != null) {
-    throw new HttpException(403, `Dropy with dropyid ${dropyId} has already been retreived`);
+    throw new HttpException(403, `Dropy with dropyid ${dropyId} has already been retrieved`);
   }
 
   const emitter = await client.user.findUnique({ where: { id: dropy.emitterId } });

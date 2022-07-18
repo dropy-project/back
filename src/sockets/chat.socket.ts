@@ -1,12 +1,14 @@
+import { chatNamespace } from './socket';
+import { ChatConversation, ChatMessage, User } from '@prisma/client';
+
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 import { UserConversation, UserMessage } from '@/interfaces/chat.interface';
 import { SocketCallback } from '@/interfaces/socket.interface';
-import { ChatConversation, ChatMessage, User } from '@prisma/client';
-import * as userController from '@controllers/users.controller';
 
-import * as chatService from '@/services/chat.service';
 import { getRoomConnectedUsers, getUsersSockets } from '@/utils/socket.utils';
-import { chatNamespace } from './socket';
+
+import * as userController from '@controllers/users.controller';
+import * as chatService from '@/services/chat.service';
 
 export async function joinConversation(clientSocket: AuthenticatedSocket, conversationId: number, callback: SocketCallback<UserMessage[]>) {
   await clientSocket.join(`conversation-${conversationId}`);

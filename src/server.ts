@@ -11,8 +11,9 @@ import express from 'express';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import cors from 'cors';
-import * as dropySocket from './sockets/dropy.socket';
-import * as chatSocket from './sockets/chat.socket';
+
+import * as dropySocket from './sockets/listeners/dropy.socket.listeners';
+import * as chatSocket from './sockets/listeners/chat.socket.listeners';
 
 import { logStartedService } from './utils/logs.utils';
 
