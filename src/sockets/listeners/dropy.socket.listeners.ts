@@ -12,7 +12,7 @@ import * as dropySocket from '../dropy.socket';
 
 export function startSocket() {
   dropyNamespace.on('connection', async (socket: AuthenticatedSocket) => {
-    const logger = new Logger('Chat Socket', socket.user);
+    const logger = new Logger('Dropy Socket', socket.user);
 
     logger.log('Connected');
 
