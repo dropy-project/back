@@ -4,6 +4,7 @@ import { Namespace } from 'socket.io';
 
 import { HttpException } from '@/exceptions/HttpException';
 import { SocketResponse } from '@/interfaces/socket.interface';
+import { isNotAFunction } from './controller.utils';
 
 export async function getUsersSockets(namespace: Namespace, users: User[]): Promise<AuthenticatedSocket[]> {
   const sockets = await namespace.fetchSockets();
@@ -21,6 +22,11 @@ export async function getRoomConnectedUsers(namespace: Namespace, roomId: string
   const sockets = await namespace.in(roomId).fetchSockets();
   const connectedUsers = sockets.map(socket => (socket as unknown as AuthenticatedSocket).user);
   return connectedUsers;
+}
+
+export function handleSocketRawError(callback, error) {
+  const socketError = createSocketError(error);
+  if (!isNotAFunction(callback)) callback(socketError);
 }
 
 export function createSocketError(error): SocketResponse<null> {
