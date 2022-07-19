@@ -1,8 +1,7 @@
 import { User } from '@prisma/client';
-import { getAvailableDropiesAroundLocation } from '@/services/dropy.service';
 import { sendPushNotification } from '../notification';
 import client from '@/prisma/client';
-import { getDistanceFromLatLonInMeters } from '@/utils/notification.utils';
+import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@/utils/geolocation.utils';
 
 const DISTANCE_FILTER_RADIUS = 50;
 const TIME_FILTER_MINUTES = 60 * 24;
