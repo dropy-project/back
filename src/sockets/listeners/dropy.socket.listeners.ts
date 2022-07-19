@@ -28,8 +28,7 @@ export function startSocket() {
     socket.on('dropy_created', async (data: any, callback) => {
       try {
         const { latitude, longitude } = data;
-        throwIfNotNumber(latitude);
-        throwIfNotNumber(longitude);
+        throwIfNotNumber(latitude, longitude);
         throwIfNotFunction(callback);
 
         await dropySocket.createDropy(socket, latitude, longitude, callback);

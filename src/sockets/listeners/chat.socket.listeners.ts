@@ -30,9 +30,7 @@ export function startSocket() {
     socket.on('list_messages', async (data, callback) => {
       try {
         const { conversationId, offset, limit } = data;
-        throwIfNotNumber(conversationId);
-        throwIfNotNumber(offset);
-        throwIfNotNumber(limit);
+        throwIfNotNumber(conversationId, offset, limit);
         throwIfNotFunction(callback);
 
         await chatSocket.listMessages(conversationId, offset, limit, callback);
