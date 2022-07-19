@@ -2,9 +2,9 @@ import { chatNamespace } from '../socket';
 
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 
-import { throwIfNotNumber, throwIfNotString } from '@/utils/controller.utils';
+import { throwIfNotFunction, throwIfNotNumber, throwIfNotString } from '@/utils/controller.utils';
 import { Logger } from '@/utils/logs.utils';
-import { createSocketError } from '@/utils/socket.utils';
+import { handleSocketRawError } from '@/utils/socket.utils';
 
 import * as chatSocket from '../chat.socket';
 
@@ -15,78 +15,85 @@ export function startSocket() {
     chatSocket.sendConnectionStatus(socket, true);
     logger.log('Connected');
 
-    socket.on('join_conversation', (data, cb) => {
+    socket.on('join_conversation', async (data, callback) => {
       try {
         throwIfNotNumber(data);
+        throwIfNotFunction(callback);
 
-        chatSocket.joinConversation(socket, data, cb);
+        await chatSocket.joinConversation(socket, data, callback);
         logger.log('Join conversation');
       } catch (error) {
-        cb(createSocketError(error));
+        handleSocketRawError(callback, error);
       }
     });
 
-    socket.on('list_messages', (data, cb) => {
+    socket.on('list_messages', async (data, callback) => {
       try {
         const { conversationId, offset, limit } = data;
         throwIfNotNumber(conversationId);
         throwIfNotNumber(offset);
         throwIfNotNumber(limit);
+        throwIfNotFunction(callback);
 
-        chatSocket.listMessages(conversationId, offset, limit, cb);
+        await chatSocket.listMessages(conversationId, offset, limit, callback);
         logger.log('List messages');
       } catch (error) {
-        cb(createSocketError(error));
+        handleSocketRawError(callback, error);
       }
     });
 
-    socket.on('leave_conversation', (data, cb) => {
+    socket.on('leave_conversation', async (data, callback) => {
       try {
         throwIfNotNumber(data);
+        throwIfNotFunction(callback);
 
-        chatSocket.leaveConversation(socket, data, cb);
+        await chatSocket.leaveConversation(socket, data, callback);
         logger.log('Leave conversation');
       } catch (error) {
-        cb(createSocketError(error));
+        handleSocketRawError(callback, error);
       }
     });
 
-    socket.on('message_sent', (data, cb) => {
+    socket.on('message_sent', async (data, callback) => {
       try {
         const { content, conversationId } = data;
         throwIfNotString(content);
         throwIfNotNumber(conversationId);
+        throwIfNotFunction(callback);
 
-        chatSocket.createMessage(socket, content, conversationId, cb);
+        await chatSocket.createMessage(socket, content, conversationId, callback);
         logger.log('Message sent');
       } catch (error) {
-        cb(createSocketError(error));
+        handleSocketRawError(callback, error);
       }
     });
 
-    socket.on('list_conversations', cb => {
+    socket.on('list_conversations', async callback => {
       try {
-        chatSocket.listConversations(socket, cb);
+        throwIfNotFunction(callback);
+
+        await chatSocket.listConversations(socket, callback);
         logger.log('List conversations');
       } catch (error) {
-        cb(createSocketError(error));
+        handleSocketRawError(callback, error);
       }
     });
 
-    socket.on('close_conversation', (data, cb) => {
+    socket.on('close_conversation', async (data, callback) => {
       try {
         throwIfNotNumber(data);
+        throwIfNotFunction(callback);
 
-        chatSocket.closeConversation(data, cb);
+        await chatSocket.closeConversation(data, callback);
         logger.log('Close conversation');
       } catch (error) {
-        cb(createSocketError(error));
+        handleSocketRawError(callback, error);
       }
     });
 
     socket.on('disconnecting', async () => {
       try {
-        chatSocket.sendConnectionStatus(socket, false);
+        await chatSocket.sendConnectionStatus(socket, false);
         logger.log('Disconnected');
       } catch (error) {
         console.error('Disconnection handling error', error);
