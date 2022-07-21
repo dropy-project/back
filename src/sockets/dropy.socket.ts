@@ -6,8 +6,8 @@ import { SocketCallback } from '@/interfaces/socket.interface';
 
 import * as dropyService from '@services/dropy.service';
 
-export async function emitAllDropiesAround(callback: SocketCallback<DropyAround[]>) {
-  const dropies = await dropyService.findDropiesAround();
+export async function emitAllDropiesAround(latitude: number, longitude: number, callback: SocketCallback<DropyAround[]>) {
+  const dropies = await dropyService.findDropiesAround(latitude, longitude);
   callback({
     status: 200,
     data: dropies,

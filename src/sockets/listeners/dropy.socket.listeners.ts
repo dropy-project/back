@@ -14,11 +14,13 @@ export function startSocket() {
 
     logger.log('Connected');
 
-    socket.on('all_dropies_around', async callback => {
+    socket.on('all_dropies_around', async (data: any, callback) => {
       try {
+        const { latitude, longitude } = data;
+        throwIfNotNumber(latitude, longitude);
         throwIfNotFunction(callback);
 
-        await dropySocket.emitAllDropiesAround(callback);
+        await dropySocket.emitAllDropiesAround(latitude, longitude, callback);
         logger.log('All dropies around');
       } catch (error) {
         handleSocketRawError(callback, error);

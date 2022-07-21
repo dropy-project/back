@@ -4,8 +4,7 @@ import { DropyAround } from '@/interfaces/dropy.interface';
 import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 import { sendPushNotification } from '@/notification';
-
-const DISTANCE_FILTER_RADIUS = 0.004; // Environ 300m
+import { getAvailableDropiesAroundLocation } from '@/utils/geolocation.utils';
 
 export async function createDropy(user: User, latitude, longitude): Promise<Dropy> {
   const dropy = client.dropy.create({ data: { emitterId: user.id, latitude, longitude } });
@@ -119,45 +118,6 @@ export async function getDropyById(dropyId: number): Promise<Dropy> {
   return dropy;
 }
 
-export async function getAvailableDropiesAroundLocation(latitude: number, longitude: number, user: User = undefined): Promise<Dropy[]> {
-  const andQuery: Object[] = [
-    {
-      latitude: {
-        gt: latitude - DISTANCE_FILTER_RADIUS,
-        lt: latitude + DISTANCE_FILTER_RADIUS,
-      },
-    },
-    {
-      longitude: {
-        gt: longitude - DISTANCE_FILTER_RADIUS,
-        lt: longitude + DISTANCE_FILTER_RADIUS,
-      },
-    },
-    {
-      mediaType: {
-        not: MediaType.NONE,
-      },
-    },
-    {
-      retrieverId: {
-        equals: null,
-      },
-    },
-  ];
-
-  if (user != undefined) {
-    andQuery.push({
-      emitterId: {
-        not: user.id,
-      },
-    });
-  }
-
-  return await client.dropy.findMany({
-    where: { AND: andQuery },
-  });
-}
-
 export async function getDropy(dropyId: number) {
   const dropy = await client.dropy.findUnique({
     where: { id: dropyId },
@@ -182,14 +142,8 @@ export async function getDropy(dropyId: number) {
   return customDropy;
 }
 
-export async function findDropiesAround(): Promise<DropyAround[]> {
-  const dropies = await client.dropy.findMany({
-    where: {
-      retrieverId: {
-        equals: null,
-      },
-    },
-  });
+export async function findDropiesAround(latitude: number, longitude: number): Promise<DropyAround[]> {
+  const dropies = await getAvailableDropiesAroundLocation(latitude, longitude);
 
   const dropiesAround = dropies.map(dropy => {
     return {
