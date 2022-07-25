@@ -54,9 +54,10 @@ NODE_ENV=<production|development>
 API_PORT=3000
 SOCKET_API=4000
 
-SECRET_KEY=<secret>
+ACCESS_SECRET_KEY=<secret>
+REFRESH_SECRET_KEY=<secret>
 
-SECRET_ENCRYPTION_KEY=<encryption key>
+CHAT_ENCRYPTION_SECRET_KEY=<encryption key>
 
 #################-> POSTGRES
 
