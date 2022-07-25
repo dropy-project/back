@@ -2,10 +2,10 @@ import client from '@/prisma/client';
 import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken } from '@interfaces/auth.interface';
+import { DataStoredInToken, UserTokens } from '@interfaces/auth.interface';
 import { createUserToken, displayNameToUsername } from '@/utils/user.utils';
 
-export async function register(uid, displayName): Promise<User> {
+export async function register(uid: string, displayName: string): Promise<User> {
   const findUser: User = await client.user.findUnique({ where: { uid: uid } });
   if (findUser) throw new HttpException(409, `This uid is already registered`);
 
@@ -14,14 +14,14 @@ export async function register(uid, displayName): Promise<User> {
   return createUserData;
 }
 
-export async function login(uid: string) {
+export async function login(uid: string): Promise<UserTokens & { user: User }> {
   const user: User = await client.user.findUnique({ where: { uid } });
   if (!user) throw new HttpException(409, 'No user found with this uid');
 
   return { ...createUserToken(user), user };
 }
 
-export async function refreshAuthToken(refreshToken: string) {
+export async function refreshAuthToken(refreshToken: string): Promise<UserTokens> {
   const secretKey = process.env.REFRESH_SECRET_KEY;
   const { userId } = (await jwt.verify(refreshToken, secretKey, {})) as DataStoredInToken;
 
