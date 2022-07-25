@@ -2,7 +2,7 @@ import client from '@/prisma/client';
 import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
+import { DataStoredInToken, UserTokens } from '@interfaces/auth.interface';
 import { displayNameToUsername } from '@/utils/user.utils';
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
@@ -32,7 +32,7 @@ export async function refreshAuthToken(refreshToken: string) {
   return createUserToken(user);
 }
 
-function createUserToken(user: User): TokenData {
+function createUserToken(user: User): UserTokens {
   const dataStoredInToken: DataStoredInToken = { userId: user.id };
   const secretKey = process.env.SECRET_KEY;
 

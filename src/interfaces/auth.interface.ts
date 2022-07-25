@@ -6,7 +6,7 @@ export interface DataStoredInToken {
   userId: number;
 }
 
-export interface TokenData {
+export interface UserTokens {
   accessToken: string;
   refreshToken: string;
   expires: number;
