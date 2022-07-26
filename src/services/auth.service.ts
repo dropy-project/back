@@ -23,7 +23,7 @@ export async function login(uid: string): Promise<UserTokens & { user: User }> {
 
 export async function refreshAuthToken(refreshToken: string): Promise<UserTokens> {
   const secretKey = process.env.REFRESH_SECRET_KEY;
-  const { userId } = (await jwt.verify(refreshToken, secretKey, {})) as DataStoredInToken;
+  const { userId } = (await jwt.verify(refreshToken, secretKey)) as DataStoredInToken;
 
   const user = await client.user.findUnique({ where: { id: userId } });
   return createUserToken(user);
