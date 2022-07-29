@@ -41,7 +41,6 @@ export async function logIn(req: Request, res: Response, next: NextFunction): Pr
     utils.throwIfNotString(uid);
 
     const authData = await authService.login(uid);
-
     res.status(200).json(authData);
   } catch (error) {
     next(error);
@@ -53,8 +52,8 @@ export async function refreshAuthToken(req: Request, res: Response, next: NextFu
     const { refreshToken } = req.body;
     utils.throwIfNotString(refreshToken);
 
-    const { token } = await authService.refreshAuthToken(refreshToken);
-    res.status(200).json(token);
+    const tokens = await authService.refreshAuthToken(refreshToken);
+    res.status(200).json(tokens);
   } catch (error) {
     next(error);
   }

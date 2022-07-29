@@ -14,7 +14,7 @@ const authMiddleware = async (req: AuthenticatedRequest | AuthenticatedSocket, r
     if (isSocket) {
       authorization = req.handshake.headers.authorization;
     } else {
-      authorization = req.header('Authorization');
+      authorization = req.header('Authorization').replace('Bearer ', '');
     }
 
     if (authorization == null) {
@@ -22,7 +22,7 @@ const authMiddleware = async (req: AuthenticatedRequest | AuthenticatedSocket, r
       return;
     }
 
-    const secretKey = process.env.SECRET_KEY;
+    const secretKey = process.env.ACCESS_SECRET_KEY;
     const { userId } = (await verify(authorization, secretKey)) as DataStoredInToken;
 
     const user = await client.user.findUnique({ where: { id: userId } });
