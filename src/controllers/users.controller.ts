@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 import * as userService from '@services/users.service';
 import * as utils from '@/utils/controller.utils';
 import { User } from '@prisma/client';
+import { UploadedFile } from 'express-fileupload';
 
 export async function updateDeviceToken(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -59,6 +60,34 @@ export async function updateUserProfile(req: AuthenticatedRequest, res: Response
 
     const profile = await userService.updateUserProfile(req.user, req.body);
     res.status(200).json(profile);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateProfilePicture(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    utils.throwIfNull(req.files);
+
+    const file = req.files['profile'] as UploadedFile;
+    utils.throwIfNull(file);
+
+    await userService.updateProfilePicture(req.user, file);
+    res.status(200).json('Profile picture has been updated');
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getProfilePicture(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { userId } = req.params;
+    utils.throwIfNotNumber(userId);
+
+    const filePath = await userService.getProfilePicture(parseInt(userId));
+    utils.throwIfNotString(filePath);
+
+    res.sendFile(filePath);
   } catch (error) {
     next(error);
   }

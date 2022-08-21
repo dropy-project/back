@@ -4,6 +4,7 @@ import client from '@/prisma/client';
 import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@/utils/geolocation.utils';
 import { Profile, UpdatableProfileInfos, userToProfile } from '@/interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
+import { UploadedFile } from 'express-fileupload';
 
 const DISTANCE_FILTER_RADIUS = 50;
 const TIME_FILTER_MINUTES = 60 * 24;
@@ -79,6 +80,32 @@ export async function updateUserProfile(user: User, profileInfos: UpdatableProfi
     },
   });
   return userToProfile(updatedUser);
+}
+
+export async function updateProfilePicture(user: User, file: UploadedFile): Promise<void> {
+  const extensionFile = file.mimetype.split('/').pop();
+  const now = new Date();
+
+  const fileName = `${now.getFullYear()}_${now.getMonth()}_${now.getDay()}_${user.id}.${extensionFile}`;
+  const filePath = `${process.cwd()}/public/dropiesMedias/${fileName}`;
+  file.mv(filePath);
+
+  await client.user.update({
+    where: { id: user.id },
+    data: {
+      avatarUrl: filePath,
+    },
+  });
+}
+
+export async function getProfilePicture(userId: number): Promise<string> {
+  const user = await client.user.findUnique({ where: { id: userId } });
+
+  if (user == null) {
+    throw new HttpException(404, `User with id ${userId} not found`);
+  }
+
+  return user.avatarUrl;
 }
 
 export async function updateDeviceToken(user: User, deviceToken: string): Promise<void> {

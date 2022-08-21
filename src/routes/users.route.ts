@@ -12,6 +12,9 @@ export function getRouter() {
   router.post(`${path}/backgroundGeolocationPing`, authMiddleware as any, usersController.backgroundGeolocationPing, errorMiddleware);
 
   router.get(`${path}/profile/:userId`, authMiddleware as any, usersController.getProfile, errorMiddleware);
+  router.get(`${path}/profile/:userId/picture`, authMiddleware as any, usersController.getProfilePicture, errorMiddleware);
+
   router.post(`${path}/profile`, authMiddleware as any, usersController.updateUserProfile, errorMiddleware);
+  router.post(`${path}/profile/picture`, authMiddleware as any, usersController.updateProfilePicture, errorMiddleware);
   return router;
 }
