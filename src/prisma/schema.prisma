@@ -15,14 +15,28 @@ enum MediaType {
   MUSIC
 }
 
+enum Pronouns {
+  UNKOWN
+  HE_HIM
+  SHE_HER
+}
+
 model User {
   id  Int    @id @default(autoincrement())
   uid String @unique
 
-  username     String   @unique
-  displayName  String
   registerDate DateTime @default(now())
   deviceToken  String?
+
+  email       String?
+  password    String?
+
+  username     String   @unique
+  displayName  String
+
+  avatarUrl String?
+  pronouns    Pronouns @default(UNKOWN)
+  about       String?
 
   emittedDropies   Dropy[] @relation("emittedDropies")
   retrievedDropies Dropy[] @relation("retrievedDropies")

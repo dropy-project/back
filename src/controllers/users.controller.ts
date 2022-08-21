@@ -39,3 +39,27 @@ export async function backgroundGeolocationPing(req: AuthenticatedRequest, res: 
 export async function changeOnlineStatus(user: User, status: boolean): Promise<void> {
   await userService.changeOnlineStatus(user, status);
 }
+
+export async function getProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { userId } = req.params;
+    utils.throwIfNotNumber(userId);
+
+    const profile = await userService.getUserProfile(parseInt(userId));
+    res.status(200).json(profile);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateUserProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { about, pronouns, displayName } = req.body;
+    utils.throwIfNotString(about, pronouns, displayName);
+
+    const profile = await userService.updateUserProfile(req.user, req.body);
+    res.status(200).json(profile);
+  } catch (error) {
+    next(error);
+  }
+}

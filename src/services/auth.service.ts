@@ -4,6 +4,8 @@ import { User } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, UserTokens } from '@interfaces/auth.interface';
 import { createUserToken, displayNameToUsername } from '@/utils/user.utils';
+import { Profile } from '@/interfaces/user.interface';
+import * as userService from './users.service';
 
 export async function register(uid: string, displayName: string): Promise<User> {
   const findUser: User = await client.user.findUnique({ where: { uid: uid } });
@@ -14,11 +16,12 @@ export async function register(uid: string, displayName: string): Promise<User> 
   return createUserData;
 }
 
-export async function login(uid: string): Promise<UserTokens & { user: User }> {
+export async function login(uid: string): Promise<UserTokens & { profile: Profile }> {
   const user: User = await client.user.findUnique({ where: { uid } });
   if (!user) throw new HttpException(409, 'No user found with this uid');
 
-  return { ...createUserToken(user), user };
+  const profile = await userService.getUserProfile(user.id);
+  return { ...createUserToken(user), profile };
 }
 
 export async function refreshAuthToken(refreshToken: string): Promise<UserTokens> {

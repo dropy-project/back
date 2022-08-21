@@ -11,5 +11,7 @@ export function getRouter() {
   router.post(`${path}/updateDeviceToken`, authMiddleware as any, usersController.updateDeviceToken, errorMiddleware);
   router.post(`${path}/backgroundGeolocationPing`, authMiddleware as any, usersController.backgroundGeolocationPing, errorMiddleware);
 
+  router.get(`${path}/profile/:userId`, authMiddleware as any, usersController.getProfile, errorMiddleware);
+  router.post(`${path}/profile`, authMiddleware as any, usersController.updateUserProfile, errorMiddleware);
   return router;
 }
