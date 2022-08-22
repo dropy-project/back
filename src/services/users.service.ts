@@ -153,7 +153,7 @@ export async function changeOnlineStatus(user: User, status: boolean): Promise<v
   });
 }
 
-export async function reportUser(reportedId: number, sender: User): Promise<void> {
+export async function reportUser(reportedId: number, sender: User, dropyId: number | undefined): Promise<void> {
   const userToReport = await client.user.findUnique({ where: { id: reportedId } });
 
   if (userToReport == null) {
@@ -171,11 +171,15 @@ export async function reportUser(reportedId: number, sender: User): Promise<void
   });
 
   if (lastHourReportsCount > 0) {
-    throw new HttpException(400, `You can't report this user more than once per hour`);
+    throw new HttpException(401, `You can't report this user more than once per hour`);
   }
 
   await client.report.create({
-    data: { senderId: sender.id, reportedId },
+    data: {
+      senderId: sender.id,
+      reportedId,
+      dropyId: dropyId,
+    },
   });
 
   const nbReports = await client.report.count({

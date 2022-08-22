@@ -98,7 +98,13 @@ export async function reportUser(req: AuthenticatedRequest, res: Response, next:
     const { userId } = req.params;
     utils.throwIfNotNumber(userId);
 
-    await userService.reportUser(parseInt(userId), req.user);
+    const { dropyId } = req.body;
+
+    if (dropyId != null) {
+      utils.throwIfNotNumber(dropyId);
+    }
+
+    await userService.reportUser(parseInt(userId), req.user, dropyId);
     res.status(200).json('User reported');
   } catch (error) {
     next(error);

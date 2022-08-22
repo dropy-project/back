@@ -28,37 +28,37 @@ model User {
   registerDate DateTime @default(now())
   deviceToken  String?
 
-  email       String?
-  password    String?
+  email    String?
+  password String?
 
-  username     String   @unique
-  displayName  String
+  username    String @unique
+  displayName String
 
   avatarUrl String?
-  pronouns    Pronouns @default(UNKOWN)
-  about       String?
+  pronouns  Pronouns @default(UNKOWN)
+  about     String?
 
-  isDeveloper Boolean @default(false)
-  isAdmin   Boolean @default(false)
+  isDeveloper  Boolean @default(false)
+  isAdmin      Boolean @default(false)
   isAmbassador Boolean @default(false)
-  isPremium Boolean @default(false)
-  isBanned Boolean @default(false)
+  isPremium    Boolean @default(false)
+  isBanned     Boolean @default(false)
 
   emittedDropies   Dropy[] @relation("emittedDropies")
   retrievedDropies Dropy[] @relation("retrievedDropies")
 
-  lastGeolocationPingDate              DateTime? 
-  lastGeolocationPingLatitude  Float?  
-  lastGeolocationPingLongitude Float?    
-  
-  isOnline Boolean @default(false)
+  lastGeolocationPingDate      DateTime?
+  lastGeolocationPingLatitude  Float?
+  lastGeolocationPingLongitude Float?
+
+  isOnline      Boolean            @default(false)
   conversations ChatConversation[]
   chatMessages  ChatMessage[]
 
-  emittedReports Report[] @relation("sentReports")
+  emittedReports  Report[] @relation("sentReports")
   receivedReports Report[] @relation("receivedReports")
 
-  blockedUsers User[] @relation("blockedUsers")
+  blockedUsers   User[] @relation("blockedUsers")
   blockedByUsers User[] @relation("blockedUsers")
 }
 
@@ -83,7 +83,8 @@ model Dropy {
   chatConversation   ChatConversation? @relation(fields: [chatConversationId], references: [id])
   chatConversationId Int?
 
-  chatMessage        ChatMessage[]
+  chatMessage ChatMessage[]
+  Report      Report[]
 }
 
 model ChatConversation {
@@ -116,12 +117,15 @@ model ChatMessage {
 }
 
 model Report {
-  id           Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  sender   User @relation("sentReports", fields: [senderId], references: [id])
-  senderId Int
-  reported User @relation("receivedReports", fields: [reportedId], references: [id])
+  sender     User @relation("sentReports", fields: [senderId], references: [id])
+  senderId   Int
+  reported   User @relation("receivedReports", fields: [reportedId], references: [id])
   reportedId Int
 
   date DateTime @default(now())
+
+  dropy   Dropy? @relation(fields: [dropyId], references: [id])
+  dropyId Int?
 }
