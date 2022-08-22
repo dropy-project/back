@@ -129,7 +129,16 @@ export async function getDropy(dropyId: number) {
 export async function findDropiesAround(user: User, latitude: number, longitude: number): Promise<DropyAround[]> {
   const dropies = await getAvailableDropiesAroundLocation(latitude, longitude);
 
-  const cleanedDropies = dropies.filter(dropy => dropy.emitter.isBanned == false || dropy.emitterId === user.id);
+  const userWithBlockedUsers = await client.user.findUnique({
+    where: { id: user.id },
+    include: { blockedUsers: true },
+  });
+
+  const blockedUsersId = userWithBlockedUsers.blockedUsers.map(users => users.id);
+
+  const cleanedDropies = dropies
+    .filter(dropy => dropy.emitter.isBanned == false || dropy.emitterId === user.id)
+    .filter(dropy => !blockedUsersId.includes(dropy.emitterId));
 
   const dropiesAround = cleanedDropies.map(dropy => {
     return {

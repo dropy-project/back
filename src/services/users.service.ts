@@ -191,3 +191,33 @@ export async function reportUser(reportedId: number, sender: User): Promise<void
     });
   }
 }
+
+export async function blockUser(blockedId: number, sender: User): Promise<void> {
+  const userToBlock = await client.user.findUnique({ where: { id: blockedId } });
+
+  if (userToBlock == null) {
+    throw new HttpException(404, `User with id ${userToBlock} not found`);
+  }
+
+  await client.user.update({
+    where: { id: sender.id },
+    data: {
+      blockedUsers: {
+        connect: {
+          id: blockedId,
+        },
+      },
+    },
+  });
+
+  await client.chatConversation.updateMany({
+    where: {
+      users: {
+        some: {
+          id: { in: [sender.id, blockedId] },
+        },
+      },
+    },
+    data: { closed: true },
+  });
+}
