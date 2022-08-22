@@ -14,7 +14,11 @@ export function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
   return d * 1000; // Distance in meters
 }
 
-export async function getAvailableDropiesAroundLocation(latitude: number, longitude: number, user: User = undefined): Promise<Dropy[]> {
+export async function getAvailableDropiesAroundLocation(
+  latitude: number,
+  longitude: number,
+  user: User = undefined,
+): Promise<(Dropy & { emitter: User })[]> {
   const andQuery: Object[] = [
     {
       latitude: {
@@ -50,5 +54,6 @@ export async function getAvailableDropiesAroundLocation(latitude: number, longit
 
   return await client.dropy.findMany({
     where: { AND: andQuery },
+    include: { emitter: true },
   });
 }

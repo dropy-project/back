@@ -8,6 +8,7 @@ import { UploadedFile } from 'express-fileupload';
 
 const DISTANCE_FILTER_RADIUS = 50;
 const TIME_FILTER_MINUTES = 60 * 24;
+const NB_REPORTS_TO_BAN = 15;
 
 export async function backgroundGeolocationPing(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<void> {
   const dropiesAround = await getAvailableDropiesAroundLocation(latitude, longitude, user);
@@ -150,4 +151,43 @@ export async function changeOnlineStatus(user: User, status: boolean): Promise<v
       isOnline: status,
     },
   });
+}
+
+export async function reportUser(reportedId: number, sender: User): Promise<void> {
+  const userToReport = await client.user.findUnique({ where: { id: reportedId } });
+
+  if (userToReport == null) {
+    throw new HttpException(404, `User with id ${reportedId} not found`);
+  }
+
+  const lastHourReportsCount = await client.report.count({
+    where: {
+      senderId: sender.id,
+      reportedId: reportedId,
+      date: {
+        gte: new Date(new Date().getTime() - 3600 * 1000),
+      },
+    },
+  });
+
+  if (lastHourReportsCount > 0) {
+    throw new HttpException(400, `You can't report this user more than once per hour`);
+  }
+
+  await client.report.create({
+    data: { senderId: sender.id, reportedId },
+  });
+
+  const nbReports = await client.report.count({
+    where: { reportedId },
+  });
+
+  if (nbReports >= NB_REPORTS_TO_BAN) {
+    await client.user.update({
+      where: { id: reportedId },
+      data: {
+        isBanned: true,
+      },
+    });
+  }
 }

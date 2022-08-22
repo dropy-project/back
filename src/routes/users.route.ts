@@ -16,5 +16,7 @@ export function getRouter() {
 
   router.post(`${path}/profile`, authMiddleware as any, usersController.updateUserProfile, errorMiddleware);
   router.post(`${path}/profile/picture`, authMiddleware as any, usersController.updateProfilePicture, errorMiddleware);
+
+  router.post(`${path}/report/:userId`, authMiddleware as any, usersController.reportUser, errorMiddleware);
   return router;
 }

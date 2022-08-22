@@ -20,7 +20,7 @@ export function startSocket() {
         throwIfNotNumber(latitude, longitude);
         throwIfNotFunction(callback);
 
-        await dropySocket.emitAllDropiesAround(latitude, longitude, callback);
+        await dropySocket.emitAllDropiesAround(socket, latitude, longitude, callback);
         logger.log('All dropies around');
       } catch (error) {
         handleSocketRawError(callback, error);

@@ -38,8 +38,6 @@ model User {
   pronouns    Pronouns @default(UNKOWN)
   about       String?
 
-  profileScore Int @default(1000)
-
   isDeveloper Boolean @default(false)
   isAdmin   Boolean @default(false)
   isAmbassador Boolean @default(false)
@@ -56,6 +54,9 @@ model User {
   isOnline Boolean @default(false)
   conversations ChatConversation[]
   chatMessages  ChatMessage[]
+
+  emittedReports Report[] @relation("sentReports")
+  receivedReports Report[] @relation("receivedReports")
 }
 
 model Dropy {
@@ -109,4 +110,15 @@ model ChatMessage {
 
   read    Boolean @default(false)
   dropyId Int?
+}
+
+model Report {
+  id           Int      @id @default(autoincrement())
+
+  sender   User @relation("sentReports", fields: [senderId], references: [id])
+  senderId Int
+  reported User @relation("receivedReports", fields: [reportedId], references: [id])
+  reportedId Int
+
+  date DateTime @default(now())
 }

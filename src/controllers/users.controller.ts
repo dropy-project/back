@@ -92,3 +92,15 @@ export async function getProfilePicture(req: AuthenticatedRequest, res: Response
     next(error);
   }
 }
+
+export async function reportUser(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { userId } = req.params;
+    utils.throwIfNotNumber(userId);
+
+    await userService.reportUser(parseInt(userId), req.user);
+    res.status(200).json('User reported');
+  } catch (error) {
+    next(error);
+  }
+}

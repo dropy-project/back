@@ -59,22 +59,6 @@ export async function createDropyMedia(user: User, dropyId: number, mediaPayload
   }
 }
 
-export async function findAround(user: User, latitude: number, longitude: number): Promise<DropyAround[]> {
-  const dropies = await getAvailableDropiesAroundLocation(latitude, longitude);
-
-  const dropiesAround = dropies.map(dropy => {
-    return {
-      id: dropy.id,
-      creationDate: dropy.creationDate,
-      latitude: dropy.latitude,
-      longitude: dropy.longitude,
-      isUserDropy: dropy.emitterId == user.id,
-    };
-  });
-
-  return dropiesAround;
-}
-
 export async function retrieveDropy(user: User, dropyId: number) {
   const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
@@ -142,10 +126,12 @@ export async function getDropy(dropyId: number) {
   return customDropy;
 }
 
-export async function findDropiesAround(latitude: number, longitude: number): Promise<DropyAround[]> {
+export async function findDropiesAround(user: User, latitude: number, longitude: number): Promise<DropyAround[]> {
   const dropies = await getAvailableDropiesAroundLocation(latitude, longitude);
 
-  const dropiesAround = dropies.map(dropy => {
+  const cleanedDropies = dropies.filter(dropy => dropy.emitter.isBanned == false || dropy.emitterId === user.id);
+
+  const dropiesAround = cleanedDropies.map(dropy => {
     return {
       id: dropy.id,
       creationDate: dropy.creationDate,

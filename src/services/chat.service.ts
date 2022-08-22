@@ -110,7 +110,7 @@ export async function getConversationByIdWithUsers(conversationId: number): Prom
 export async function getAllUserConversations(user: User): Promise<UserConversation[]> {
   const chatConversations = await client.chatConversation.findMany({
     where: {
-      users: { some: { id: user.id } },
+      users: { some: { id: user.id }, every: { isBanned: false } },
       closed: false,
     },
     include: { users: true },
