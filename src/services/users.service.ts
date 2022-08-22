@@ -2,7 +2,7 @@ import { User } from '@prisma/client';
 import { sendPushNotification } from '../notification';
 import client from '@/prisma/client';
 import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@/utils/geolocation.utils';
-import { Profile, UpdatableProfileInfos, userToProfile } from '@/interfaces/user.interface';
+import { Profile, UpdatableProfileInfos } from '@/interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 
@@ -69,7 +69,31 @@ export async function getUserProfile(userId: number): Promise<Profile> {
     throw new HttpException(404, `User with id ${userId} not found`);
   }
 
-  return userToProfile(user);
+  return await userToProfile(user);
+}
+
+export async function userToProfile(user: User): Promise<Profile> {
+  const emittedDropiesCount = await client.dropy.count({ where: { emitterId: user.id } });
+  const retrievedDropiesCount = await client.dropy.count({ where: { retrieverId: user.id } });
+
+  return {
+    id: user.id,
+    username: user.username,
+    displayName: user.displayName,
+    email: user.email,
+    registerDate: user.registerDate,
+    isOnline: user.isOnline,
+    about: user.about,
+    pronouns: user.pronouns,
+    avatarUrl: user.avatarUrl,
+    emittedDropiesCount,
+    retrievedDropiesCount,
+    isAdmin: user.isAdmin,
+    isAmbassador: user.isAmbassador,
+    isBanned: user.isBanned,
+    isDeveloper: user.isDeveloper,
+    isPremium: user.isPremium,
+  };
 }
 
 export async function updateUserProfile(user: User, profileInfos: UpdatableProfileInfos): Promise<Profile> {
@@ -79,7 +103,7 @@ export async function updateUserProfile(user: User, profileInfos: UpdatableProfi
       ...profileInfos,
     },
   });
-  return userToProfile(updatedUser);
+  return await userToProfile(updatedUser);
 }
 
 export async function updateProfilePicture(user: User, file: UploadedFile): Promise<void> {

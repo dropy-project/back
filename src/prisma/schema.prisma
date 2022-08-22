@@ -38,6 +38,14 @@ model User {
   pronouns    Pronouns @default(UNKOWN)
   about       String?
 
+  profileScore Int @default(1000)
+
+  isDeveloper Boolean @default(false)
+  isAdmin   Boolean @default(false)
+  isAmbassador Boolean @default(false)
+  isPremium Boolean @default(false)
+  isBanned Boolean @default(false)
+
   emittedDropies   Dropy[] @relation("emittedDropies")
   retrievedDropies Dropy[] @relation("retrievedDropies")
 
