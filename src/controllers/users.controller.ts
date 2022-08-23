@@ -79,6 +79,15 @@ export async function updateProfilePicture(req: AuthenticatedRequest, res: Respo
   }
 }
 
+export async function deleteProfilePicture(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    await userService.deleteProfilePicture(req.user);
+    res.status(200).json('Profile picture has been deleted');
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function getProfilePicture(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const { userId } = req.params;

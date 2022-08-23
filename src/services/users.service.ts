@@ -1,4 +1,5 @@
 import { User } from '@prisma/client';
+import fs from 'fs';
 import { sendPushNotification } from '../notification';
 import client from '@/prisma/client';
 import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@/utils/geolocation.utils';
@@ -109,18 +110,32 @@ export async function updateUserProfile(user: User, profileInfos: UpdatableProfi
 
 export async function updateProfilePicture(user: User, file: UploadedFile): Promise<void> {
   const extensionFile = file.mimetype.split('/').pop();
-  const now = new Date();
 
-  const fileName = `${now.getFullYear()}_${now.getMonth()}_${now.getDay()}_${user.id}.${extensionFile}`;
-  const filePath = `${process.cwd()}/public/dropiesMedias/${fileName}`;
+  if (user.avatarUrl != null) {
+    fs.unlinkSync(user.avatarUrl);
+  }
+
+  const fileName = `${new Date().getTime()}_${user.id}.${extensionFile}`;
+  const filePath = `${process.cwd()}/public/profiles/${fileName}`;
   file.mv(filePath);
 
   await client.user.update({
     where: { id: user.id },
+    data: { avatarUrl: filePath },
+  });
+}
+
+export async function deleteProfilePicture(user: User): Promise<void> {
+  await client.user.update({
+    where: { id: user.id },
     data: {
-      avatarUrl: filePath,
+      avatarUrl: null,
     },
   });
+
+  if (user.avatarUrl != null) {
+    fs.unlinkSync(user.avatarUrl);
+  }
 }
 
 export async function getProfilePicture(userId: number): Promise<string> {

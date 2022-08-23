@@ -16,6 +16,7 @@ export function getRouter() {
 
   router.post(`${path}/profile`, authMiddleware as any, usersController.updateUserProfile, errorMiddleware);
   router.post(`${path}/profile/picture`, authMiddleware as any, usersController.updateProfilePicture, errorMiddleware);
+  router.delete(`${path}/profile/picture`, authMiddleware as any, usersController.deleteProfilePicture, errorMiddleware);
 
   router.post(`${path}/report/:userId`, authMiddleware as any, usersController.reportUser, errorMiddleware);
   router.post(`${path}/block/:userId`, authMiddleware as any, usersController.blockUser, errorMiddleware);
