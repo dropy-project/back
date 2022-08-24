@@ -22,3 +22,5 @@ export type Profile = Pick<
 };
 
 export type UpdatableProfileInfos = Pick<User, 'about' | 'pronouns' | 'displayName'>;
+
+export type SimplifiedUser = Pick<User, 'id' | 'username' | 'displayName'>;

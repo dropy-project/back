@@ -20,6 +20,8 @@ export function getRouter() {
 
   router.post(`${path}/report/:userId`, authMiddleware as any, usersController.reportUser, errorMiddleware);
   router.post(`${path}/block/:userId`, authMiddleware as any, usersController.blockUser, errorMiddleware);
+  router.get(`${path}/blocked`, authMiddleware as any, usersController.getBlockedUsers, errorMiddleware);
+  router.post(`${path}/unblock/:userId`, authMiddleware as any, usersController.unblockUser, errorMiddleware);
 
   return router;
 }

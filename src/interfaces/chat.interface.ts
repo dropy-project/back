@@ -1,11 +1,9 @@
 import { DropyAround } from './dropy.interface';
+import { SimplifiedUser } from './user.interface';
 
 export interface UserConversation {
   id: number;
-  user: {
-    displayName: string;
-    userId: number;
-  };
+  user: SimplifiedUser;
   lastMessagePreview: string | null;
   lastMessageDate: Date | null;
   isOnline: boolean;
@@ -17,8 +15,5 @@ export interface UserMessage {
   date: Date;
   content: string | DropyAround;
   read: boolean;
-  sender: {
-    displayName: string;
-    id: number;
-  };
+  sender: SimplifiedUser;
 }

@@ -3,7 +3,7 @@ import fs from 'fs';
 import { sendPushNotification } from '../notification';
 import client from '@/prisma/client';
 import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@/utils/geolocation.utils';
-import { Profile, UpdatableProfileInfos } from '@/interfaces/user.interface';
+import { Profile, SimplifiedUser, UpdatableProfileInfos } from '@/interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 
@@ -238,5 +238,41 @@ export async function blockUser(blockedId: number, sender: User): Promise<void> 
       },
     },
     data: { closed: true },
+  });
+}
+
+export async function getBlockedUsers(user: User): Promise<SimplifiedUser[]> {
+  const userWithBlockedUsers = await client.user.findUnique({
+    where: { id: user.id },
+    include: { blockedUsers: true },
+  });
+
+  const blockedProfiles = await userWithBlockedUsers.blockedUsers.map(blockedUser => {
+    return {
+      id: blockedUser.id,
+      username: blockedUser.username,
+      displayName: blockedUser.displayName,
+    };
+  });
+
+  return blockedProfiles;
+}
+
+export async function unblockUser(unblockedId: number, sender: User): Promise<void> {
+  const userToUnblock = await client.user.findUnique({ where: { id: unblockedId } });
+
+  if (userToUnblock == null) {
+    throw new HttpException(404, `User with id ${unblockedId} not found`);
+  }
+
+  await client.user.update({
+    where: { id: sender.id },
+    data: {
+      blockedUsers: {
+        disconnect: {
+          id: unblockedId,
+        },
+      },
+    },
   });
 }

@@ -93,3 +93,25 @@ export async function getDropy(req: AuthenticatedRequest, res: Response, next: N
     next(error);
   }
 }
+
+export async function userEmittedDropies(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const drops = await dropyService.userEmittedDropies(req.user);
+    res.status(200).json(drops);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteDropy(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const dropyId = Number(req.params.id);
+    utils.throwIfNotNumber(dropyId);
+
+    await dropyService.deleteDropy(dropyId, req.user);
+
+    res.status(200).json(`Dropy with id ${dropyId} deleted`);
+  } catch (error) {
+    next(error);
+  }
+}

@@ -4,6 +4,7 @@ import * as userService from '@services/users.service';
 import * as utils from '@/utils/controller.utils';
 import { User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
+import { HttpException } from '@/exceptions/HttpException';
 
 export async function updateDeviceToken(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -113,6 +114,10 @@ export async function reportUser(req: AuthenticatedRequest, res: Response, next:
       utils.throwIfNotNumber(dropyId);
     }
 
+    if (parseInt(userId) === req.user.id) {
+      throw new HttpException(301, 'You cannot report yourself');
+    }
+
     await userService.reportUser(parseInt(userId), req.user, dropyId);
     res.status(200).json('User reported');
   } catch (error) {
@@ -125,8 +130,33 @@ export async function blockUser(req: AuthenticatedRequest, res: Response, next: 
     const { userId } = req.params;
     utils.throwIfNotNumber(userId);
 
+    if (parseInt(userId) === req.user.id) {
+      throw new HttpException(301, 'You cannot report block');
+    }
+
     await userService.blockUser(parseInt(userId), req.user);
     res.status(200).json('User blocked');
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getBlockedUsers(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const blockedUsers = await userService.getBlockedUsers(req.user);
+    res.status(200).json(blockedUsers);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function unblockUser(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { userId } = req.params;
+    utils.throwIfNotNumber(userId);
+
+    await userService.unblockUser(parseInt(userId), req.user);
+    res.status(200).json('User unblocked');
   } catch (error) {
     next(error);
   }

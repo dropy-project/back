@@ -18,6 +18,7 @@ export async function getAllMessages(conversationId: number): Promise<UserMessag
     read: message.read,
     id: message.id,
     sender: {
+      username: message.sender.username,
       displayName: message.sender.displayName,
       id: message.sender.id,
     },
@@ -28,6 +29,17 @@ export async function getMessages(conversationId: number, offset: number, limit:
   const chatMessages = await client.chatMessage.findMany({
     where: {
       conversationId: conversationId,
+      OR: [
+        {
+          AND: [{ NOT: { dropyId: null } }, { NOT: { content: null } }],
+        },
+        {
+          AND: [{ dropyId: null }, { NOT: { content: null } }],
+        },
+        {
+          AND: [{ NOT: { dropyId: null } }, { content: null }],
+        },
+      ],
     },
     orderBy: {
       date: 'desc',
@@ -43,6 +55,7 @@ export async function getMessages(conversationId: number, offset: number, limit:
     read: message.read,
     id: message.id,
     sender: {
+      username: message.sender.username,
       displayName: message.sender.displayName,
       id: message.sender.id,
     },
@@ -57,6 +70,11 @@ export async function closeConversation(conversationId: number): Promise<void> {
 }
 
 export async function addMessage(user: User, connectedUsers: User[], content: string, conversationId: number): Promise<UserMessage> {
+  const userWithBlockedUsers = await client.user.findUnique({
+    where: { id: user.id },
+    include: { blockedUsers: true },
+  });
+
   const message = await client.chatMessage.create({
     data: {
       conversationId: conversationId,
@@ -74,15 +92,20 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     return !connectedUsers.some(connectedUser => connectedUser.id === user.id);
   });
 
+  const filteredDisconnectedUsers = disconnectedUsers.filter(userToFilter => {
+    return userWithBlockedUsers.blockedUsers.some(blockedUser => blockedUser.id === userToFilter.id);
+  });
+
   sendPushNotification({
-    users: disconnectedUsers,
+    users: filteredDisconnectedUsers,
     title: user.displayName,
     body: decryptMessage(content),
     sound: 'message_sound.mp3',
     payload: {
       id: conversation.id,
       user: {
-        userId: user.id,
+        id: user.id,
+        username: user.username,
         displayName: user.displayName,
       },
     } as UserConversation,
@@ -96,6 +119,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     sender: {
       displayName: user.displayName,
       id: user.id,
+      username: user.username,
     },
   };
 }
@@ -128,7 +152,8 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
       lastMessagePreview: lastMessage?.content ?? null,
       lastMessageDate: lastMessage?.date ?? null,
       user: {
-        userId: otherUser.id,
+        id: otherUser.id,
+        username: otherUser.username,
         displayName: otherUser.displayName,
       },
     });

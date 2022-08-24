@@ -1,4 +1,5 @@
 import client from '@/prisma/client';
+import fs from 'fs';
 import { HttpException } from '@/exceptions/HttpException';
 import { DropyAround } from '@/interfaces/dropy.interface';
 import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
@@ -195,3 +196,30 @@ const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConvers
     return newConversation;
   }
 };
+
+export async function userEmittedDropies(user: User): Promise<Dropy[]> {
+  const userDropies = await client.dropy.findMany({
+    where: { emitterId: user.id },
+    orderBy: { creationDate: 'desc' },
+  });
+
+  return userDropies;
+}
+
+export async function deleteDropy(dropyId: number, user: User): Promise<void> {
+  const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
+
+  if (dropy == undefined) {
+    throw new HttpException(404, `Dropy with id ${dropyId} not found`);
+  }
+
+  if (user.id != dropy.emitterId) {
+    throw new HttpException(403, `You can't delete this dropy`);
+  }
+
+  if (dropy.mediaType === MediaType.PICTURE || dropy.mediaType === MediaType.VIDEO) {
+    fs.unlinkSync(dropy.filePath);
+  }
+
+  await client.dropy.delete({ where: { id: dropyId } });
+}
