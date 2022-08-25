@@ -231,11 +231,18 @@ export async function blockUser(blockedId: number, sender: User): Promise<void> 
 
   await client.chatConversation.updateMany({
     where: {
-      users: {
-        some: {
-          id: { in: [sender.id, blockedId] },
+      AND: [
+        {
+          users: {
+            some: { id: blockedId },
+          },
         },
-      },
+        {
+          users: {
+            some: { id: sender.id },
+          },
+        },
+      ],
     },
     data: { closed: true },
   });
