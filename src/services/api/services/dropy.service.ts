@@ -1,11 +1,11 @@
-import client from '@/prisma/client';
+import client from '@/client';
 import fs from 'fs';
-import { HttpException } from '@/exceptions/HttpException';
-import { DropyAround } from '@/interfaces/dropy.interface';
+import { HttpException } from '@exceptions/HttpException';
+import { DropyAround } from '@interfaces/dropy.interface';
 import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
-import { sendPushNotification } from '@/notification';
-import { getAvailableDropiesAroundLocation } from '@/utils/geolocation.utils';
+import { sendPushNotification } from '@services/api/notification';
+import { getAvailableDropiesAroundLocation } from '@utils/geolocation.utils';
 
 export async function createDropy(user: User, latitude, longitude): Promise<Dropy> {
   const dropy = client.dropy.create({ data: { emitterId: user.id, latitude, longitude } });

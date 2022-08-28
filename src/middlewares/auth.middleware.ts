@@ -1,8 +1,8 @@
-import client from '@/prisma/client';
+import client from '@/client';
 import { JsonWebTokenError, verify } from 'jsonwebtoken';
 import { NextFunction, Response } from 'express';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, AuthenticatedRequest, AuthenticatedSocket } from '@interfaces/auth.interface';
+import { DataStoredInToken, AuthenticatedRequest, AuthenticatedSocket } from '@/interfaces/auth.interface';
 
 import errorMiddleware from './error.middleware';
 import { Socket } from 'socket.io';

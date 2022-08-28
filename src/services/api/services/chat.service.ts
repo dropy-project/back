@@ -1,6 +1,6 @@
-import { UserMessage, UserConversation } from '@/interfaces/chat.interface';
-import client from '@/prisma/client';
-import { decryptMessage } from '@/utils/encrypt';
+import { UserMessage, UserConversation } from '@interfaces/chat.interface';
+import client from '@/client';
+import { decryptMessage } from '@utils/encrypt';
 import { ChatConversation, ChatMessage, User } from '@prisma/client';
 import { sendPushNotification } from '../notification';
 

@@ -1,9 +1,9 @@
 import { User } from '@prisma/client';
 import fs from 'fs';
 import { sendPushNotification } from '../notification';
-import client from '@/prisma/client';
-import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@/utils/geolocation.utils';
-import { Profile, SimplifiedUser, UpdatableProfileInfos } from '@/interfaces/user.interface';
+import client from '@/client';
+import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@utils/geolocation.utils';
+import { Profile, SimplifiedUser, UpdatableProfileInfos } from '@interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 

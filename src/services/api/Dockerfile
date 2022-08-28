@@ -1,0 +1,14 @@
+FROM node:16
+RUN npm install -g --unsafe-perm prisma
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY ../../../ /app
+
+RUN npm init -y
+RUN npx prisma generate
+
+EXPOSE 3000
+
+CMD [ "npm", "run", "api" ]

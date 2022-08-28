@@ -1,12 +1,12 @@
 import { dropyNamespace } from '../socket';
 
-import { AuthenticatedSocket } from '@/interfaces/auth.interface';
+import { AuthenticatedSocket } from '@interfaces/auth.interface';
 
-import { throwIfNotFunction, throwIfNotNumber } from '@/utils/controller.utils';
-import { Logger } from '@/utils/logs.utils';
-import { handleSocketRawError } from '@/utils/socket.utils';
+import { throwIfNotFunction, throwIfNotNumber } from '@utils/controller.utils';
+import { Logger } from '@utils/logs.utils';
+import { handleSocketRawError } from '@utils/socket.utils';
 
-import * as dropySocket from '../dropy.socket';
+import * as dropySocket from '@services/socket/emitters/dropy.socket.emitters';
 
 export function startSocket() {
   dropyNamespace.on('connection', async (socket: AuthenticatedSocket) => {

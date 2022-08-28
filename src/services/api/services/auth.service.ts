@@ -1,10 +1,10 @@
-import client from '@/prisma/client';
+import client from '@/client';
 import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, UserTokens } from '@interfaces/auth.interface';
 import { createUserToken, displayNameToUsername } from '@/utils/user.utils';
-import { Profile } from '@/interfaces/user.interface';
+import { Profile } from '@interfaces/user.interface';
 import * as userService from './users.service';
 
 export async function register(uid: string, displayName: string): Promise<User> {

@@ -1,12 +1,12 @@
 import { chatNamespace } from '../socket';
 
-import { AuthenticatedSocket } from '@/interfaces/auth.interface';
+import { AuthenticatedSocket } from '@interfaces/auth.interface';
 
-import { throwIfNotFunction, throwIfNotNumber, throwIfNotString } from '@/utils/controller.utils';
-import { Logger } from '@/utils/logs.utils';
-import { handleSocketRawError } from '@/utils/socket.utils';
+import { throwIfNotFunction, throwIfNotNumber, throwIfNotString } from '@utils/controller.utils';
+import { Logger } from '@utils/logs.utils';
+import { handleSocketRawError } from '@utils/socket.utils';
 
-import * as chatSocket from '../chat.socket';
+import * as chatSocket from '../emitters/chat.socket.emitters';
 
 export function startSocket() {
   chatNamespace.on('connection', async (socket: AuthenticatedSocket) => {

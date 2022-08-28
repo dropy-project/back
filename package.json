@@ -6,6 +6,9 @@
   "license": "ISC",
   "scripts": {
     "start": "npm run build && node dist/server.js",
+    "api": "npm run build && node dist/src/services/api/server.js",
+    "socket": "npm run build && node dist/src/services/socket/socket.js",
+    "content": "npm run build && node dist/src/services/content/server.js",
     "dev": "nodemon",
     "build": "swc src -d dist --source-maps --copy-files",
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",

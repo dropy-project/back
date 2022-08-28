@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { User } from '@prisma/client';
-import * as authService from '@services/auth.service';
-import * as utils from '@/utils/controller.utils';
-import versionsJSON from '../../versions.json';
+import * as authService from '@services/api/services/auth.service';
+import * as utils from '@utils/controller.utils';
+import versionsJSON from '../../../../versions.json';
 import { HttpException } from '@/exceptions/HttpException';
 
 export async function versionCheck(req: Request, res: Response, next: NextFunction) {

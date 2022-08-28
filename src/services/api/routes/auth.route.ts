@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import errorMiddleware from '@/middlewares/error.middleware';
-import * as authController from '@controllers/auth.controller';
+import * as authController from '@services/api/controllers/auth.controller';
 
 const path = '/';
 
