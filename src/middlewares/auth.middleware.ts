@@ -14,6 +14,9 @@ const authMiddleware = async (req: AuthenticatedRequest | AuthenticatedSocket, r
     if (isSocket) {
       authorization = req.handshake.headers.authorization;
     } else {
+      if (req.header('Authorization') == undefined) {
+        throw new HttpException(401, 'Missing authorization');
+      }
       authorization = req.header('Authorization').replace('Bearer ', '');
     }
 

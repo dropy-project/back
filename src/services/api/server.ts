@@ -3,7 +3,6 @@ import * as usersRoutes from '@services/api/routes/users.route';
 import * as dropyRoutes from './routes/dropy.route';
 import dotenv from 'dotenv';
 
-import fileUpload from 'express-fileupload';
 import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -37,11 +36,6 @@ function initializeMiddleWares() {
   app.use(cookieParser());
   app.use(morgan(':date[web] - :method :url :status :res[content-length] - :response-time ms'));
   app.use(handleTopLevelErrors);
-  app.use(
-    fileUpload({
-      createParentPath: true,
-    }),
-  );
 }
 
 function initializeRoutes() {
