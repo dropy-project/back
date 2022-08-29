@@ -8,7 +8,7 @@ import { SocketCallback } from '@interfaces/socket.interface';
 import { getRoomConnectedUsers, getUsersSockets } from '@utils/socket.utils';
 
 import * as userController from '@services/api/controllers/users.controller';
-import * as chatService from '@services/api/services/chat.service';
+import * as chatService from '@services/socket/services/chat.socket.service';
 
 export async function joinConversation(clientSocket: AuthenticatedSocket, conversationId: number, callback: SocketCallback<UserMessage[]>) {
   await clientSocket.join(`conversation-${conversationId}`);
