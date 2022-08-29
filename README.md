@@ -54,7 +54,10 @@ API_PORT=3000
 SOCKET_PORT=4000
 CONTENT_PORT=6000
 STUDIO_PORT=5555
+
 POSTGRES_EXPOSE_PORTS=127.0.0.1:5432:5432
+# En developpement = 127.0.0.1:5432:5432 (Exposition sur la machine de développement) 
+# En production = 5432 (Port restreint au réseau virtuel du docker compose)
 
 #################
 
