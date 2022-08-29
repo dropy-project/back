@@ -46,41 +46,39 @@
 
 ### Variables d'environnement : 
 ```
-
-NODE_ENV=<production|development>
-
-#################-> API
-
-API_PORT=3000
-SOCKET_API=4000
-
-ACCESS_SECRET_KEY=<secret>
-REFRESH_SECRET_KEY=<secret>
-
-CHAT_ENCRYPTION_SECRET_KEY=<encryption key>
-
-#################-> POSTGRES
-
-EXPOSE_PORTS=127.0.0.1:5432:5432
-# En developpement = 127.0.0.1:5432:5432 (Exposition sur la machine de développement) 
-# En production = 5432 (Port restreint au réseau virtuel du docker compose)
-
-POSTGRES_USER=<user>
-POSTGRES_PASSWORD=<password>
-POSTGRES_DB=<database name>
-
-DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}'
-
-#################-> NOTIFICATIONS
-
-APN_KEYID=<apple push notification>
-APN_TEAMID=<apple push notification>
-FCM_KEY=<firebase cloud messaing token>
+NODE_ENV=development
 
 #################
 
-PRISMA_PORT=5555
+API_PORT=3000
+SOCKET_PORT=4000
+CONTENT_PORT=6000
+STUDIO_PORT=5555
+POSTGRES_EXPOSE_PORTS=127.0.0.1:5432:5432
 
+#################
+
+ACCESS_SECRET_KEY=""
+REFRESH_SECRET_KEY=""
+
+CHAT_ENCRYPTION_SECRET_KEY=""
+
+#################-> POSTGRES
+
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres
+
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
+
+#################-> NOTIFICATIONS
+
+APN_KEYID=
+APN_TEAMID=
+FCM_KEY=
+
+#################
 ```
 
 
