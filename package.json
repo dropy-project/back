@@ -5,8 +5,14 @@
   "author": "Dropy team",
   "license": "ISC",
   "scripts": {
-    "start": "npm run build && node dist/server.js",
+    "start": "echo \"Error: OUTDATED COMMAND\" && exit 1",
+
+    "api": "npm run build && node dist/services/api/server.js",
+    "socket": "npm run build && node dist/services/socket/socket.js",
+    "content": "npm run build && node dist/services/content/server.js",
+
     "dev": "nodemon",
+
     "build": "swc src -d dist --source-maps --copy-files",
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",
     "lint:fix": "npm run lint -- --fix",
@@ -15,7 +21,7 @@
     "prisma:generate": "prisma generate"
   },
   "prisma": {
-    "schema": "src/prisma/schema.prisma"
+    "schema": "src/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^4.0.0",

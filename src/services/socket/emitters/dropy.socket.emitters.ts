@@ -1,10 +1,9 @@
-import { dropyNamespace } from './socket';
-
 import { DropyAround } from '@/interfaces/dropy.interface';
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 import { SocketCallback } from '@/interfaces/socket.interface';
 
-import * as dropyService from '@services/dropy.service';
+import * as dropyService from '@services/socket/services/dropy.socket.service';
+import { dropyNamespace } from '../socket';
 
 export async function emitAllDropiesAround(
   clientSocket: AuthenticatedSocket,

@@ -1,29 +1,16 @@
-import { UserMessage, UserConversation } from '@/interfaces/chat.interface';
-import client from '@/prisma/client';
+import { ChatConversation, User, ChatMessage } from '@prisma/client';
+import client from '@/client';
+import { UserMessage, UserConversation } from '@interfaces/chat.interface';
+import { sendPushNotification } from '@/notification';
 import { decryptMessage } from '@/utils/encrypt';
-import { ChatConversation, ChatMessage, User } from '@prisma/client';
-import { sendPushNotification } from '../notification';
 
-export async function getAllMessages(conversationId: number): Promise<UserMessage[]> {
-  const chatMessages = await client.chatMessage.findMany({
-    where: {
-      conversationId: conversationId,
-    },
-    include: { sender: true, dropy: true },
+export async function getConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
+  return await client.chatConversation.findFirst({
+    where: { id: conversationId },
+    include: { users: true },
   });
-
-  return chatMessages.map(message => ({
-    content: message.content ?? message.dropy,
-    date: message.date,
-    read: message.read,
-    id: message.id,
-    sender: {
-      username: message.sender.username,
-      displayName: message.sender.displayName,
-      id: message.sender.id,
-    },
-  }));
 }
+
 export async function getMessages(conversationId: number, offset: number, limit: number): Promise<UserMessage[]> {
   const skip = offset * limit;
   const chatMessages = await client.chatMessage.findMany({
@@ -60,13 +47,6 @@ export async function getMessages(conversationId: number, offset: number, limit:
       id: message.sender.id,
     },
   }));
-}
-
-export async function closeConversation(conversationId: number): Promise<void> {
-  await client.chatConversation.update({
-    where: { id: conversationId },
-    data: { closed: true },
-  });
 }
 
 export async function addMessage(user: User, connectedUsers: User[], content: string, conversationId: number): Promise<UserMessage> {
@@ -124,11 +104,15 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
   };
 }
 
-export async function getConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
-  return await client.chatConversation.findFirst({
-    where: { id: conversationId },
+export async function getAllChatConversations(user: User): Promise<ChatConversation[]> {
+  const conversations = await client.chatConversation.findMany({
+    where: {
+      users: { some: { id: user.id } },
+      closed: false,
+    },
     include: { users: true },
   });
+  return conversations;
 }
 
 export async function getAllUserConversations(user: User): Promise<UserConversation[]> {
@@ -171,13 +155,30 @@ export function getLastMessage(conversationId: number): Promise<ChatMessage> {
   return lastMessage;
 }
 
-export async function getAllChatConversations(user: User): Promise<ChatConversation[]> {
-  const conversations = await client.chatConversation.findMany({
-    where: {
-      users: { some: { id: user.id } },
-      closed: false,
-    },
-    include: { users: true },
+export async function closeConversation(conversationId: number): Promise<void> {
+  await client.chatConversation.update({
+    where: { id: conversationId },
+    data: { closed: true },
   });
-  return conversations;
+}
+
+export async function getAllMessages(conversationId: number): Promise<UserMessage[]> {
+  const chatMessages = await client.chatMessage.findMany({
+    where: {
+      conversationId: conversationId,
+    },
+    include: { sender: true, dropy: true },
+  });
+
+  return chatMessages.map(message => ({
+    content: message.content ?? message.dropy,
+    date: message.date,
+    read: message.read,
+    id: message.id,
+    sender: {
+      username: message.sender.username,
+      displayName: message.sender.displayName,
+      id: message.sender.id,
+    },
+  }));
 }

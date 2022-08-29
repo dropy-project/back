@@ -2,9 +2,9 @@ import { NextFunction, Response } from 'express';
 import { MediaType } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 import { HttpException } from '@/exceptions/HttpException';
-import { AuthenticatedRequest } from '@/interfaces/auth.interface';
-import * as dropyService from '@/services/dropy.service';
-import * as utils from '@/utils/controller.utils';
+import { AuthenticatedRequest } from '@interfaces/auth.interface';
+import * as dropyService from '@services/api/services/dropy.service';
+import * as utils from '@utils/controller.utils';
 
 export async function createDropyMedia(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {

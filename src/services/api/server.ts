@@ -1,5 +1,5 @@
-import * as authRoutes from '@routes/auth.route';
-import * as usersRoutes from '@routes/users.route';
+import * as authRoutes from '@services/api/routes/auth.route';
+import * as usersRoutes from '@services/api/routes/users.route';
 import * as dropyRoutes from './routes/dropy.route';
 import dotenv from 'dotenv';
 
@@ -12,10 +12,7 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import cors from 'cors';
 
-import * as dropySocket from './sockets/listeners/dropy.socket.listeners';
-import * as chatSocket from './sockets/listeners/chat.socket.listeners';
-
-import { logStartedService } from './utils/logs.utils';
+import { logStartedService } from '../../utils/logs.utils';
 
 dotenv.config();
 
@@ -26,11 +23,8 @@ const apiPort = 3000;
 initializeMiddleWares();
 initializeRoutes();
 
-dropySocket.startSocket();
-chatSocket.startSocket();
-
 app.listen(apiPort, () => {
-  logStartedService('API', apiPort);
+  logStartedService('Dropy API', apiPort);
 });
 
 function initializeMiddleWares() {

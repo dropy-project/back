@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import client from '@/prisma/client';
+import client from '@/client';
 
 import { DataStoredInToken, UserTokens } from '@/interfaces/auth.interface';
 import { User } from '@prisma/client';

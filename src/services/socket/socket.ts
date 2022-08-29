@@ -6,6 +6,9 @@ import { logStartedService } from '@/utils/logs.utils';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 
+import * as dropySocket from './listeners/dropy.socket.listeners';
+import * as chatSocket from './listeners/chat.socket.listeners';
+
 const socketPort = 4000;
 
 const io = new Server(socketPort);
@@ -19,6 +22,9 @@ export const dropyNamespace = io.of('/dropy');
 dropyNamespace.use((socket, next: NextFunction) => {
   authMiddleware(socket as AuthenticatedSocket, null, next);
 });
+
+dropySocket.startSocket();
+chatSocket.startSocket();
 
 logStartedService('Dropy Socket', socketPort);
 

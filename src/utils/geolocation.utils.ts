@@ -1,5 +1,5 @@
 import { Dropy, MediaType, User } from '@prisma/client';
-import client from '@/prisma/client';
+import client from '@/client';
 
 const DISTANCE_FILTER_RADIUS = 0.003; // Environ 300m
 

@@ -4,11 +4,11 @@ RUN npm install -g --unsafe-perm prisma
 RUN mkdir /app
 WORKDIR /app
 
-COPY ./* ./prisma/
+COPY ../../../ /app
 
 RUN npm init -y
-RUN npm install @prisma/photon
+RUN npx prisma generate
 
-CMD [ "npx", "prisma", "studio" ]
+EXPOSE 6000
 
-EXPOSE 5555
+CMD [ "npm", "run", "content" ]

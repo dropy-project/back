@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
-import { AuthenticatedRequest } from '@/interfaces/auth.interface';
-import * as userService from '@services/users.service';
-import * as utils from '@/utils/controller.utils';
+import { AuthenticatedRequest } from '@interfaces/auth.interface';
+import * as userService from '@services/api/services/users.service';
+import * as utils from '@utils/controller.utils';
 import { User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 import { HttpException } from '@/exceptions/HttpException';

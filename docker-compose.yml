@@ -1,52 +1,78 @@
 version: '3.7'
 
 services:
-  api:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    ports:
-      - '127.0.0.1:${API_PORT}:3000'
-      - '127.0.0.1:${SOCKET_PORT}:4000'
-    depends_on:
-      - postgres
-    environment:
-      TZ: Europe/Paris
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
-      API_PORT: "${API_PORT}"
-      SOCKET_PORT: "${SOCKET_PORT}"
-    networks:
-      - back
-    volumes:
-      - ./public:/app/public
-
   postgres:
     image: postgres:14.1-alpine
     networks:
       - back
     ports:
-      - "${EXPOSE_PORTS}"
+      - '${POSTGRES_EXPOSE_PORTS}'
     environment:
       TZ: Europe/Paris
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+      POSTGRES_DB: '${POSTGRES_DB}'
     volumes:
       - ./data:/var/lib/postgresql/data
 
-  prisma:
+  api:
+    build:
+      context: .
+      dockerfile: src/services/api/Dockerfile
     ports:
-      - "127.0.0.1:${PRISMA_PORT}:5555"
+      - '127.0.0.1:${API_PORT}:3000'
     depends_on:
       - postgres
     environment:
       TZ: Europe/Paris
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}'
+      API_PORT: '${API_PORT}'
     networks:
       - back
+    volumes:
+      - ./public:/app/public
+
+  studio:
     build:
-      context: src/prisma
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: src/services/studio/Dockerfile
+    ports:
+      - '127.0.0.1:${STUDIO_PORT}:5555'
+    depends_on:
+      - postgres
+    environment:
+      TZ: Europe/Paris
+      DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}'
+      STUDIO_PORT: '${STUDIO_PORT}'
+    networks:
+      - back
+  
+  content:
+    build:
+      context: .
+      dockerfile: src/services/content/Dockerfile
+    ports:
+      - '127.0.0.1:${CONTENT_PORT}:6000'
+    environment:
+      TZ: Europe/Paris
+      CONTENT_PORT: '${CONTENT_PORT}'
+    networks:
+     - back
+
+  socket:
+    build:
+      context: .
+      dockerfile: src/services/socket/Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      TZ: Europe/Paris
+      DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}'
+      SOCKET_PORT: '${SOCKET_PORT}'
+    ports:
+      - '127.0.0.1:${SOCKET_PORT}:4000'
+    networks:
+     - back
 
 networks:
- back:
+  back:

@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import authMiddleware from '@/middlewares/auth.middleware';
-import errorMiddleware from '@/middlewares/error.middleware';
-import * as dropyController from '@controllers/dropy.controller';
+import authMiddleware from '@middlewares/auth.middleware';
+import errorMiddleware from '@middlewares/error.middleware';
+import * as dropyController from '@services/api/controllers/dropy.controller';
 
 const path = '/dropy';
 
