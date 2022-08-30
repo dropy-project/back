@@ -4,7 +4,7 @@ RUN mkdir /app
 
 WORKDIR /app
 
-COPY ../../../ /app
+COPY . /app
 
 RUN npm init -y
 RUN npm install @prisma/photon
