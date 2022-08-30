@@ -18,7 +18,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: src/services/api/Dockerfile
+      dockerfile: Dockerfile.api
     ports:
       - '127.0.0.1:${API_PORT}:3000'
     depends_on:
@@ -35,7 +35,7 @@ services:
   studio:
     build:
       context: .
-      dockerfile: src/services/studio/Dockerfile
+      dockerfile: Dockerfile.studio
     ports:
       - '127.0.0.1:${STUDIO_PORT}:5555'
     depends_on:
@@ -50,7 +50,7 @@ services:
   content:
     build:
       context: .
-      dockerfile: src/services/content/Dockerfile
+      dockerfile: Dockerfile.content
     ports:
       - '127.0.0.1:${CONTENT_PORT}:6000'
     environment:
@@ -62,7 +62,7 @@ services:
   socket:
     build:
       context: .
-      dockerfile: src/services/socket/Dockerfile
+      dockerfile: Dockerfile.socket
     depends_on:
       - postgres
     environment:
