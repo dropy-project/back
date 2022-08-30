@@ -8,6 +8,7 @@ import crypto from 'crypto-js';
 
 const PUBLIC_PATH_PREFIX = process.cwd() + '/content/public/';
 const PRIVATE_PATH_PREFIX = process.cwd() + '/content/private/';
+const URL_PREFIX = process.env.CONTENT_URL_PREFIX ?? 'http://localhost:6000';
 
 export async function getContent(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
@@ -39,7 +40,7 @@ export async function postContent(req: AuthenticatedRequest, res: Response, next
     file.mv(filePath);
 
     res.status(200).send({
-      fileUrl: `localhost:3000/${fileName}`,
+      fileUrl: `${URL_PREFIX}/${fileName}`,
     });
   } catch (error) {
     next(error);
@@ -116,7 +117,7 @@ export async function postPrivateContent(req: AuthenticatedRequest, res: Respons
     file.mv(filePath);
 
     res.status(200).send({
-      fileUrl: `localhost:3000/${fileName}`,
+      fileUrl: `${URL_PREFIX}/${fileName}`,
       accessToken,
     });
   } catch (error) {

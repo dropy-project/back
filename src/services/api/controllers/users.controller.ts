@@ -72,9 +72,8 @@ export async function updateProfilePicture(req: AuthenticatedRequest, res: Respo
 
     const file = req.files['profile'] as UploadedFile;
     utils.throwIfNull(file);
-
-    await userService.updateProfilePicture(req.user, file);
-    res.status(200).json('Profile picture has been updated');
+    const newAvatarUrl = await userService.updateProfilePicture(req.user, file, req.header('Authorization'));
+    res.status(200).json(newAvatarUrl);
   } catch (error) {
     next(error);
   }
@@ -82,7 +81,7 @@ export async function updateProfilePicture(req: AuthenticatedRequest, res: Respo
 
 export async function deleteProfilePicture(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    await userService.deleteProfilePicture(req.user);
+    await userService.deleteProfilePicture(req.user, req.header('Authorization'));
     res.status(200).json('Profile picture has been deleted');
   } catch (error) {
     next(error);

@@ -1,11 +1,11 @@
 import { User } from '@prisma/client';
-import fs from 'fs';
 import { sendPushNotification } from '../../../notification';
 import client from '@/client';
 import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@utils/geolocation.utils';
 import { Profile, SimplifiedUser, UpdatableProfileInfos } from '@interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
+import { deleteContent, uploadContent } from '@/utils/content.utils';
 
 const DISTANCE_FILTER_RADIUS = 50;
 const TIME_FILTER_MINUTES = 60 * 24;
@@ -108,24 +108,22 @@ export async function updateUserProfile(user: User, profileInfos: UpdatableProfi
   return await userToProfile(updatedUser);
 }
 
-export async function updateProfilePicture(user: User, file: UploadedFile): Promise<void> {
-  const extensionFile = file.mimetype.split('/').pop();
-
+export async function updateProfilePicture(user: User, file: UploadedFile, Authorization: string): Promise<string> {
   if (user.avatarUrl != null) {
-    fs.unlinkSync(user.avatarUrl);
+    deleteContent(user.avatarUrl, Authorization);
   }
 
-  const fileName = `${new Date().getTime()}_${user.id}.${extensionFile}`;
-  const filePath = `${process.cwd()}/public/profiles/${fileName}`;
-  file.mv(filePath);
+  const { fileUrl } = await uploadContent(file, Authorization);
 
   await client.user.update({
     where: { id: user.id },
-    data: { avatarUrl: filePath },
+    data: { avatarUrl: fileUrl },
   });
+
+  return fileUrl;
 }
 
-export async function deleteProfilePicture(user: User): Promise<void> {
+export async function deleteProfilePicture(user: User, Authorization: string): Promise<void> {
   await client.user.update({
     where: { id: user.id },
     data: {
@@ -134,7 +132,7 @@ export async function deleteProfilePicture(user: User): Promise<void> {
   });
 
   if (user.avatarUrl != null) {
-    fs.unlinkSync(user.avatarUrl);
+    deleteContent(user.avatarUrl, Authorization);
   }
 }
 

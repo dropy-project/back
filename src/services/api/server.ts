@@ -12,6 +12,7 @@ import hpp from 'hpp';
 import cors from 'cors';
 
 import { logStartedService } from '../../utils/logs.utils';
+import fileUpload from 'express-fileupload';
 
 dotenv.config();
 
@@ -36,6 +37,11 @@ function initializeMiddleWares() {
   app.use(cookieParser());
   app.use(morgan(':date[web] - :method :url :status :res[content-length] - :response-time ms'));
   app.use(handleTopLevelErrors);
+  app.use(
+    fileUpload({
+      createParentPath: true,
+    }),
+  );
 }
 
 function initializeRoutes() {

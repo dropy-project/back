@@ -30,7 +30,7 @@ function initializeMiddleWares() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
-  app.use(morgan(':date[web] - :method :url :status :res[content-length] - :response-time ms'));
+  app.use(morgan('[Content] :date[web] - :method :url :status :res[content-length] - :response-time ms'));
   app.use(handleTopLevelErrors);
   app.use(
     fileUpload({
