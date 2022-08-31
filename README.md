@@ -61,6 +61,10 @@ POSTGRES_EXPOSE_PORTS=127.0.0.1:5432:5432
 
 #################
 
+CONTENT_URL_PREFIX=http://localhost:${CONTENT_PORT}
+
+#################
+
 ACCESS_SECRET_KEY=""
 REFRESH_SECRET_KEY=""
 

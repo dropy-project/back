@@ -45,6 +45,7 @@ export async function getMessages(conversationId: number, offset: number, limit:
       username: message.sender.username,
       displayName: message.sender.displayName,
       id: message.sender.id,
+      avatarUrl: message.sender.avatarUrl,
     },
   }));
 }
@@ -100,6 +101,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
       displayName: user.displayName,
       id: user.id,
       username: user.username,
+      avatarUrl: user.avatarUrl,
     },
   };
 }
@@ -139,6 +141,7 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
         id: otherUser.id,
         username: otherUser.username,
         displayName: otherUser.displayName,
+        avatarUrl: otherUser.avatarUrl,
       },
     });
   }
@@ -171,7 +174,15 @@ export async function getAllMessages(conversationId: number): Promise<UserMessag
   });
 
   return chatMessages.map(message => ({
-    content: message.content ?? message.dropy,
+    content: message.content ?? {
+      id: message.dropy.id,
+      mediaUrl: message.dropy.mediaUrl,
+      mediaType: message.dropy.mediaType,
+      creationDate: message.dropy.creationDate,
+      latitude: message.dropy.latitude,
+      longitude: message.dropy.longitude,
+      retrieveDate: message.dropy.retrieveDate,
+    },
     date: message.date,
     read: message.read,
     id: message.id,
@@ -179,6 +190,7 @@ export async function getAllMessages(conversationId: number): Promise<UserMessag
       username: message.sender.username,
       displayName: message.sender.displayName,
       id: message.sender.id,
+      avatarUrl: message.sender.avatarUrl,
     },
   }));
 }

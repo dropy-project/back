@@ -3,7 +3,6 @@ import * as usersRoutes from '@services/api/routes/users.route';
 import * as dropyRoutes from './routes/dropy.route';
 import dotenv from 'dotenv';
 
-import fileUpload from 'express-fileupload';
 import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -13,6 +12,7 @@ import hpp from 'hpp';
 import cors from 'cors';
 
 import { logStartedService } from '../../utils/logs.utils';
+import fileUpload from 'express-fileupload';
 
 dotenv.config();
 

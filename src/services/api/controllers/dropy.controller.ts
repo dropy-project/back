@@ -37,7 +37,7 @@ export async function createDropyMedia(req: AuthenticatedRequest, res: Response,
       throw new HttpException(400, 'File data corrupted or more than one file sent at once');
     }
 
-    await dropyService.createDropyMedia(req.user, dropyId, mediaPayload, mediaType);
+    await dropyService.createDropyMedia(req.user, dropyId, mediaPayload, mediaType, req.header('Authorization'));
 
     res.status(200).json(`Media added for dropy with id ${dropyId}`);
   } catch (error) {
@@ -60,11 +60,7 @@ export async function getDropyMedia(req: AuthenticatedRequest, res: Response, ne
     const mediaType = dropy.mediaType;
 
     if (mediaType == MediaType.PICTURE || mediaType == MediaType.VIDEO) {
-      if (dropy.filePath == undefined) {
-        throw new HttpException(404, `Media filePath from dropy with id ${dropyId} not found`);
-      }
-
-      res.status(200).sendFile(dropy.filePath);
+      throw new HttpException(404, `The media on this dropy can be found on ${dropy.mediaUrl?.split('?')[0]}`);
     } else {
       if (dropy.mediaData == undefined) {
         throw new HttpException(404, `Media data from dropy with id ${dropyId} not found`);
@@ -108,7 +104,7 @@ export async function deleteDropy(req: AuthenticatedRequest, res: Response, next
     const dropyId = Number(req.params.id);
     utils.throwIfNotNumber(dropyId);
 
-    await dropyService.deleteDropy(dropyId, req.user);
+    await dropyService.deleteDropy(dropyId, req.user, req.header('Authorization'));
 
     res.status(200).json(`Dropy with id ${dropyId} deleted`);
   } catch (error) {
