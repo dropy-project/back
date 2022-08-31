@@ -56,14 +56,6 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     include: { blockedUsers: true },
   });
 
-  const message = await client.chatMessage.create({
-    data: {
-      conversationId: conversationId,
-      senderId: user.id,
-      content: content,
-    },
-  });
-
   const conversation = await client.chatConversation.findFirst({
     where: { id: conversationId },
     include: { users: true, messages: true },
@@ -75,6 +67,15 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
 
   const filteredDisconnectedUsers = disconnectedUsers.filter(userToFilter => {
     return userWithBlockedUsers.blockedUsers.some(blockedUser => blockedUser.id === userToFilter.id);
+  });
+
+  const message = await client.chatMessage.create({
+    data: {
+      conversationId: conversationId,
+      senderId: user.id,
+      content: content,
+      read: connectedUsers.some(connectedUser => connectedUser.id !== user.id),
+    },
   });
 
   sendPushNotification({

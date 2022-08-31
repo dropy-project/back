@@ -24,6 +24,10 @@ export async function joinConversation(clientSocket: AuthenticatedSocket, conver
     data: otherUser.isOnline,
   });
 
+  clientSocket.broadcast.to(`conversation-${conversationId}`).emit('join_conversation', {
+    status: 200,
+  });
+
   callback({
     status: 200,
   });
@@ -54,7 +58,10 @@ export async function createMessage(clientSocket: AuthenticatedSocket, content: 
 
   callback({
     status: 200,
-    data: message.id,
+    data: {
+      messageId: message.id,
+      messageRead: message.read,
+    },
   });
 }
 
