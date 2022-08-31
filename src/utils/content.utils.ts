@@ -6,7 +6,6 @@ const CONTENT_SERVER_URL = 'http://localhost:6000';
 
 export async function uploadContent(file: UploadedFile, Authorization: string): Promise<{ fileUrl: string }> {
   const formData = new FormData();
-  console.log(file.name);
 
   formData.append('image', file.data, file.name);
 
