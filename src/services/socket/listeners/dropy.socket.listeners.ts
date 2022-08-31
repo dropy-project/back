@@ -2,7 +2,7 @@ import { dropyNamespace } from '../socket';
 
 import { AuthenticatedSocket } from '@interfaces/auth.interface';
 
-import { throwIfNotFunction, throwIfNotNumber } from '@utils/controller.utils';
+import { throwIfNotFunction, throwIfNotNumber, throwIfNotString, throwIfNull } from '@utils/controller.utils';
 import { Logger } from '@utils/logs.utils';
 import { handleSocketRawError } from '@utils/socket.utils';
 
@@ -29,11 +29,13 @@ export function startSocket() {
 
     socket.on('dropy_created', async (data: any, callback) => {
       try {
-        const { latitude, longitude } = data;
+        const { latitude, longitude, mediaType, content } = data;
+        throwIfNull(content);
+        throwIfNotString(mediaType);
         throwIfNotNumber(latitude, longitude);
         throwIfNotFunction(callback);
 
-        await dropySocket.createDropy(socket, latitude, longitude, callback);
+        await dropySocket.createDropy(socket, latitude, longitude, mediaType, content, callback);
         logger.log('Dropy created');
       } catch (error) {
         handleSocketRawError(callback, error);

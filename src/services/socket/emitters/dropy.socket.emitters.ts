@@ -18,8 +18,22 @@ export async function emitAllDropiesAround(
   });
 }
 
-export async function createDropy(clientSocket: AuthenticatedSocket, latitude: number, longitude: number, callback: SocketCallback<DropyAround>) {
-  const dropy = await dropyService.createDropy(clientSocket.user, latitude, longitude);
+export async function createDropy(
+  clientSocket: AuthenticatedSocket,
+  latitude: number,
+  longitude: number,
+  mediaType: string,
+  content: string | Buffer,
+  callback: SocketCallback<DropyAround>,
+) {
+  const dropy = await dropyService.createDropy(
+    clientSocket.user,
+    latitude,
+    longitude,
+    mediaType,
+    content,
+    clientSocket.handshake.headers['authorization'] as string,
+  );
 
   dropyNamespace.emit('dropy_created', {
     status: 200,
@@ -28,7 +42,6 @@ export async function createDropy(clientSocket: AuthenticatedSocket, latitude: n
 
   callback({
     status: 200,
-    data: dropy,
   });
 }
 

@@ -11,7 +11,9 @@ import * as chatSocket from './listeners/chat.socket.listeners';
 
 const socketPort = 4000;
 
-const io = new Server(socketPort);
+const io = new Server(socketPort, {
+  maxHttpBufferSize: 1e8,
+});
 
 export const chatNamespace = io.of('/chat');
 chatNamespace.use((socket, next: NextFunction) => {

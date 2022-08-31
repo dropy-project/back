@@ -2,8 +2,9 @@ import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
 import { DropyAround } from '@/interfaces/dropy.interface';
 import { sendPushNotification } from '@/notification';
+import { uploadPrivateContent } from '@/utils/content.utils';
 import { getAvailableDropiesAroundLocation } from '@/utils/geolocation.utils';
-import { ChatConversation, Dropy, User } from '@prisma/client';
+import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
 
 export async function findDropiesAround(user: User, latitude: number, longitude: number): Promise<DropyAround[]> {
   const dropies = await getAvailableDropiesAroundLocation(latitude, longitude);
@@ -65,8 +66,54 @@ export async function retrieveDropy(user: User, dropyId: number) {
   });
 }
 
-export async function createDropy(user: User, latitude, longitude): Promise<Dropy> {
-  const dropy = client.dropy.create({ data: { emitterId: user.id, latitude, longitude } });
+export async function createDropy(
+  user: User,
+  latitude: number,
+  longitude: number,
+  rawMediaType: string,
+  content: string | Buffer,
+  Authorization: string,
+): Promise<Dropy> {
+  const dropy = await client.dropy.create({ data: { emitterId: user.id, latitude, longitude } });
+
+  if (dropy.emitterId != user.id) {
+    throw new HttpException(403, `User is not allowed to add a media for this dropy`);
+  }
+
+  const mediaType: MediaType = MediaType[rawMediaType.toUpperCase()];
+
+  if (dropy.mediaType !== MediaType.NONE) {
+    throw new HttpException(409, `Dropy with id ${dropy.id} has already a linked media`);
+  }
+
+  const isFile = (content as Buffer).buffer != undefined;
+
+  if (isFile) {
+    if (mediaType == MediaType.TEXT || mediaType == MediaType.MUSIC) {
+      throw new HttpException(406, `MediaType ${mediaType} cannot have a text or music ressource as media`);
+    }
+  } else {
+    if (mediaType == MediaType.PICTURE || mediaType == MediaType.VIDEO) {
+      throw new HttpException(406, `MediaType ${mediaType} cannot have a file as media`);
+    }
+  }
+
+  if (isFile) {
+    const file = content as Buffer;
+
+    const { fileUrl, accessToken } = await uploadPrivateContent(file, Authorization);
+
+    await client.dropy.update({
+      where: { id: dropy.id },
+      data: { mediaUrl: `${fileUrl}?accessToken=${accessToken}`, mediaType: mediaType },
+    });
+  } else {
+    await client.dropy.update({
+      where: { id: dropy.id },
+      data: { mediaData: content as string, mediaType: mediaType },
+    });
+  }
+
   return dropy;
 }
 
