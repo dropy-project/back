@@ -131,7 +131,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-content
+.content
 
 data
 certNotification.p8

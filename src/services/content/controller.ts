@@ -6,8 +6,8 @@ import { UploadedFile } from 'express-fileupload';
 import { throwIfNotString } from '@/utils/controller.utils';
 import crypto from 'crypto-js';
 
-const PUBLIC_PATH_PREFIX = process.cwd() + '/content/public/';
-const PRIVATE_PATH_PREFIX = process.cwd() + '/content/private/';
+const PUBLIC_PATH_PREFIX = process.cwd() + '/.content/public/';
+const PRIVATE_PATH_PREFIX = process.cwd() + '/.content/private/';
 const URL_PREFIX = process.env.CONTENT_URL_PREFIX ?? 'http://localhost:6000';
 
 export async function getContent(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -76,6 +76,7 @@ export async function getPrivateContent(req: AuthenticatedRequest, res: Response
   try {
     const { fileName } = req.params;
     const { accessToken } = req.query;
+    console.log(fileName, accessToken);
     throwIfNotString(fileName, accessToken as any);
 
     const filePath = PRIVATE_PATH_PREFIX + fileName;
@@ -86,10 +87,6 @@ export async function getPrivateContent(req: AuthenticatedRequest, res: Response
 
     const fileId = fileName.split('_')[0];
     const expectedToken = crypto.HmacSHA1(fileId, process.env.ACCESS_SECRET_KEY).toString();
-
-    console.log(fileId);
-    console.log(accessToken);
-    console.log(expectedToken);
 
     if (accessToken !== expectedToken) {
       throw new HttpException(403, 'You are not allowed to get this file');
@@ -117,7 +114,7 @@ export async function postPrivateContent(req: AuthenticatedRequest, res: Respons
     file.mv(filePath);
 
     res.status(200).send({
-      fileUrl: `${URL_PREFIX}/${fileName}`,
+      fileUrl: `${URL_PREFIX}/private/${fileName}`,
       accessToken,
     });
   } catch (error) {

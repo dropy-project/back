@@ -1,15 +1,22 @@
 import client from '@/client';
-import fs from 'fs';
 import { HttpException } from '@exceptions/HttpException';
 import { Dropy, MediaType, User } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
+import { deleteContent, uploadPrivateContent } from '@/utils/content.utils';
+import { DropyWithUsers, SimplifiedDropy } from '@/interfaces/dropy.interface';
 
 export async function createDropy(user: User, latitude, longitude): Promise<Dropy> {
   const dropy = client.dropy.create({ data: { emitterId: user.id, latitude, longitude } });
   return dropy;
 }
 
-export async function createDropyMedia(user: User, dropyId: number, mediaPayload: UploadedFile | string, mediaType: MediaType) {
+export async function createDropyMedia(
+  user: User,
+  dropyId: number,
+  mediaPayload: UploadedFile | string,
+  mediaType: MediaType,
+  Authorization: string,
+) {
   const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
   if (dropy == undefined) {
@@ -39,15 +46,11 @@ export async function createDropyMedia(user: User, dropyId: number, mediaPayload
   if (isFile) {
     const file = mediaPayload as UploadedFile;
 
-    const extensionFile = file.mimetype.split('/').pop();
+    const { fileUrl, accessToken } = await uploadPrivateContent(file, Authorization);
 
-    const fileName = `${dropy.creationDate.getFullYear()}_${dropy.creationDate.getMonth()}_${dropy.creationDate.getDay()}_${mediaType}_${dropyId}.${extensionFile}`;
-
-    const filePath = `${process.cwd()}/public/dropiesMedias/${fileName}`;
-    file.mv(filePath);
     await client.dropy.update({
       where: { id: dropyId },
-      data: { filePath: filePath, mediaType: mediaType },
+      data: { mediaUrl: `${fileUrl}?accessToken=${accessToken}`, mediaType: mediaType },
     });
   } else {
     await client.dropy.update({
@@ -67,7 +70,7 @@ export async function getDropyById(dropyId: number): Promise<Dropy> {
   return dropy;
 }
 
-export async function getDropy(dropyId: number) {
+export async function getDropy(dropyId: number): Promise<DropyWithUsers> {
   const dropy = await client.dropy.findUnique({
     where: { id: dropyId },
     include: { emitter: true, retriever: true },
@@ -77,8 +80,12 @@ export async function getDropy(dropyId: number) {
     throw new HttpException(404, `Dropy with id ${dropyId} not found`);
   }
 
-  const customDropy = {
+  return {
     id: dropy.id,
+    latitude: dropy.latitude,
+    longitude: dropy.longitude,
+    mediaUrl: dropy.mediaUrl,
+    retrieveDate: dropy.retrieveDate,
     mediaType: dropy.mediaType,
     creationDate: dropy.creationDate,
     emitterId: dropy.emitterId,
@@ -87,20 +94,30 @@ export async function getDropy(dropyId: number) {
     retrieverDisplayName: dropy.retriever.displayName,
     conversationId: dropy.chatConversationId,
   };
-
-  return customDropy;
 }
 
-export async function userEmittedDropies(user: User): Promise<Dropy[]> {
+export async function userEmittedDropies(user: User): Promise<SimplifiedDropy[]> {
   const userDropies = await client.dropy.findMany({
     where: { emitterId: user.id },
     orderBy: { creationDate: 'desc' },
   });
 
-  return userDropies;
+  const simplifiedDropies = userDropies.map(dropy => {
+    return {
+      id: dropy.id,
+      mediaType: dropy.mediaType,
+      mediaUrl: dropy.mediaUrl,
+      creationDate: dropy.creationDate,
+      retrieveDate: dropy.retrieveDate,
+      latitude: dropy.latitude,
+      longitude: dropy.longitude,
+    };
+  });
+
+  return simplifiedDropies;
 }
 
-export async function deleteDropy(dropyId: number, user: User): Promise<void> {
+export async function deleteDropy(dropyId: number, user: User, Authorization: string): Promise<void> {
   const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
   if (dropy == undefined) {
@@ -112,7 +129,7 @@ export async function deleteDropy(dropyId: number, user: User): Promise<void> {
   }
 
   if (dropy.mediaType === MediaType.PICTURE || dropy.mediaType === MediaType.VIDEO) {
-    fs.unlinkSync(dropy.filePath);
+    deleteContent(dropy.mediaUrl, Authorization);
   }
 
   await client.dropy.delete({ where: { id: dropyId } });

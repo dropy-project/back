@@ -76,7 +76,7 @@ model Dropy {
   latitude  Float
   longitude Float
 
-  filePath  String?
+  mediaUrl  String?
   mediaData String?
   mediaType MediaType @default(NONE)
 

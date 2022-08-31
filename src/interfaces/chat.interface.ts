@@ -1,4 +1,4 @@
-import { DropyAround } from './dropy.interface';
+import { SimplifiedDropy } from './dropy.interface';
 import { SimplifiedUser } from './user.interface';
 
 export interface UserConversation {
@@ -13,7 +13,7 @@ export interface UserConversation {
 export interface UserMessage {
   id: number;
   date: Date;
-  content: string | DropyAround;
+  content: string | SimplifiedDropy;
   read: boolean;
   sender: SimplifiedUser;
 }

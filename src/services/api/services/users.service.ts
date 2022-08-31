@@ -257,6 +257,7 @@ export async function getBlockedUsers(user: User): Promise<SimplifiedUser[]> {
       id: blockedUser.id,
       username: blockedUser.username,
       displayName: blockedUser.displayName,
+      avatarUrl: blockedUser.avatarUrl,
     };
   });
 
