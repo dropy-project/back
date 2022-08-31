@@ -76,7 +76,6 @@ export async function getPrivateContent(req: AuthenticatedRequest, res: Response
   try {
     const { fileName } = req.params;
     const { accessToken } = req.query;
-    console.log(fileName, accessToken);
     throwIfNotString(fileName, accessToken as any);
 
     const filePath = PRIVATE_PATH_PREFIX + fileName;
