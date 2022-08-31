@@ -134,7 +134,7 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
     userConversations.push({
       id: conv.id,
       isOnline: otherUser.isOnline,
-      isRead: lastMessage?.read ?? false,
+      unreadMessagesCount: await getConversationUnreadMessageCount(conv.id, otherUser.id),
       lastMessagePreview: lastMessage?.content ?? null,
       lastMessageDate: lastMessage?.date ?? null,
       user: {
@@ -147,6 +147,16 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
   }
 
   return userConversations;
+}
+
+export async function getConversationUnreadMessageCount(conversationId: number, userId: number): Promise<number> {
+  return await client.chatMessage.count({
+    where: {
+      conversationId: conversationId,
+      senderId: userId,
+      read: false,
+    },
+  });
 }
 
 export function getLastMessage(conversationId: number): Promise<ChatMessage> {
@@ -193,4 +203,14 @@ export async function getAllMessages(conversationId: number): Promise<UserMessag
       avatarUrl: message.sender.avatarUrl,
     },
   }));
+}
+
+export async function markConversationAsRead(conversationId: number, userId: number): Promise<void> {
+  await client.chatMessage.updateMany({
+    where: {
+      senderId: userId,
+      conversationId,
+    },
+    data: { read: true },
+  });
 }

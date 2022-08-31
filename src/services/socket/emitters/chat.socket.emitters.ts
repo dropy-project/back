@@ -9,11 +9,15 @@ import { getRoomConnectedUsers, getUsersSockets } from '@utils/socket.utils';
 
 import * as userController from '@services/api/controllers/users.controller';
 import * as chatService from '@services/socket/services/chat.socket.service';
+import { SimplifiedDropy } from '@/interfaces/dropy.interface';
 
 export async function joinConversation(clientSocket: AuthenticatedSocket, conversationId: number, callback: SocketCallback<UserMessage[]>) {
   await clientSocket.join(`conversation-${conversationId}`);
   const conversation = await chatService.getConversationByIdWithUsers(conversationId);
+
   const otherUser = conversation.users.find((u: User) => u.id !== clientSocket.user.id);
+
+  await chatService.markConversationAsRead(conversationId, otherUser.id);
 
   clientSocket.emit('user_status', {
     status: 200,
@@ -103,25 +107,33 @@ export async function closeConversation(conversationId: any, callback: SocketCal
   });
 }
 
-const emitConversationUpdated = (
+const emitConversationUpdated = async (
   socket: AuthenticatedSocket,
   conversation: ChatConversation & { users: User[] },
   lastMessage: UserMessage | ChatMessage,
 ) => {
   const otherUser = conversation.users.find((u: User) => u.id !== socket.user.id);
 
+  const unreadMessagesCount = await chatService.getConversationUnreadMessageCount(conversation.id, otherUser.id);
+
+  const lastMessagePreview: string | null = (lastMessage?.content as SimplifiedDropy).id != undefined ? null : (lastMessage?.content as string);
+
+  const data: UserConversation = {
+    id: conversation.id,
+    isOnline: socket.user.isOnline,
+    unreadMessagesCount,
+    lastMessagePreview,
+    lastMessageDate: lastMessage?.date ?? null,
+    user: {
+      id: otherUser.id,
+      username: otherUser.username,
+      displayName: otherUser.displayName,
+      avatarUrl: otherUser.avatarUrl,
+    },
+  };
+
   chatNamespace.to(socket.id).emit('conversation_updated', {
     status: 200,
-    data: {
-      id: conversation.id,
-      isOnline: socket.user.isOnline,
-      isRead: false,
-      lastMessagePreview: lastMessage?.content ?? null,
-      lastMessageDate: lastMessage?.date ?? null,
-      user: {
-        userId: otherUser.id,
-        displayName: otherUser.displayName,
-      },
-    },
+    data,
   });
 };
