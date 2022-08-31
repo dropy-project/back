@@ -6,6 +6,7 @@ import { Profile, SimplifiedUser, UpdatableProfileInfos } from '@interfaces/user
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 import { deleteContent, uploadContent } from '@/utils/content.utils';
+import { displayNameToUsername } from '@/utils/user.utils';
 
 const DISTANCE_FILTER_RADIUS = 50;
 const TIME_FILTER_MINUTES = 60 * 24;
@@ -99,10 +100,16 @@ export async function userToProfile(user: User): Promise<Profile> {
 }
 
 export async function updateUserProfile(user: User, profileInfos: UpdatableProfileInfos): Promise<Profile> {
+  let username = user.username;
+  if (profileInfos.displayName !== user.displayName) {
+    username = await displayNameToUsername(profileInfos.displayName);
+  }
+
   const updatedUser = await client.user.update({
     where: { id: user.id },
     data: {
       ...profileInfos,
+      username,
     },
   });
   return await userToProfile(updatedUser);
