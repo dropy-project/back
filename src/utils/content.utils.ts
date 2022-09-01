@@ -2,7 +2,7 @@ import { UploadedFile } from 'express-fileupload';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
 
-const CONTENT_SERVER_URL = 'http://localhost:6000';
+const CONTENT_SERVER_URL = `http://${process.env.CONTENT_URL_LOCAL}:6000`;
 
 export async function uploadContent(file: UploadedFile, Authorization: string): Promise<{ fileUrl: string }> {
   const formData = new FormData();

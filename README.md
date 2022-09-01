@@ -61,6 +61,9 @@ POSTGRES_EXPOSE_PORTS=127.0.0.1:5432:5432
 
 #################
 
+# Dans le cas ou le projet est lancé à 100% au travers de docker-compose, remplacer localhost par content
+CONTENT_URL_LOCAL=http://localhost:${CONTENT_PORT}
+
 CONTENT_URL_PREFIX=http://localhost:${CONTENT_PORT}
 
 #################
