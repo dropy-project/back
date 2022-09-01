@@ -31,6 +31,10 @@ export async function postContent(req: AuthenticatedRequest, res: Response, next
     const file = req.files['image'] as UploadedFile;
     const extensionFile = file.mimetype.split('/').pop();
 
+    if (extensionFile !== 'jpeg' && extensionFile !== 'png') {
+      throw new HttpException(400, 'File type not supported');
+    }
+
     const now = new Date().getTime();
     const fileName = now.toString() + '_' + req.user.id + '.' + extensionFile;
 
@@ -100,6 +104,10 @@ export async function postPrivateContent(req: AuthenticatedRequest, res: Respons
   try {
     const file = req.files['image'] as UploadedFile;
     const extensionFile = file.mimetype.split('/').pop();
+
+    if (extensionFile !== 'jpeg' && extensionFile !== 'png') {
+      throw new HttpException(400, 'File type not supported');
+    }
 
     const now = new Date().getTime();
     const fileId = now + Math.round(Math.random() * 100);
