@@ -8,7 +8,8 @@ import crypto from 'crypto-js';
 
 const PUBLIC_PATH_PREFIX = process.cwd() + '/.content/public/';
 const PRIVATE_PATH_PREFIX = process.cwd() + '/.content/private/';
-const URL_PREFIX = process.env.CONTENT_URL_PREFIX ?? 'http://localhost:6000';
+
+const URL_PREFIX = process.env.CONTENT_URL_PUBLIC;
 
 export async function getContent(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
