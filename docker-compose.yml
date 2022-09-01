@@ -55,6 +55,7 @@ services:
       - '127.0.0.1:${CONTENT_PORT}:6000'
     environment:
       TZ: Europe/Paris
+      DATABASE_URL: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}'
       CONTENT_PORT: '${CONTENT_PORT}'
     networks:
      - back

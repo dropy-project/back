@@ -1,5 +1,6 @@
 import { logStartedService } from '@/utils/logs.utils';
 
+import dotenv from 'dotenv';
 import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -9,6 +10,8 @@ import hpp from 'hpp';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
 import * as routes from './routes';
+
+dotenv.config();
 
 const app: express.Application = express();
 const contentPort = 6000;

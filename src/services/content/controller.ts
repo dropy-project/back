@@ -8,7 +8,6 @@ import crypto from 'crypto-js';
 
 const PUBLIC_PATH_PREFIX = process.cwd() + '/.content/public/';
 const PRIVATE_PATH_PREFIX = process.cwd() + '/.content/private/';
-const URL_PREFIX = process.env.CONTENT_URL_PREFIX ?? 'http://localhost:6000';
 
 export async function getContent(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
@@ -32,6 +31,10 @@ export async function postContent(req: AuthenticatedRequest, res: Response, next
     const file = req.files['image'] as UploadedFile;
     const extensionFile = file.mimetype.split('/').pop();
 
+    if (extensionFile !== 'jpeg' && extensionFile !== 'png') {
+      throw new HttpException(400, 'File type not supported');
+    }
+
     const now = new Date().getTime();
     const fileName = now.toString() + '_' + req.user.id + '.' + extensionFile;
 
@@ -40,7 +43,7 @@ export async function postContent(req: AuthenticatedRequest, res: Response, next
     file.mv(filePath);
 
     res.status(200).send({
-      fileUrl: `${URL_PREFIX}/${fileName}`,
+      fileUrl: `${process.env.CONTENT_URL_PUBLIC}/${fileName}`,
     });
   } catch (error) {
     next(error);
@@ -102,6 +105,10 @@ export async function postPrivateContent(req: AuthenticatedRequest, res: Respons
     const file = req.files['image'] as UploadedFile;
     const extensionFile = file.mimetype.split('/').pop();
 
+    if (extensionFile !== 'jpeg' && extensionFile !== 'png') {
+      throw new HttpException(400, 'File type not supported');
+    }
+
     const now = new Date().getTime();
     const fileId = now + Math.round(Math.random() * 100);
     const accessToken = crypto.HmacSHA1(fileId.toString(), process.env.ACCESS_SECRET_KEY).toString();
@@ -113,7 +120,7 @@ export async function postPrivateContent(req: AuthenticatedRequest, res: Respons
     file.mv(filePath);
 
     res.status(200).send({
-      fileUrl: `${URL_PREFIX}/private/${fileName}`,
+      fileUrl: `${process.env.CONTENT_URL_PUBLIC}/private/${fileName}`,
       accessToken,
     });
   } catch (error) {
