@@ -56,14 +56,6 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     include: { blockedUsers: true },
   });
 
-  const message = await client.chatMessage.create({
-    data: {
-      conversationId: conversationId,
-      senderId: user.id,
-      content: content,
-    },
-  });
-
   const conversation = await client.chatConversation.findFirst({
     where: { id: conversationId },
     include: { users: true, messages: true },
@@ -75,6 +67,15 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
 
   const filteredDisconnectedUsers = disconnectedUsers.filter(userToFilter => {
     return userWithBlockedUsers.blockedUsers.some(blockedUser => blockedUser.id === userToFilter.id);
+  });
+
+  const message = await client.chatMessage.create({
+    data: {
+      conversationId: conversationId,
+      senderId: user.id,
+      content: content,
+      read: connectedUsers.some(connectedUser => connectedUser.id !== user.id),
+    },
   });
 
   sendPushNotification({
@@ -134,7 +135,7 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
     userConversations.push({
       id: conv.id,
       isOnline: otherUser.isOnline,
-      isRead: lastMessage?.read ?? false,
+      unreadMessagesCount: await getConversationUnreadMessageCount(conv.id, otherUser.id),
       lastMessagePreview: lastMessage?.content ?? null,
       lastMessageDate: lastMessage?.date ?? null,
       user: {
@@ -147,6 +148,16 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
   }
 
   return userConversations;
+}
+
+export async function getConversationUnreadMessageCount(conversationId: number, userId: number): Promise<number> {
+  return await client.chatMessage.count({
+    where: {
+      conversationId: conversationId,
+      senderId: userId,
+      read: false,
+    },
+  });
 }
 
 export function getLastMessage(conversationId: number): Promise<ChatMessage> {
@@ -193,4 +204,14 @@ export async function getAllMessages(conversationId: number): Promise<UserMessag
       avatarUrl: message.sender.avatarUrl,
     },
   }));
+}
+
+export async function markConversationAsRead(conversationId: number, userId: number): Promise<void> {
+  await client.chatMessage.updateMany({
+    where: {
+      senderId: userId,
+      conversationId,
+    },
+    data: { read: true },
+  });
 }

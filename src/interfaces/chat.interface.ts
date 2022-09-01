@@ -7,7 +7,7 @@ export interface UserConversation {
   lastMessagePreview: string | null;
   lastMessageDate: Date | null;
   isOnline: boolean;
-  isRead: boolean;
+  unreadMessagesCount: number;
 }
 
 export interface UserMessage {
