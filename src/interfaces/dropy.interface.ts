@@ -7,7 +7,11 @@ export type SimplifiedDropy = Pick<Dropy, 'id' | 'mediaUrl' | 'mediaType' | 'lat
 export type DropyWithUsers = SimplifiedDropy & {
   emitterId: number;
   emitterDisplayName: string;
+  emitterAvatarUrl: string;
+
   retrieverId?: number;
   retrieverDisplayName?: string;
+  retrieverAvatarUrl?: string;
+
   conversationId: number;
 };

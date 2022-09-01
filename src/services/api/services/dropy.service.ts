@@ -42,6 +42,8 @@ export async function getDropy(dropyId: number): Promise<DropyWithUsers> {
     retrieverId: dropy.retrieverId,
     retrieverDisplayName: dropy.retriever.displayName,
     conversationId: dropy.chatConversationId,
+    emitterAvatarUrl: dropy.emitter.avatarUrl,
+    retrieverAvatarUrl: dropy.retriever.avatarUrl,
   };
 }
 
