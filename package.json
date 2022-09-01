@@ -6,13 +6,10 @@
   "license": "ISC",
   "scripts": {
     "start": "echo \"Error: OUTDATED COMMAND\" && exit 1",
-
     "api": "npm run build && node dist/services/api/server.js",
     "socket": "npm run build && node dist/services/socket/socket.js",
     "content": "npm run build && node dist/services/content/server.js",
-
     "dev": "nodemon",
-
     "build": "swc src -d dist --source-maps --copy-files",
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",
     "lint:fix": "npm run lint -- --fix",
@@ -24,7 +21,7 @@
     "schema": "src/schema.prisma"
   },
   "dependencies": {
-    "@prisma/client": "^4.0.0",
+    "@prisma/client": "^4.3.0",
     "@types/express-fileupload": "^1.2.2",
     "@types/node-pushnotifications": "^1.0.4",
     "compression": "^1.7.4",
@@ -62,7 +59,7 @@
     "node-gyp": "^8.1.0",
     "nodemon": "^2.0.9",
     "prettier": "^2.3.2",
-    "prisma": "^4.0.0",
+    "prisma": "^4.3.0",
     "ts-node": "^10.4.0",
     "tsc-alias": "^1.4.1",
     "tsconfig-paths": "^3.10.1",
