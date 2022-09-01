@@ -23,9 +23,9 @@ export async function deleteContent(fileUrl: string, Authorization: string) {
   });
 }
 
-export async function uploadPrivateContent(file: UploadedFile, Authorization: string): Promise<{ fileUrl: string; accessToken: string }> {
+export async function uploadPrivateContent(file: Buffer, Authorization: string): Promise<{ fileUrl: string; accessToken: string }> {
   const formData = new FormData();
-  formData.append('image', file.data, file.name);
+  formData.append('image', file);
 
   return await fetch(`${CONTENT_SERVER_URL}/private`, {
     method: 'POST',

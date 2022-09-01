@@ -1,49 +1,9 @@
 import { NextFunction, Response } from 'express';
 import { MediaType } from '@prisma/client';
-import { UploadedFile } from 'express-fileupload';
 import { HttpException } from '@/exceptions/HttpException';
 import { AuthenticatedRequest } from '@interfaces/auth.interface';
 import * as dropyService from '@services/api/services/dropy.service';
 import * as utils from '@utils/controller.utils';
-
-export async function createDropyMedia(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const dropyId = Number(req.params.id);
-    utils.throwIfNotNumber(dropyId);
-
-    const requestData = req.files ?? req.body;
-
-    if (utils.isNull(requestData)) {
-      throw new HttpException(400, 'No form data found');
-    }
-
-    if (utils.isNull(Object.entries(requestData)[0])) {
-      throw new HttpException(400, 'Empty form data');
-    }
-
-    const [formField, mediaPayload] = Object.entries(requestData)[0] as [string, UploadedFile | string];
-
-    if (utils.isNull(formField, mediaPayload)) {
-      throw new HttpException(400, 'No payload were uploaded.');
-    }
-
-    const mediaType = MediaType[formField.toUpperCase()];
-    if (mediaType == null) {
-      throw new HttpException(400, `Unsuported dropy media type : ${formField}`);
-    }
-
-    const isFile = (mediaPayload as UploadedFile).mimetype != null;
-    if (isFile && (mediaPayload as UploadedFile).data == null) {
-      throw new HttpException(400, 'File data corrupted or more than one file sent at once');
-    }
-
-    await dropyService.createDropyMedia(req.user, dropyId, mediaPayload, mediaType, req.header('Authorization'));
-
-    res.status(200).json(`Media added for dropy with id ${dropyId}`);
-  } catch (error) {
-    next(error);
-  }
-}
 
 export async function getDropyMedia(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
