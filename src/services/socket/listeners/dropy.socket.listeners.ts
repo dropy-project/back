@@ -7,6 +7,7 @@ import { Logger } from '@utils/logs.utils';
 import { handleSocketRawError } from '@utils/socket.utils';
 
 import * as dropySocket from '@services/socket/emitters/dropy.socket.emitters';
+import { HttpException } from '@/exceptions/HttpException';
 
 export function startSocket() {
   dropyNamespace.on('connection', async (socket: AuthenticatedSocket) => {
@@ -14,14 +15,25 @@ export function startSocket() {
 
     logger.log('Connected');
 
-    socket.on('all_dropies_around', async (data: any, callback) => {
+    socket.on('zones_update', async (data: any, callback) => {
       try {
-        const { latitude, longitude } = data;
-        throwIfNotNumber(latitude, longitude);
-        throwIfNotFunction(callback);
+        const { zones } = data;
+        throwIfNull(zones);
 
-        await dropySocket.emitAllDropiesAround(socket, latitude, longitude, callback);
-        logger.log('All dropies around');
+        if (zones.length === undefined) {
+          throw new HttpException(400, 'Zones must be an array');
+        }
+
+        if (zones.length !== 9) {
+          throw new HttpException(400, '9 Zones must be provided');
+        }
+
+        zones.forEach(zone => {
+          throwIfNotNumber(zone);
+        });
+
+        await dropySocket.updateZones(socket, zones, callback);
+        console.log('User zones updated');
       } catch (error) {
         handleSocketRawError(callback, error);
       }
