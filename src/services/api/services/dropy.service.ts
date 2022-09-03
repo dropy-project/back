@@ -37,13 +37,19 @@ export async function getDropy(dropyId: number): Promise<DropyWithUsers> {
     retrieveDate: dropy.retrieveDate,
     mediaType: dropy.mediaType,
     creationDate: dropy.creationDate,
-    emitterId: dropy.emitterId,
-    emitterDisplayName: dropy.emitter.displayName,
-    retrieverId: dropy.retrieverId,
-    retrieverDisplayName: dropy.retriever.displayName,
     conversationId: dropy.chatConversationId,
-    emitterAvatarUrl: dropy.emitter.avatarUrl,
-    retrieverAvatarUrl: dropy.retriever.avatarUrl,
+    emitter: {
+      id: dropy.emitter.id,
+      username: dropy.emitter.username,
+      avatarUrl: dropy.emitter.avatarUrl,
+      displayName: dropy.emitter.displayName,
+    },
+    retriever: {
+      id: dropy.retriever.id,
+      username: dropy.retriever.username,
+      avatarUrl: dropy.retriever.avatarUrl,
+      displayName: dropy.retriever.displayName,
+    },
   };
 }
 
@@ -66,6 +72,39 @@ export async function userEmittedDropies(user: User): Promise<SimplifiedDropy[]>
   });
 
   return simplifiedDropies;
+}
+
+export async function userRetrievedDropies(user: User): Promise<DropyWithUsers[]> {
+  const userDropies = await client.dropy.findMany({
+    where: { retrieverId: user.id },
+    orderBy: { creationDate: 'desc' },
+    include: { emitter: true, retriever: true },
+  });
+
+  return userDropies.map(dropy => {
+    return {
+      id: dropy.id,
+      mediaType: dropy.mediaType,
+      mediaUrl: dropy.mediaUrl,
+      creationDate: dropy.creationDate,
+      retrieveDate: dropy.retrieveDate,
+      latitude: dropy.latitude,
+      longitude: dropy.longitude,
+      conversationId: dropy.chatConversationId,
+      emitter: {
+        id: dropy.emitter.id,
+        username: dropy.emitter.username,
+        avatarUrl: dropy.emitter.avatarUrl,
+        displayName: dropy.emitter.displayName,
+      },
+      retriever: {
+        id: dropy.retriever.id,
+        username: dropy.retriever.username,
+        avatarUrl: dropy.retriever.avatarUrl,
+        displayName: dropy.retriever.displayName,
+      },
+    };
+  });
 }
 
 export async function deleteDropy(dropyId: number, user: User, Authorization: string): Promise<void> {

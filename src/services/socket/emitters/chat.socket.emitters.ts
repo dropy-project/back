@@ -1,11 +1,11 @@
 import { chatNamespace } from '../socket';
-import { ChatConversation, ChatMessage, User } from '@prisma/client';
+import { ChatConversation, User } from '@prisma/client';
 
 import { AuthenticatedSocket } from '@interfaces/auth.interface';
 import { UserConversation, UserMessage } from '@interfaces/chat.interface';
 import { SocketCallback } from '@interfaces/socket.interface';
 
-import { getRoomConnectedUsers, getUsersSockets } from '@utils/socket.utils';
+import { getRoomConnectedUsers, getUsersSockets, handleSocketRawError } from '@utils/socket.utils';
 
 import * as userController from '@services/api/controllers/users.controller';
 import * as chatService from '@services/socket/services/chat.socket.service';
@@ -40,7 +40,12 @@ export async function listMessages(conversationId: number, offset: number, limit
   });
 }
 
-export async function createMessage(clientSocket: AuthenticatedSocket, content: string, conversationId: number, callback: SocketCallback<number>) {
+export async function createMessage(
+  clientSocket: AuthenticatedSocket,
+  content: string,
+  conversationId: number,
+  callback: SocketCallback<{ messageId: number; messageRead: boolean }>,
+) {
   const connectedUsers = await getRoomConnectedUsers(chatNamespace, `conversation-${conversationId}`);
   const message = await chatService.addMessage(clientSocket.user, connectedUsers, content, conversationId);
   const chatConversation = await chatService.getConversationByIdWithUsers(conversationId);
@@ -50,10 +55,12 @@ export async function createMessage(clientSocket: AuthenticatedSocket, content: 
     data: message,
   });
 
-  const usersToEmit = await getUsersSockets(chatNamespace, chatConversation.users);
+  const socketsToEmit = await getUsersSockets(chatNamespace, chatConversation.users);
 
-  usersToEmit.forEach(socket => {
-    emitConversationUpdated(socket, chatConversation, message);
+  socketsToEmit.forEach(socket => {
+    emitConversationUpdated(socket, chatConversation, message).catch(error => {
+      handleSocketRawError(null, error);
+    });
   });
 
   callback({
@@ -85,7 +92,9 @@ export async function sendConnectionStatus(clientSocket: AuthenticatedSocket, co
     const usersToEmit = await getUsersSockets(chatNamespace, conversation.users);
     const lastMessage = await chatService.getLastMessage(conversation.id);
     usersToEmit.forEach(socket => {
-      emitConversationUpdated(socket, conversation, lastMessage);
+      emitConversationUpdated(socket, conversation, lastMessage).catch(error => {
+        handleSocketRawError(null, error);
+      });
     });
   });
 }
@@ -114,11 +123,7 @@ export async function closeConversation(conversationId: any, callback: SocketCal
   });
 }
 
-const emitConversationUpdated = async (
-  socket: AuthenticatedSocket,
-  conversation: ChatConversation & { users: User[] },
-  lastMessage: UserMessage | ChatMessage,
-) => {
+const emitConversationUpdated = async (socket: AuthenticatedSocket, conversation: ChatConversation & { users: User[] }, lastMessage: UserMessage) => {
   const otherUser = conversation.users.find((u: User) => u.id !== socket.user.id);
 
   const unreadMessagesCount = await chatService.getConversationUnreadMessageCount(conversation.id, otherUser.id);

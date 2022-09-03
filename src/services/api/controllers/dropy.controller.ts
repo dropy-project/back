@@ -40,7 +40,7 @@ export async function getDropy(req: AuthenticatedRequest, res: Response, next: N
 
     const dropy = await dropyService.getDropy(dropyId);
 
-    if (req.user.id != dropy.retrieverId) {
+    if (req.user.id != dropy.retriever.id) {
       throw new HttpException(403, `User with id ${req.user.id} not allow to retrieve dropy with id ${dropy.id}`);
     }
 
@@ -53,6 +53,15 @@ export async function getDropy(req: AuthenticatedRequest, res: Response, next: N
 export async function userEmittedDropies(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const drops = await dropyService.userEmittedDropies(req.user);
+    res.status(200).json(drops);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function userRetrievedDropies(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const drops = await dropyService.userRetrievedDropies(req.user);
     res.status(200).json(drops);
   } catch (error) {
     next(error);

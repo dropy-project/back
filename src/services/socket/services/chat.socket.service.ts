@@ -1,8 +1,9 @@
-import { ChatConversation, User, ChatMessage } from '@prisma/client';
+import { ChatConversation, User } from '@prisma/client';
 import client from '@/client';
 import { UserMessage, UserConversation } from '@interfaces/chat.interface';
 import { sendPushNotification } from '@/notification';
 import { decryptMessage } from '@/utils/encrypt';
+import { SimplifiedDropy } from '@/interfaces/dropy.interface';
 
 export async function getConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
   return await client.chatConversation.findFirst({
@@ -132,11 +133,13 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
     const otherUser = conv.users.find((u: User) => u.id !== user.id);
     const lastMessage = await getLastMessage(conv.id);
 
+    const lastMessagePreview = (lastMessage?.content as SimplifiedDropy).id != undefined ? null : (lastMessage?.content as string);
+
     userConversations.push({
       id: conv.id,
       isOnline: otherUser.isOnline,
       unreadMessagesCount: await getConversationUnreadMessageCount(conv.id, otherUser.id),
-      lastMessagePreview: lastMessage?.content ?? null,
+      lastMessagePreview,
       lastMessageDate: lastMessage?.date ?? null,
       user: {
         id: otherUser.id,
@@ -160,13 +163,25 @@ export async function getConversationUnreadMessageCount(conversationId: number, 
   });
 }
 
-export function getLastMessage(conversationId: number): Promise<ChatMessage> {
-  const lastMessage = client.chatMessage.findFirst({
+export async function getLastMessage(conversationId: number): Promise<UserMessage> {
+  const lastMessage = await client.chatMessage.findFirst({
     where: { conversationId },
     orderBy: { date: 'desc' },
     include: { sender: true, dropy: true },
   });
-  return lastMessage;
+
+  return {
+    content: lastMessage.content ?? lastMessage.dropy,
+    date: lastMessage.date,
+    id: lastMessage.id,
+    read: lastMessage.read,
+    sender: {
+      id: lastMessage.sender.id,
+      username: lastMessage.sender.username,
+      displayName: lastMessage.sender.displayName,
+      avatarUrl: lastMessage.sender.avatarUrl,
+    },
+  };
 }
 
 export async function closeConversation(conversationId: number): Promise<void> {
