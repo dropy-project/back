@@ -33,7 +33,7 @@ export function startSocket() {
         });
 
         await dropySocket.updateZones(socket, zones, callback);
-        console.log('User zones updated');
+        logger.log(`${socket.user.username}'s zones updated around ${zones[0]}`);
       } catch (error) {
         handleSocketRawError(callback, error);
       }
