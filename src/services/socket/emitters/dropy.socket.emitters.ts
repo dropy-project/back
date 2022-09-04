@@ -23,7 +23,7 @@ export async function createDropy(
     clientSocket.handshake.headers['authorization'] as string,
   );
 
-  dropyNamespace.emit('dropy_created', {
+  dropyNamespace.to(`zone-${dropy.geohash}`).emit('dropy_created', {
     status: 200,
     data: dropy,
   });
@@ -34,9 +34,9 @@ export async function createDropy(
 }
 
 export async function retrieveDropy(socket: AuthenticatedSocket, dropyId: number, callback: SocketCallback<null>) {
-  await dropyService.retrieveDropy(socket.user, dropyId);
+  const dropy = await dropyService.retrieveDropy(socket.user, dropyId);
 
-  dropyNamespace.emit('dropy_retrieved', {
+  dropyNamespace.to(`zone-${dropy.geohash}`).emit('dropy_retrieved', {
     status: 200,
     data: dropyId,
   });

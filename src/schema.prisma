@@ -74,6 +74,7 @@ model Dropy {
 
   latitude  Float
   longitude Float
+  geohash String
 
   mediaUrl  String?
   mediaData String?
