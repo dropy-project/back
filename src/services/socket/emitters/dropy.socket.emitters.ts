@@ -4,19 +4,7 @@ import { SocketCallback } from '@/interfaces/socket.interface';
 
 import * as dropyService from '@services/socket/services/dropy.socket.service';
 import { dropyNamespace } from '../socket';
-
-export async function emitAllDropiesAround(
-  clientSocket: AuthenticatedSocket,
-  latitude: number,
-  longitude: number,
-  callback: SocketCallback<DropyAround[]>,
-) {
-  const dropies = await dropyService.findDropiesAround(clientSocket.user, latitude, longitude);
-  callback({
-    status: 200,
-    data: dropies,
-  });
-}
+import { findDropiesByGeohash } from '@/utils/geolocation.utils';
 
 export async function createDropy(
   clientSocket: AuthenticatedSocket,
@@ -55,5 +43,27 @@ export async function retrieveDropy(socket: AuthenticatedSocket, dropyId: number
 
   callback({
     status: 200,
+  });
+}
+
+export async function updateZones(socket: AuthenticatedSocket, zones: number[], callback: SocketCallback<DropyAround[]>) {
+  socket.rooms.forEach(room => {
+    if (room.includes('zone')) {
+      socket.leave(room);
+    }
+  });
+
+  for (const zone of zones) {
+    await socket.join(`zone-${zone}`);
+  }
+
+  const dropiesInGeohash = await findDropiesByGeohash(
+    socket.user,
+    zones.map(z => z.toString()),
+  );
+
+  callback({
+    status: 200,
+    data: dropiesInGeohash,
   });
 }

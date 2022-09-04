@@ -1,39 +1,12 @@
 import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
-import { DropyAround } from '@/interfaces/dropy.interface';
 import { sendPushNotification } from '@/notification';
 import { uploadPrivateContent } from '@/utils/content.utils';
-import { getAvailableDropiesAroundLocation } from '@/utils/geolocation.utils';
+import { GEOHASH_SIZE } from '@/utils/geolocation.utils';
 import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
+import Geohash from 'ngeohash';
 
-export async function findDropiesAround(user: User, latitude: number, longitude: number): Promise<DropyAround[]> {
-  const dropies = await getAvailableDropiesAroundLocation(latitude, longitude);
-
-  const userWithBlockedUsers = await client.user.findUnique({
-    where: { id: user.id },
-    include: { blockedUsers: true },
-  });
-
-  const blockedUsersId = userWithBlockedUsers.blockedUsers.map(users => users.id);
-
-  const cleanedDropies = dropies
-    .filter(dropy => dropy.emitter.isBanned == false || dropy.emitterId === user.id)
-    .filter(dropy => !blockedUsersId.includes(dropy.emitterId));
-
-  const dropiesAround = cleanedDropies.map(dropy => {
-    return {
-      id: dropy.id,
-      creationDate: dropy.creationDate,
-      latitude: dropy.latitude,
-      longitude: dropy.longitude,
-      emitterId: dropy.emitterId,
-    };
-  });
-
-  return dropiesAround;
-}
-
-export async function retrieveDropy(user: User, dropyId: number) {
+export async function retrieveDropy(user: User, dropyId: number): Promise<Dropy> {
   const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
   if (dropy == undefined) {
@@ -64,6 +37,8 @@ export async function retrieveDropy(user: User, dropyId: number) {
     sound: 'message_sound.mp3',
     payload: conversation,
   });
+
+  return newDropy;
 }
 
 export async function createDropy(
@@ -74,7 +49,14 @@ export async function createDropy(
   content: string | Buffer,
   Authorization: string,
 ): Promise<Dropy> {
-  const dropy = await client.dropy.create({ data: { emitterId: user.id, latitude, longitude } });
+  const dropy = await client.dropy.create({
+    data: {
+      emitterId: user.id,
+      latitude,
+      longitude,
+      geohash: Geohash.encode_int(latitude, longitude, GEOHASH_SIZE).toString(),
+    },
+  });
 
   if (dropy.emitterId != user.id) {
     throw new HttpException(403, `User is not allowed to add a media for this dropy`);

@@ -47,9 +47,8 @@ model User {
   emittedDropies   Dropy[] @relation("emittedDropies")
   retrievedDropies Dropy[] @relation("retrievedDropies")
 
-  lastGeolocationPingDate      DateTime?
-  lastGeolocationPingLatitude  Float?
-  lastGeolocationPingLongitude Float?
+  lastPingDate     DateTime?
+  lastPingGeohash  String?
 
   isOnline      Boolean            @default(false)
   conversations ChatConversation[]
