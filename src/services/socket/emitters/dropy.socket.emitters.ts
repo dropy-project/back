@@ -5,19 +5,6 @@ import { SocketCallback } from '@/interfaces/socket.interface';
 import * as dropyService from '@services/socket/services/dropy.socket.service';
 import { dropyNamespace } from '../socket';
 
-export async function emitAllDropiesAround(
-  clientSocket: AuthenticatedSocket,
-  latitude: number,
-  longitude: number,
-  callback: SocketCallback<DropyAround[]>,
-) {
-  const dropies = await dropyService.findDropiesAround(clientSocket.user, latitude, longitude);
-  callback({
-    status: 200,
-    data: dropies,
-  });
-}
-
 export async function createDropy(
   clientSocket: AuthenticatedSocket,
   latitude: number,
@@ -35,7 +22,7 @@ export async function createDropy(
     clientSocket.handshake.headers['authorization'] as string,
   );
 
-  dropyNamespace.emit('dropy_created', {
+  dropyNamespace.to(`zone-${dropy.geohash}`).emit('dropy_created', {
     status: 200,
     data: dropy,
   });
@@ -46,14 +33,36 @@ export async function createDropy(
 }
 
 export async function retrieveDropy(socket: AuthenticatedSocket, dropyId: number, callback: SocketCallback<null>) {
-  await dropyService.retrieveDropy(socket.user, dropyId);
+  const dropy = await dropyService.retrieveDropy(socket.user, dropyId);
 
-  dropyNamespace.emit('dropy_retrieved', {
+  dropyNamespace.to(`zone-${dropy.geohash}`).emit('dropy_retrieved', {
     status: 200,
     data: dropyId,
   });
 
   callback({
     status: 200,
+  });
+}
+
+export async function updateZones(socket: AuthenticatedSocket, zones: number[], callback: SocketCallback<DropyAround[]>) {
+  socket.rooms.forEach(room => {
+    if (room.includes('zone')) {
+      socket.leave(room);
+    }
+  });
+
+  for (const zone of zones) {
+    await socket.join(`zone-${zone}`);
+  }
+
+  const dropiesInGeohash = await dropyService.findDropiesByGeohash(
+    socket.user,
+    zones.map(z => z.toString()),
+  );
+
+  callback({
+    status: 200,
+    data: dropiesInGeohash,
   });
 }
