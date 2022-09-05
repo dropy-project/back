@@ -25,13 +25,12 @@ export async function backgroundGeolocationPing(req: AuthenticatedRequest, res: 
 
     utils.throwIfNull(location?.coords, req.user);
 
-    const { timestamp, coords } = location;
+    const { coords } = location;
     const { latitude, longitude } = coords;
 
-    utils.throwIfNotString(timestamp);
     utils.throwIfNotNumber(latitude, longitude);
 
-    await userService.backgroundGeolocationPing(req.user, latitude, longitude, new Date(timestamp));
+    await userService.backgroundGeolocationPing(req.user, latitude, longitude);
     res.status(200).json('Success');
   } catch (error) {
     next(error);

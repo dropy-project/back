@@ -4,6 +4,7 @@ import { SocketCallback } from '@/interfaces/socket.interface';
 
 import * as dropyService from '@services/socket/services/dropy.socket.service';
 import { dropyNamespace } from '../socket';
+import { findDropiesByGeohash } from '@/utils/geolocation.utils';
 
 export async function createDropy(
   clientSocket: AuthenticatedSocket,
@@ -56,7 +57,7 @@ export async function updateZones(socket: AuthenticatedSocket, zones: number[], 
     await socket.join(`zone-${zone}`);
   }
 
-  const dropiesInGeohash = await dropyService.findDropiesByGeohash(
+  const dropiesInGeohash = await findDropiesByGeohash(
     socket.user,
     zones.map(z => z.toString()),
   );

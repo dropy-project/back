@@ -3,10 +3,9 @@ import { HttpException } from '@/exceptions/HttpException';
 import { DropyAround } from '@/interfaces/dropy.interface';
 import { sendPushNotification } from '@/notification';
 import { uploadPrivateContent } from '@/utils/content.utils';
+import { GEOHASH_SIZE } from '@/utils/geolocation.utils';
 import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
 import Geohash from 'ngeohash';
-
-export const GEOHASH_SIZE = 32;
 
 export async function retrieveDropy(user: User, dropyId: number): Promise<Dropy> {
   const dropy = await client.dropy.findUnique({ where: { id: dropyId } });

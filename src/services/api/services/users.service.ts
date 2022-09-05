@@ -1,68 +1,59 @@
 import { User } from '@prisma/client';
 import { sendPushNotification } from '../../../notification';
 import client from '@/client';
-import { getAvailableDropiesAroundLocation, getDistanceFromLatLonInMeters } from '@utils/geolocation.utils';
+import { findDropiesByGeohash, GEOHASH_SIZE } from '@utils/geolocation.utils';
 import { Profile, SimplifiedUser, UpdatableProfileInfos } from '@interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 import { deleteContent, uploadContent } from '@/utils/content.utils';
 import { displayNameToUsername } from '@/utils/user.utils';
+import Geohash from 'ngeohash';
 
-const DISTANCE_FILTER_RADIUS = 50;
-const TIME_FILTER_MINUTES = 60 * 24;
 const NB_REPORTS_TO_BAN = 15;
 
-export async function backgroundGeolocationPing(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<void> {
-  const dropiesAround = await getAvailableDropiesAroundLocation(latitude, longitude, user);
+export async function backgroundGeolocationPing(user: User, latitude: number, longitude: number): Promise<void> {
+  const pingGeohash: string = Geohash.encode_int(latitude, longitude, GEOHASH_SIZE).toString();
 
   console.log();
   console.log('-------------------');
   console.log(`[BACKGROUND PING] - ${user.displayName}`);
-  console.log(`${latitude} , ${longitude}`);
+  console.log(`User current geohash: ${pingGeohash}`);
 
-  const canSendNotification = await checkTimeAndDistanceBetweenNotifications(user, latitude, longitude, timeStamp);
+  const { lastPingGeohash } = user;
+  console.log(`User last geohash: ${pingGeohash}`);
 
-  const nearDropies = dropiesAround.filter(dropy => {
-    return getDistanceFromLatLonInMeters(latitude, longitude, dropy.latitude, dropy.longitude) <= DISTANCE_FILTER_RADIUS;
+  await client.user.update({
+    where: { id: user.id },
+    data: {
+      lastPingGeohash: pingGeohash,
+    },
   });
 
-  console.log(`Dropies around : ${dropiesAround.length}`);
-  console.log(`Dropies around : ${nearDropies.length}`);
+  if (lastPingGeohash === pingGeohash) {
+    console.log('User has not entered a new zone');
+    console.log('-------------------');
+    return;
+  }
+
+  const dropiesAround = await findDropiesByGeohash(user, [pingGeohash]);
+
+  const canSendNotification = dropiesAround.length > 0;
+
+  if (!canSendNotification) {
+    console.log('No notification to send');
+    console.log('-------------------');
+    return;
+  }
+
   console.log(`Send notification : ${canSendNotification}`);
   console.log('-------------------');
 
-  if (nearDropies.length > 0 && canSendNotification) {
-    console.log('Send notification and save into the database');
-    await sendPushNotification({
-      user,
-      title: 'Drop found near your position!',
-      body: 'Open the app to see it',
-      sound: 'dropy_sound.mp3',
-    });
-
-    await client.user.update({
-      where: { id: user.id },
-      data: {
-        lastGeolocationPingDate: timeStamp,
-        lastGeolocationPingLatitude: latitude,
-        lastGeolocationPingLongitude: longitude,
-      },
-    });
-  }
-}
-
-export async function checkTimeAndDistanceBetweenNotifications(user: User, latitude: number, longitude: number, timeStamp: Date): Promise<Boolean> {
-  const { lastGeolocationPingDate, lastGeolocationPingLatitude, lastGeolocationPingLongitude } = user;
-  if (lastGeolocationPingDate == null || lastGeolocationPingLatitude == null || lastGeolocationPingLongitude == null) return true;
-
-  const distance = getDistanceFromLatLonInMeters(latitude, longitude, lastGeolocationPingLatitude, lastGeolocationPingLongitude);
-  console.log(`Distance from last ping : ${distance}m`);
-
-  const timeDifference = timeStamp.getTime() - lastGeolocationPingDate.getTime();
-  const timeDifferenceInMinutes = timeDifference / (1000 * 60);
-  console.log(`Time from last ping : ${timeDifferenceInMinutes}m`);
-
-  return distance > DISTANCE_FILTER_RADIUS || timeDifferenceInMinutes > TIME_FILTER_MINUTES;
+  await sendPushNotification({
+    user,
+    title: `${canSendNotification} Drops found near your position!`,
+    body: `Open the app to see ${dropiesAround.length > 1 ? 'them' : 'it'}!`,
+    sound: 'dropy_sound.mp3',
+  });
 }
 
 export async function getUserProfile(userId: number): Promise<Profile> {
