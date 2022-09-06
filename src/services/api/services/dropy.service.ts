@@ -2,12 +2,7 @@ import client from '@/client';
 import { HttpException } from '@exceptions/HttpException';
 import { Dropy, MediaType, User } from '@prisma/client';
 import { deleteContent } from '@/utils/content.utils';
-import { DropyWithUsers, SimplifiedDropy } from '@/interfaces/dropy.interface';
-
-export async function createDropy(user: User, latitude, longitude): Promise<Dropy> {
-  const dropy = client.dropy.create({ data: { emitterId: user.id, latitude, longitude } });
-  return dropy;
-}
+import { DropyWithUsers } from '@/interfaces/dropy.interface';
 
 export async function getDropyById(dropyId: number): Promise<Dropy> {
   const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
@@ -53,13 +48,14 @@ export async function getDropy(dropyId: number): Promise<DropyWithUsers> {
   };
 }
 
-export async function userEmittedDropies(user: User): Promise<SimplifiedDropy[]> {
+export async function userEmittedDropies(user: User): Promise<DropyWithUsers[]> {
   const userDropies = await client.dropy.findMany({
     where: { emitterId: user.id },
     orderBy: { creationDate: 'desc' },
+    include: { emitter: true, retriever: true },
   });
 
-  const simplifiedDropies = userDropies.map(dropy => {
+  return userDropies.map(dropy => {
     return {
       id: dropy.id,
       mediaType: dropy.mediaType,
@@ -68,10 +64,24 @@ export async function userEmittedDropies(user: User): Promise<SimplifiedDropy[]>
       retrieveDate: dropy.retrieveDate,
       latitude: dropy.latitude,
       longitude: dropy.longitude,
+      conversationId: dropy.chatConversationId,
+      emitter: {
+        id: user.id,
+        username: user.username,
+        avatarUrl: user.avatarUrl,
+        displayName: user.displayName,
+      },
+      retriever:
+        dropy.retrieverId != null
+          ? {
+              id: dropy.retrieverId,
+              username: dropy.retriever.username,
+              avatarUrl: dropy.retriever.avatarUrl,
+              displayName: dropy.retriever.displayName,
+            }
+          : null,
     };
   });
-
-  return simplifiedDropies;
 }
 
 export async function userRetrievedDropies(user: User): Promise<DropyWithUsers[]> {
