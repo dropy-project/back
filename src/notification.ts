@@ -54,14 +54,23 @@ export async function sendPushNotification(notification: Notification | BatchedN
     tokens.push(single.user.deviceToken);
   }
 
-  const results = await push.send(tokens, {
-    topic: 'com.dropy.project',
-    title: notification.title,
-    body: notification.body,
-    sound: notification.sound ?? 'default',
-    badge: notification.badge,
-    contentAvailable: true,
-    clickAction: notification.payload ? JSON.stringify(notification.payload) : undefined,
-  });
-  return results;
+  try {
+    return await push.send(tokens, {
+      topic: 'com.dropy.project',
+      title: notification.title,
+      body: notification.body,
+      sound: notification.sound ?? 'default',
+      badge: notification.badge,
+      contentAvailable: true,
+      clickAction: notification.payload ? JSON.stringify(notification.payload) : undefined,
+    });
+  } catch (error) {
+    console.error('PUSH NOTIFICATION ERROR', error, {
+      production: process.env.NODE_ENV === 'production',
+      apnKey: apnKey != undefined,
+      apnKeyId: process.env.APN_KEYID != undefined,
+      apnTeamId: process.env.APN_TEAMID != undefined,
+      fcmKey: process.env.FCM_KEY != undefined,
+    });
+  }
 }

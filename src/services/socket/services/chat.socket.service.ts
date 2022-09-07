@@ -38,7 +38,17 @@ export async function getMessages(conversationId: number, offset: number, limit:
   });
 
   return chatMessages.reverse().map(message => ({
-    content: message.content ?? message.dropy,
+    content: message.content ?? {
+      id: message.dropy.id,
+      latitude: message.dropy.latitude,
+      longitude: message.dropy.longitude,
+      mediaUrl: message.dropy.mediaUrl,
+      retrieveDate: message.dropy.retrieveDate,
+      mediaType: message.dropy.mediaType,
+      creationDate: message.dropy.creationDate,
+      emitter: { id: message.dropy.emitterId },
+      retriever: { id: message.dropy.retrieverId },
+    },
     date: message.date,
     read: message.read,
     id: message.id,
@@ -172,7 +182,17 @@ export async function getLastMessage(conversationId: number): Promise<UserMessag
   });
 
   return {
-    content: lastMessage.content ?? lastMessage.dropy,
+    content: lastMessage.content ?? {
+      id: lastMessage.dropy.id,
+      latitude: lastMessage.dropy.latitude,
+      longitude: lastMessage.dropy.longitude,
+      mediaUrl: lastMessage.dropy.mediaUrl,
+      retrieveDate: lastMessage.dropy.retrieveDate,
+      mediaType: lastMessage.dropy.mediaType,
+      creationDate: lastMessage.dropy.creationDate,
+      emitter: { id: lastMessage.dropy.emitterId },
+      retriever: { id: lastMessage.dropy.retrieverId },
+    },
     date: lastMessage.date,
     id: lastMessage.id,
     read: lastMessage.read,
@@ -203,12 +223,14 @@ export async function getAllMessages(conversationId: number): Promise<UserMessag
   return chatMessages.map(message => ({
     content: message.content ?? {
       id: message.dropy.id,
-      mediaUrl: message.dropy.mediaUrl,
-      mediaType: message.dropy.mediaType,
-      creationDate: message.dropy.creationDate,
       latitude: message.dropy.latitude,
       longitude: message.dropy.longitude,
+      mediaUrl: message.dropy.mediaUrl,
       retrieveDate: message.dropy.retrieveDate,
+      mediaType: message.dropy.mediaType,
+      creationDate: message.dropy.creationDate,
+      emitter: { id: message.dropy.emitterId },
+      retriever: { id: message.dropy.retrieverId },
     },
     date: message.date,
     read: message.read,

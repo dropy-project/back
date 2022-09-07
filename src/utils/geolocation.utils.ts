@@ -4,11 +4,12 @@ import { DropyAround } from '@/interfaces/dropy.interface';
 
 export const GEOHASH_SIZE = 32;
 
-export async function findDropiesByGeohash(user: User, zones: string[]): Promise<DropyAround[]> {
+export async function findDropiesByGeohash(user: User, zones: string[], excludeUserDropies = false): Promise<DropyAround[]> {
   const dropiesByGeohash = await client.dropy.findMany({
     where: {
       geohash: { in: zones },
       retrieverId: null,
+      emitterId: excludeUserDropies ? { not: user.id } : undefined,
     },
     include: { emitter: true },
   });

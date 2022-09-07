@@ -35,7 +35,7 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
     return;
   }
 
-  const dropiesAround = await findDropiesByGeohash(user, [pingGeohash]);
+  const dropiesAround = await findDropiesByGeohash(user, [pingGeohash], true);
 
   const canSendNotification = dropiesAround.length > 0;
 
@@ -48,9 +48,9 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
   console.log(`Send notification : ${canSendNotification}`);
   console.log('-------------------');
 
-  await sendPushNotification({
+  sendPushNotification({
     user,
-    title: `${canSendNotification} Drops found near your position!`,
+    title: `${dropiesAround.length} Drops found near your position!`,
     body: `Open the app to see ${dropiesAround.length > 1 ? 'them' : 'it'}!`,
     sound: 'dropy_sound.mp3',
   });
