@@ -43,10 +43,14 @@ export async function sendPushNotification(notification: Notification | BatchedN
   const batched = notification as BatchedNotification;
 
   if (batched.users != undefined) {
+    if (batched.users.length === 0) return;
+
     batched.users.forEach(user => {
       tokens.push(user.deviceToken);
     });
   } else if (single.user != undefined) {
+    if (single.user != undefined) return;
+
     tokens.push(single.user.deviceToken);
   }
 

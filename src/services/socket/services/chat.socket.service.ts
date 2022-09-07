@@ -66,8 +66,9 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     return !connectedUsers.some(connectedUser => connectedUser.id === user.id);
   });
 
-  const filteredDisconnectedUsers = disconnectedUsers.filter(userToFilter => {
-    return userWithBlockedUsers.blockedUsers.some(blockedUser => blockedUser.id === userToFilter.id);
+  const blockedUsersIds = userWithBlockedUsers.blockedUsers.map(user => user.id);
+  const notBlockedDisconnectedUsers = disconnectedUsers.filter(disconnectedUser => {
+    return blockedUsersIds.every(id => id !== disconnectedUser.id);
   });
 
   const message = await client.chatMessage.create({
@@ -80,7 +81,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
   });
 
   sendPushNotification({
-    users: filteredDisconnectedUsers,
+    users: notBlockedDisconnectedUsers,
     title: user.displayName,
     body: decryptMessage(content),
     sound: 'message_sound.mp3',
