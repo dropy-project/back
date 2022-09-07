@@ -51,7 +51,6 @@ export async function sendPushNotification(notification: Notification | BatchedN
   }
 
   try {
-    console.log('Sending push notification to', single.user.username, batched.users.map(user => user.username).join(', '));
     return await push.send(tokens, {
       topic: 'com.dropy.project',
       title: notification.title,
