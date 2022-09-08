@@ -29,8 +29,6 @@ services:
       API_PORT: '${API_PORT}'
     networks:
       - back
-    volumes:
-      - ./.content:/app/.content
 
   studio:
     build:
@@ -59,6 +57,8 @@ services:
       CONTENT_PORT: '${CONTENT_PORT}'
     networks:
      - back
+    volumes:
+      - ./.content:/app/.content
 
   socket:
     build:
