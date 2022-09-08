@@ -36,13 +36,21 @@
 > Si le chema de la BD doit être modifié
 
 - En production
-    - lancer docker-compose `docker-compose up`
-    - entrer dans le conteneur de l'API : `docker exec -it api /bin/bash`
-    - effectuer la migration : `npm run prisma:migrate`
+    - lancer docker-compose `docker-compose up -d`
+    - entrer dans le conteneur de l'API : `docker exec -it <nom_conteneur_api> /bin/bash`
+    - effectuer la migration : `npx prisma migrate deploy`
 
 - En développement
     - lancer la base de donnée `docker-compose up postgres`
-    - effectuer la migration : `npm run prisma:migrate`
+    - Option 1. Créer une migration : `npx prisma migrate dev`
+    - Option 2. Appliquer une migration déjà existante `npx prisma migrate deploy`
+
+### Deployer en production
+
+- Mettre à jour le fichier `version.json`
+- Commit la version et créer un tag git
+- Rebase la branche production et push
+- Sur le vps : pull la branche et build puis lancer docker-compose
 
 ### Variables d'environnement : 
 ```
