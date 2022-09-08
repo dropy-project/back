@@ -142,9 +142,10 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
   const userConversations: UserConversation[] = [];
   for (const conv of chatConversations) {
     const otherUser = conv.users.find((u: User) => u.id !== user.id);
-    const lastMessage = await getLastMessage(conv.id);
 
-    const lastMessagePreview = (lastMessage?.content as SimplifiedDropy).id != undefined ? null : (lastMessage?.content as string);
+    const lastMessage = await getLastMessage(conv.id);
+    const lastMessageContent: string | SimplifiedDropy | null = lastMessage.content;
+    const lastMessagePreview: string | null = typeof lastMessageContent === 'string' ? lastMessageContent : null;
 
     userConversations.push({
       id: conv.id,
@@ -219,9 +220,7 @@ export async function closeConversation(conversationId: number): Promise<void> {
 
 export async function getAllMessages(conversationId: number): Promise<UserMessage[]> {
   const chatMessages = await client.chatMessage.findMany({
-    where: {
-      conversationId: conversationId,
-    },
+    where: { conversationId: conversationId },
     include: { sender: true, dropy: true },
   });
 
