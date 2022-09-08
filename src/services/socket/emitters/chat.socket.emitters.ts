@@ -9,7 +9,6 @@ import { getRoomConnectedUsers, getUsersSockets, handleSocketRawError } from '@u
 
 import * as userController from '@services/api/controllers/users.controller';
 import * as chatService from '@services/socket/services/chat.socket.service';
-import { SimplifiedDropy } from '@/interfaces/dropy.interface';
 
 export async function joinConversation(clientSocket: AuthenticatedSocket, conversationId: number, callback: SocketCallback<UserMessage[]>) {
   await clientSocket.join(`conversation-${conversationId}`);
@@ -90,9 +89,8 @@ export async function sendConnectionStatus(clientSocket: AuthenticatedSocket, co
     });
 
     const usersToEmit = await getUsersSockets(chatNamespace, conversation.users);
-    const lastMessage = await chatService.getLastMessage(conversation.id);
     usersToEmit.forEach(socket => {
-      emitConversationUpdated(socket, conversation, lastMessage).catch(error => {
+      emitConversationUpdated(socket, conversation).catch(error => {
         handleSocketRawError(null, error);
       });
     });
@@ -123,29 +121,15 @@ export async function closeConversation(conversationId: any, callback: SocketCal
   });
 }
 
-const emitConversationUpdated = async (socket: AuthenticatedSocket, conversation: ChatConversation & { users: User[] }, lastMessage: UserMessage) => {
-  const otherUser = conversation.users.find((u: User) => u.id !== socket.user.id);
-
-  const unreadMessagesCount = await chatService.getConversationUnreadMessageCount(conversation.id, otherUser.id);
-
-  const lastMessagePreview: string | null = (lastMessage?.content as SimplifiedDropy).id != undefined ? null : (lastMessage?.content as string);
-
-  const data: UserConversation = {
-    id: conversation.id,
-    isOnline: socket.user.isOnline,
-    unreadMessagesCount,
-    lastMessagePreview,
-    lastMessageDate: lastMessage?.date ?? null,
-    user: {
-      id: otherUser.id,
-      username: otherUser.username,
-      displayName: otherUser.displayName,
-      avatarUrl: otherUser.avatarUrl,
-    },
-  };
+const emitConversationUpdated = async (
+  socket: AuthenticatedSocket,
+  conversation: ChatConversation & { users: User[] },
+  lastMessage?: UserMessage,
+) => {
+  const updatedConversation = await chatService.chatConversationToUserConversation(socket.user, conversation, lastMessage);
 
   chatNamespace.to(socket.id).emit('conversation_updated', {
     status: 200,
-    data,
+    data: updatedConversation,
   });
 };

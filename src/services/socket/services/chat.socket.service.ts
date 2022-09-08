@@ -141,25 +141,7 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
 
   const userConversations: UserConversation[] = [];
   for (const conv of chatConversations) {
-    const otherUser = conv.users.find((u: User) => u.id !== user.id);
-
-    const lastMessage = await getLastMessage(conv.id);
-    const lastMessageContent: string | SimplifiedDropy | null = lastMessage.content;
-    const lastMessagePreview: string | null = typeof lastMessageContent === 'string' ? lastMessageContent : null;
-
-    userConversations.push({
-      id: conv.id,
-      isOnline: otherUser.isOnline,
-      unreadMessagesCount: await getConversationUnreadMessageCount(conv.id, otherUser.id),
-      lastMessagePreview,
-      lastMessageDate: lastMessage?.date ?? null,
-      user: {
-        id: otherUser.id,
-        username: otherUser.username,
-        displayName: otherUser.displayName,
-        avatarUrl: otherUser.avatarUrl,
-      },
-    });
+    userConversations.push(await chatConversationToUserConversation(user, conv));
   }
 
   return userConversations;
@@ -256,4 +238,30 @@ export async function markConversationAsRead(conversationId: number, userId: num
     },
     data: { read: true },
   });
+}
+
+export async function chatConversationToUserConversation(
+  user: User,
+  chatConversations: ChatConversation & { users: User[] },
+  lastMessage?: UserMessage,
+): Promise<UserConversation> {
+  const otherUser = chatConversations.users.find((u: User) => u.id !== user.id);
+
+  const _lastMessage = lastMessage ?? (await getLastMessage(chatConversations.id));
+  const lastMessageContent: string | SimplifiedDropy | null = _lastMessage.content;
+  const lastMessagePreview: string | null = typeof lastMessageContent === 'string' ? lastMessageContent : null;
+
+  return {
+    id: chatConversations.id,
+    isOnline: otherUser.isOnline,
+    unreadMessagesCount: await getConversationUnreadMessageCount(chatConversations.id, otherUser.id),
+    lastMessagePreview,
+    lastMessageDate: _lastMessage?.date ?? null,
+    user: {
+      id: otherUser.id,
+      username: otherUser.username,
+      displayName: otherUser.displayName,
+      avatarUrl: otherUser.avatarUrl,
+    },
+  };
 }
