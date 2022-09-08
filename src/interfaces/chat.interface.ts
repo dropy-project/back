@@ -13,7 +13,7 @@ export interface UserConversation {
 export interface UserMessage {
   id: number;
   date: Date;
-  content: string | SimplifiedDropy;
+  content: string | SimplifiedDropy | null;
   read: boolean;
   sender: SimplifiedUser;
 }

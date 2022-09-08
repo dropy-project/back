@@ -10,9 +10,12 @@ import * as chatSocket from '../emitters/chat.socket.emitters';
 
 export function startSocket() {
   chatNamespace.on('connection', async (socket: AuthenticatedSocket) => {
+    try {
+      chatSocket.sendConnectionStatus(socket, true);
+    } catch (error) {
+      handleSocketRawError(null, error);
+    }
     const logger = new Logger('Chat Socket', socket.user);
-
-    chatSocket.sendConnectionStatus(socket, true);
     logger.log('Connected');
 
     socket.on('join_conversation', async (data, callback) => {

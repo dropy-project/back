@@ -181,8 +181,9 @@ export async function getLastMessage(conversationId: number): Promise<UserMessag
     include: { sender: true, dropy: true },
   });
 
-  return {
-    content: lastMessage.content ?? {
+  let content: SimplifiedDropy | string | null = lastMessage.content;
+  if (content == null && lastMessage.dropy != null) {
+    content = {
       id: lastMessage.dropy.id,
       latitude: lastMessage.dropy.latitude,
       longitude: lastMessage.dropy.longitude,
@@ -192,7 +193,11 @@ export async function getLastMessage(conversationId: number): Promise<UserMessag
       creationDate: lastMessage.dropy.creationDate,
       emitter: { id: lastMessage.dropy.emitterId },
       retriever: { id: lastMessage.dropy.retrieverId },
-    },
+    };
+  }
+
+  return {
+    content,
     date: lastMessage.date,
     id: lastMessage.id,
     read: lastMessage.read,
