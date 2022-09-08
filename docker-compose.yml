@@ -30,7 +30,7 @@ services:
     networks:
       - back
     volumes:
-      - ./public:/app/public
+      - ./.content:/app/.content
 
   studio:
     build:
