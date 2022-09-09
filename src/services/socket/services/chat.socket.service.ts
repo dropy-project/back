@@ -95,14 +95,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     title: user.displayName,
     body: decryptMessage(content),
     sound: 'message_sound.mp3',
-    payload: {
-      id: conversation.id,
-      user: {
-        id: user.id,
-        username: user.username,
-        displayName: user.displayName,
-      },
-    } as UserConversation,
+    payload: conversation.id,
   });
 
   return {

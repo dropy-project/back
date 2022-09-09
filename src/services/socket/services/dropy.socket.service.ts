@@ -36,7 +36,7 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<Dropy>
     title: `${user.displayName} just found your drop !`,
     body: 'Start chating with him !',
     sound: 'message_sound.mp3',
-    payload: conversation,
+    payload: conversation.id,
   });
 
   return newDropy;
