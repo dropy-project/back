@@ -8,7 +8,7 @@ import { Profile } from '@interfaces/user.interface';
 import * as userService from './users.service';
 import crypto from 'crypto-js';
 
-export async function register(displayName: string, email: string, password: string): Promise<User> {
+export async function register(displayName: string, email: string, password: string, newsLetter: boolean): Promise<User> {
   const findUser: User = await client.user.findUnique({ where: { email } });
   if (findUser) throw new HttpException(409, `This email is already registered`);
 
@@ -20,6 +20,7 @@ export async function register(displayName: string, email: string, password: str
       email,
       password: hashedPassword,
       username,
+      newsLetter,
     },
   });
   return createUserData;
@@ -31,6 +32,11 @@ export async function login(email: string, password: string): Promise<UserTokens
 
   const hash = crypto.SHA256(password).toString();
   if (hash !== user.password) throw new HttpException(403, 'Wrong password');
+
+  await client.user.update({
+    where: { id: user.id },
+    data: { lastLoginDate: new Date() },
+  });
 
   const profile = await userService.getUserProfile(user.id);
   return { ...createUserToken(user), profile };

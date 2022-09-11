@@ -31,6 +31,8 @@ export async function findDropiesByGeohash(user: User, zones: string[], excludeU
       creationDate: dropy.creationDate,
       latitude: dropy.latitude,
       longitude: dropy.longitude,
+      premium: dropy.emitter.isPremium,
+      ambassador: dropy.emitter.isAmbassador,
       emitterId: dropy.emitterId,
     };
   });

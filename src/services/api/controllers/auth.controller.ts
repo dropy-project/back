@@ -24,10 +24,11 @@ export async function versionCheck(req: Request, res: Response, next: NextFuncti
 
 export async function register(req: Request, res: Response, next: NextFunction) {
   try {
-    const { email, displayName, password } = req.body;
+    const { email, displayName, password, newsLetter } = req.body;
     utils.throwIfNotString(email, displayName, password);
+    utils.throwIfNotBoolean(newsLetter);
 
-    const createUserData: User = await authService.register(displayName, email, password);
+    const createUserData: User = await authService.register(displayName, email, password, newsLetter);
 
     res.status(201).json(createUserData);
   } catch (error) {

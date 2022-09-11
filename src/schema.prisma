@@ -27,8 +27,11 @@ model User {
   registerDate DateTime @default(now())
   deviceToken  String?
 
-  email    String @unique
-  password String?
+  email         String @unique
+  password      String
+  lastLoginDate DateTime @default(now())
+
+  newsLetter Boolean @default(false)
 
   username    String @unique
   displayName String
@@ -42,12 +45,13 @@ model User {
   isAmbassador Boolean @default(false)
   isPremium    Boolean @default(false)
   isBanned     Boolean @default(false)
+  isDeleted    Boolean @default(false)
 
   emittedDropies   Dropy[] @relation("emittedDropies")
   retrievedDropies Dropy[] @relation("retrievedDropies")
 
-  lastPingDate     DateTime?
-  lastPingGeohash  String?
+  lastPingDate    DateTime?
+  lastPingGeohash String?
 
   isOnline      Boolean            @default(false)
   conversations ChatConversation[]
@@ -73,7 +77,7 @@ model Dropy {
 
   latitude  Float
   longitude Float
-  geohash String
+  geohash   String
 
   mediaUrl  String?
   mediaData String?
