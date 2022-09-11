@@ -28,14 +28,11 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<Dropy>
     data: { retriever: { connect: { id: user.id } }, retrieveDate: new Date() },
   });
 
-  const conversation = await createOrUpdateChatConversation(newDropy);
-
   sendPushNotification({
     user: emitter,
     title: `${user.displayName} just found your drop !`,
     body: 'Start chating with him !',
     sound: 'message_sound.mp3',
-    payload: conversation.id,
   });
 
   return newDropy;
@@ -99,7 +96,7 @@ export async function createDropy(
   return dropy;
 }
 
-const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConversation> => {
+export async function createOrUpdateChatConversation(dropy: Dropy): Promise<ChatConversation> {
   const existingConversation = await client.chatConversation.findFirst({
     where: {
       users: {
@@ -140,4 +137,4 @@ const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConvers
     await sendDropyAsMessage(newConversation.id);
     return newConversation;
   }
-};
+}

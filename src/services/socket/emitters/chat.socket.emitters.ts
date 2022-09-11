@@ -9,6 +9,10 @@ import { getRoomConnectedUsers, getUsersSockets, handleSocketRawError } from '@u
 
 import * as userController from '@services/api/controllers/users.controller';
 import * as chatService from '@services/socket/services/chat.socket.service';
+import { getDropyById } from '@/services/api/services/dropy.service';
+
+import * as dropySocket from '../services/dropy.socket.service';
+import { getUserConversationWithUser } from '@services/socket/services/chat.socket.service';
 
 export async function joinConversation(clientSocket: AuthenticatedSocket, conversationId: number, callback: SocketCallback<UserMessage[]>) {
   await clientSocket.join(`conversation-${conversationId}`);
@@ -29,6 +33,26 @@ export async function joinConversation(clientSocket: AuthenticatedSocket, conver
 
   callback({
     status: 200,
+  });
+}
+
+export async function createConversation(clientSocket: AuthenticatedSocket, dropyId: number, callback: SocketCallback<UserConversation>) {
+  const dropy = await getDropyById(dropyId);
+  const chatConversation = await dropySocket.createOrUpdateChatConversation(dropy);
+  const chatConversationwithusers = await getUserConversationWithUser(chatConversation);
+  const userConversation = await chatService.chatConversationToUserConversation(clientSocket.user, chatConversationwithusers);
+
+  const sockets = await getUsersSockets(chatNamespace, chatConversationwithusers.users);
+  sockets.forEach(socket => {
+    socket.emit('conversation_created', {
+      status: 200,
+      data: userConversation,
+    });
+  });
+
+  callback({
+    status: 200,
+    data: userConversation,
   });
 }
 

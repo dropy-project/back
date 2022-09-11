@@ -30,6 +30,16 @@ export function startSocket() {
       }
     });
 
+    socket.on('conversation_created', async (data, callback) => {
+      try {
+        throwIfNotFunction(callback);
+
+        await chatSocket.createConversation(socket, data, callback);
+      } catch (error) {
+        handleSocketRawError(callback, error);
+      }
+    });
+
     socket.on('list_messages', async (data, callback) => {
       try {
         const { conversationId, offset, limit } = data;

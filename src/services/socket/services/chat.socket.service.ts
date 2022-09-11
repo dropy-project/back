@@ -140,6 +140,17 @@ export async function getAllUserConversations(user: User): Promise<UserConversat
   return userConversations;
 }
 
+export async function getUserConversationWithUser(chatConversation: ChatConversation): Promise<ChatConversation & { users: User[] }> {
+  const chatConversationWithUsers = await client.chatConversation.findUnique({
+    where: {
+      id: chatConversation.id,
+    },
+    include: { users: true },
+  });
+
+  return chatConversationWithUsers;
+}
+
 export async function getConversationUnreadMessageCount(conversationId: number, userId: number): Promise<number> {
   return await client.chatMessage.count({
     where: {
