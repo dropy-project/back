@@ -1,17 +1,32 @@
 -- CreateEnum
 CREATE TYPE "MediaType" AS ENUM ('NONE', 'TEXT', 'PICTURE', 'VIDEO', 'MUSIC');
 
+-- CreateEnum
+CREATE TYPE "Pronouns" AS ENUM ('UNKOWN', 'HE_HIM', 'SHE_HER');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
-    "uid" TEXT NOT NULL,
-    "username" TEXT NOT NULL,
-    "displayName" TEXT NOT NULL,
     "registerDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deviceToken" TEXT,
-    "lastGeolocationPingDate" TIMESTAMP(3),
-    "lastGeolocationPingLatitude" DOUBLE PRECISION,
-    "lastGeolocationPingLongitude" DOUBLE PRECISION,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "lastLoginDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "newsLetter" BOOLEAN NOT NULL DEFAULT false,
+    "username" TEXT NOT NULL,
+    "displayName" TEXT NOT NULL,
+    "avatarUrl" TEXT,
+    "pronouns" "Pronouns" NOT NULL DEFAULT 'UNKOWN',
+    "about" TEXT,
+    "isDeveloper" BOOLEAN NOT NULL DEFAULT false,
+    "isAdmin" BOOLEAN NOT NULL DEFAULT false,
+    "isAmbassador" BOOLEAN NOT NULL DEFAULT false,
+    "isPremium" BOOLEAN NOT NULL DEFAULT false,
+    "isBanned" BOOLEAN NOT NULL DEFAULT false,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "lastPingDate" TIMESTAMP(3),
+    "lastPingGeohash" TEXT,
+    "isOnline" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -25,9 +40,10 @@ CREATE TABLE "Dropy" (
     "retrieveDate" TIMESTAMP(3),
     "latitude" DOUBLE PRECISION NOT NULL,
     "longitude" DOUBLE PRECISION NOT NULL,
-    "filePath" TEXT,
+    "geohash" TEXT NOT NULL,
+    "mediaUrl" TEXT,
     "mediaData" TEXT,
-    "mediaType" "MediaType" NOT NULL DEFAULT E'NONE',
+    "mediaType" "MediaType" NOT NULL DEFAULT 'NONE',
     "chatConversationId" INTEGER,
 
     CONSTRAINT "Dropy_pkey" PRIMARY KEY ("id")
@@ -56,16 +72,39 @@ CREATE TABLE "ChatMessage" (
 );
 
 -- CreateTable
+CREATE TABLE "Report" (
+    "id" SERIAL NOT NULL,
+    "senderId" INTEGER NOT NULL,
+    "reportedId" INTEGER NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "dropyId" INTEGER,
+
+    CONSTRAINT "Report_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_blockedUsers" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
 CREATE TABLE "_ChatConversationToUser" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_uid_key" ON "User"("uid");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_blockedUsers_AB_unique" ON "_blockedUsers"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_blockedUsers_B_index" ON "_blockedUsers"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_ChatConversationToUser_AB_unique" ON "_ChatConversationToUser"("A", "B");
@@ -90,6 +129,21 @@ ALTER TABLE "ChatMessage" ADD CONSTRAINT "ChatMessage_dropyId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "ChatMessage" ADD CONSTRAINT "ChatMessage_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "ChatConversation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Report" ADD CONSTRAINT "Report_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Report" ADD CONSTRAINT "Report_reportedId_fkey" FOREIGN KEY ("reportedId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Report" ADD CONSTRAINT "Report_dropyId_fkey" FOREIGN KEY ("dropyId") REFERENCES "Dropy"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_blockedUsers" ADD CONSTRAINT "_blockedUsers_A_fkey" FOREIGN KEY ("A") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_blockedUsers" ADD CONSTRAINT "_blockedUsers_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ChatConversationToUser" ADD CONSTRAINT "_ChatConversationToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatConversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;

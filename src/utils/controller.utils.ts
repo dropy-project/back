@@ -16,6 +16,10 @@ export function isNotAFunction(...args: unknown[]) {
   return args.some(arg => typeof arg !== 'function');
 }
 
+export function isNotABoolean(...args: unknown[]) {
+  return args.some(arg => typeof arg !== 'boolean');
+}
+
 export function throwIfNull(...args: unknown[]) {
   if (isNull(...args)) {
     throw HttpException.MISSING_PARAMETER;
@@ -30,6 +34,12 @@ export function throwIfNotNumber(...args: unknown[]) {
 
 export function throwIfNotString(...args: string[]) {
   if (isNotAString(...args) || isNull(...args)) {
+    throw HttpException.INVALID_PARAMETER;
+  }
+}
+
+export function throwIfNotBoolean(...args: boolean[]) {
+  if (isNotABoolean(...args) || isNull(...args)) {
     throw HttpException.INVALID_PARAMETER;
   }
 }

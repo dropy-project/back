@@ -25,7 +25,15 @@ export async function createDropy(
 
   dropyNamespace.to(`zone-${dropy.geohash}`).emit('dropy_created', {
     status: 200,
-    data: dropy,
+    data: {
+      id: dropy.id,
+      latitude: dropy.latitude,
+      longitude: dropy.longitude,
+      creationDate: dropy.creationDate,
+      emitterId: dropy.emitterId,
+      ambassador: clientSocket.user.isAmbassador,
+      premium: clientSocket.user.isPremium,
+    } as DropyAround,
   });
 
   callback({

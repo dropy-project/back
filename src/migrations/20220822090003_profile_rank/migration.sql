@@ -1,7 +1,0 @@
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "isAmbassador" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "isBanned" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "isDeveloper" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "isPremium" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "profileScore" INTEGER NOT NULL DEFAULT 1000;
