@@ -24,10 +24,10 @@ export async function versionCheck(req: Request, res: Response, next: NextFuncti
 
 export async function register(req: Request, res: Response, next: NextFunction) {
   try {
-    const { uid, displayName } = req.body;
-    utils.throwIfNotString(uid, displayName);
+    const { email, displayName, password } = req.body;
+    utils.throwIfNotString(email, displayName, password);
 
-    const createUserData: User = await authService.register(uid, displayName);
+    const createUserData: User = await authService.register(displayName, email, password);
 
     res.status(201).json(createUserData);
   } catch (error) {
@@ -37,10 +37,10 @@ export async function register(req: Request, res: Response, next: NextFunction) 
 
 export async function logIn(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { uid } = req.body;
-    utils.throwIfNotString(uid);
+    const { email, password } = req.body;
+    utils.throwIfNotString(email, password);
 
-    const authData = await authService.login(uid);
+    const authData = await authService.login(email, password);
     res.status(200).json(authData);
   } catch (error) {
     next(error);
