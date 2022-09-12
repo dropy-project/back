@@ -19,7 +19,6 @@ enum Pronouns {
   UNKOWN
   HE_HIM
   SHE_HER
-  THEY_THEM
   OTHER
 }
 
