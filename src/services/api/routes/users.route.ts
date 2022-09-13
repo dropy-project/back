@@ -14,6 +14,7 @@ export function getRouter() {
   router.get(`${path}/profile/:userId`, authMiddleware as any, usersController.getProfile, errorMiddleware);
   router.get(`${path}/profile/:userId/picture`, authMiddleware as any, usersController.getProfilePicture, errorMiddleware);
 
+  router.get(`${path}/profile`, authMiddleware as any, usersController.getUserProfile, errorMiddleware);
   router.post(`${path}/profile`, authMiddleware as any, usersController.updateUserProfile, errorMiddleware);
   router.post(`${path}/profile/picture`, authMiddleware as any, usersController.updateProfilePicture, errorMiddleware);
   router.delete(`${path}/profile/picture`, authMiddleware as any, usersController.deleteProfilePicture, errorMiddleware);

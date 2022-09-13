@@ -65,6 +65,15 @@ export async function updateUserProfile(req: AuthenticatedRequest, res: Response
   }
 }
 
+export async function getUserProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const profile = await userService.getUserProfile(req.user.id);
+    res.status(200).json(profile);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function updateProfilePicture(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     utils.throwIfNull(req.files);
