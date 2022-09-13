@@ -30,7 +30,7 @@ export function startSocket() {
       }
     });
 
-    socket.on('conversation_created', async (data, callback) => {
+    socket.on('create_conversation', async (data, callback) => {
       try {
         throwIfNotFunction(callback);
 
