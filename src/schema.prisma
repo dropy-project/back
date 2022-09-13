@@ -19,6 +19,7 @@ enum Pronouns {
   UNKNOWN
   HE_HIM
   SHE_HER
+  OTHER
 }
 
 model User {
