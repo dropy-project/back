@@ -1,12 +1,13 @@
 import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
+import { DropyWithUsers } from '@/interfaces/dropy.interface';
 import { sendPushNotification } from '@/notification';
 import { uploadPrivateContent } from '@/utils/content.utils';
 import { GEOHASH_SIZE } from '@/utils/geolocation.utils';
 import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
 import Geohash from 'ngeohash';
 
-export async function retrieveDropy(user: User, dropyId: number): Promise<Dropy> {
+export async function retrieveDropy(user: User, dropyId: number): Promise<[DropyWithUsers, string]> {
   const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
   if (dropy == undefined) {
@@ -35,7 +36,30 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<Dropy>
     sound: 'message_sound.mp3',
   });
 
-  return newDropy;
+  const dropyWithUsers: DropyWithUsers = {
+    id: newDropy.id,
+    conversationId: dropy.chatConversationId,
+    latitude: newDropy.latitude,
+    longitude: newDropy.longitude,
+    mediaType: newDropy.mediaType,
+    mediaUrl: newDropy.mediaUrl,
+    creationDate: newDropy.creationDate,
+    retrieveDate: newDropy.retrieveDate,
+    retriever: {
+      id: user.id,
+      username: user.username,
+      avatarUrl: user.avatarUrl,
+      displayName: user.displayName,
+    },
+    emitter: {
+      id: emitter.id,
+      username: emitter.username,
+      avatarUrl: emitter.avatarUrl,
+      displayName: emitter.displayName,
+    },
+  };
+
+  return [dropyWithUsers, dropy.geohash];
 }
 
 export async function createDropy(

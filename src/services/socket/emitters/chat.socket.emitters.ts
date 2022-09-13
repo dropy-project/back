@@ -9,10 +9,10 @@ import { getRoomConnectedUsers, getUsersSockets, handleSocketRawError } from '@u
 
 import * as userController from '@services/api/controllers/users.controller';
 import * as chatService from '@services/socket/services/chat.socket.service';
-import { getDropyById } from '@/services/api/services/dropy.service';
 
 import * as dropySocket from '../services/dropy.socket.service';
 import { getUserConversationWithUser } from '@services/socket/services/chat.socket.service';
+import { getDropyById } from '@/utils/dropy.utils';
 
 export async function joinConversation(clientSocket: AuthenticatedSocket, conversationId: number, callback: SocketCallback<UserMessage[]>) {
   await clientSocket.join(`conversation-${conversationId}`);

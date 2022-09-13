@@ -1,18 +1,8 @@
 import client from '@/client';
 import { HttpException } from '@exceptions/HttpException';
-import { Dropy, MediaType, User } from '@prisma/client';
+import { MediaType, User } from '@prisma/client';
 import { deleteContent } from '@/utils/content.utils';
 import { DropyWithUsers } from '@/interfaces/dropy.interface';
-
-export async function getDropyById(dropyId: number): Promise<Dropy> {
-  const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
-
-  if (dropy == undefined) {
-    throw new HttpException(404, `Dropy with id ${dropyId} not found`);
-  }
-
-  return dropy;
-}
 
 export async function getDropy(dropyId: number): Promise<DropyWithUsers> {
   const dropy = await client.dropy.findUnique({
