@@ -44,7 +44,7 @@ export async function createConversation(clientSocket: AuthenticatedSocket, drop
 
   const sockets = await getUsersSockets(chatNamespace, chatConversationwithusers.users);
   sockets.forEach(socket => {
-    socket.emit('conversation_created', {
+    socket.emit('conversation_updated', {
       status: 200,
       data: userConversation,
     });
