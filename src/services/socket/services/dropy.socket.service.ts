@@ -120,7 +120,7 @@ export async function createDropy(
   return dropy;
 }
 
-export async function createOrUpdateChatConversation(dropy: Dropy): Promise<ChatConversation> {
+export async function linkConversationToDropy(dropy: Dropy): Promise<ChatConversation> {
   const existingConversation = await client.chatConversation.findFirst({
     where: {
       users: {
@@ -130,6 +130,16 @@ export async function createOrUpdateChatConversation(dropy: Dropy): Promise<Chat
       },
     },
   });
+
+  const existingMessageWithThisDropy = await client.chatMessage.findFirst({
+    where: { dropyId: dropy.id },
+  });
+
+  console.log(existingMessageWithThisDropy);
+
+  if (existingMessageWithThisDropy != null) {
+    throw new HttpException(409, `Dropy with id ${dropy.id} is already linked to a conversation`);
+  }
 
   const sendDropyAsMessage = async (conversationId: number) => {
     await client.chatMessage.create({

@@ -38,7 +38,7 @@ model User {
   displayName String
 
   avatarUrl String?
-  pronouns  Pronouns @default(UNKOWN)
+  pronouns  Pronouns @default(UNKNOWN)
   about     String?
 
   isDeveloper  Boolean @default(false)
