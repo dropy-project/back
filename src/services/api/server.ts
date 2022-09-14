@@ -1,6 +1,7 @@
 import * as authRoutes from '@services/api/routes/auth.route';
 import * as usersRoutes from '@services/api/routes/users.route';
 import * as dropyRoutes from './routes/dropy.route';
+import * as metricsRoutes from '@services/api/routes/metrics.route';
 import dotenv from 'dotenv';
 
 import morgan from 'morgan';
@@ -48,6 +49,7 @@ function initializeRoutes() {
   app.use(authRoutes.getRouter());
   app.use(dropyRoutes.getRouter());
   app.use(usersRoutes.getRouter());
+  app.use(metricsRoutes.getRouter());
 }
 
 function handleTopLevelErrors(err, req, res, next) {

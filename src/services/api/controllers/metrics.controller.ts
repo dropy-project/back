@@ -6,5 +6,10 @@ import * as metricsService from '@services/api/services/metrics.service';
 import * as utils from '@utils/controller.utils';
 
 export async function API(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
     const data = await metricsService.API();
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
 }
