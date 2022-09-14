@@ -16,7 +16,7 @@ enum MediaType {
 }
 
 enum Pronouns {
-  UNKOWN
+  UNKNOWN
   HE_HIM
   SHE_HER
   OTHER
@@ -38,7 +38,7 @@ model User {
   displayName String
 
   avatarUrl String?
-  pronouns  Pronouns @default(UNKOWN)
+  pronouns  Pronouns @default(UNKNOWN)
   about     String?
 
   isDeveloper  Boolean @default(false)

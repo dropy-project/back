@@ -4,13 +4,14 @@ import { HttpException } from '@/exceptions/HttpException';
 import { AuthenticatedRequest } from '@interfaces/auth.interface';
 import * as dropyService from '@services/api/services/dropy.service';
 import * as utils from '@utils/controller.utils';
+import { getDropyById } from '@/utils/dropy.utils';
 
 export async function getDropyMedia(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const dropyId = Number(req.params.id);
     utils.throwIfNotNumber(dropyId);
 
-    const dropy = await dropyService.getDropyById(dropyId);
+    const dropy = await getDropyById(dropyId);
 
     const isAllowed = req.user.id === dropy.emitterId || req.user.id === dropy.retrieverId;
     if (!isAllowed) {

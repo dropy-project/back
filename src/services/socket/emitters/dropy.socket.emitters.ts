@@ -1,4 +1,4 @@
-import { DropyAround } from '@/interfaces/dropy.interface';
+import { DropyAround, DropyWithUsers } from '@/interfaces/dropy.interface';
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 import { SocketCallback } from '@/interfaces/socket.interface';
 
@@ -41,16 +41,17 @@ export async function createDropy(
   });
 }
 
-export async function retrieveDropy(socket: AuthenticatedSocket, dropyId: number, callback: SocketCallback<null>) {
-  const dropy = await dropyService.retrieveDropy(socket.user, dropyId);
+export async function retrieveDropy(socket: AuthenticatedSocket, dropyId: number, callback: SocketCallback<DropyWithUsers>) {
+  const [dropyWithUsers, geohash] = await dropyService.retrieveDropy(socket.user, dropyId);
 
-  dropyNamespace.to(`zone-${dropy.geohash}`).emit('dropy_retrieved', {
+  dropyNamespace.to(`zone-${geohash}`).emit('dropy_retrieved', {
     status: 200,
     data: dropyId,
   });
 
   callback({
     status: 200,
+    data: dropyWithUsers,
   });
 }
 

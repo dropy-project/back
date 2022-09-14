@@ -1,12 +1,13 @@
 import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
+import { DropyWithUsers } from '@/interfaces/dropy.interface';
 import { sendPushNotification } from '@/notification';
 import { uploadPrivateContent } from '@/utils/content.utils';
 import { GEOHASH_SIZE } from '@/utils/geolocation.utils';
 import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
 import Geohash from 'ngeohash';
 
-export async function retrieveDropy(user: User, dropyId: number): Promise<Dropy> {
+export async function retrieveDropy(user: User, dropyId: number): Promise<[DropyWithUsers, string]> {
   const dropy = await client.dropy.findUnique({ where: { id: dropyId } });
 
   if (dropy == undefined) {
@@ -28,17 +29,37 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<Dropy>
     data: { retriever: { connect: { id: user.id } }, retrieveDate: new Date() },
   });
 
-  const conversation = await createOrUpdateChatConversation(newDropy);
-
   sendPushNotification({
     user: emitter,
     title: `${user.displayName} just found your drop !`,
     body: 'Start chating with him !',
     sound: 'message_sound.mp3',
-    payload: conversation.id,
   });
 
-  return newDropy;
+  const dropyWithUsers: DropyWithUsers = {
+    id: newDropy.id,
+    conversationId: dropy.chatConversationId,
+    latitude: newDropy.latitude,
+    longitude: newDropy.longitude,
+    mediaType: newDropy.mediaType,
+    mediaUrl: newDropy.mediaUrl,
+    creationDate: newDropy.creationDate,
+    retrieveDate: newDropy.retrieveDate,
+    retriever: {
+      id: user.id,
+      username: user.username,
+      avatarUrl: user.avatarUrl,
+      displayName: user.displayName,
+    },
+    emitter: {
+      id: emitter.id,
+      username: emitter.username,
+      avatarUrl: emitter.avatarUrl,
+      displayName: emitter.displayName,
+    },
+  };
+
+  return [dropyWithUsers, dropy.geohash];
 }
 
 export async function createDropy(
@@ -99,7 +120,7 @@ export async function createDropy(
   return dropy;
 }
 
-const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConversation> => {
+export async function linkConversationToDropy(dropy: Dropy): Promise<ChatConversation> {
   const existingConversation = await client.chatConversation.findFirst({
     where: {
       users: {
@@ -109,6 +130,16 @@ const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConvers
       },
     },
   });
+
+  const existingMessageWithThisDropy = await client.chatMessage.findFirst({
+    where: { dropyId: dropy.id },
+  });
+
+  console.log(existingMessageWithThisDropy);
+
+  if (existingMessageWithThisDropy != null) {
+    throw new HttpException(409, `Dropy with id ${dropy.id} is already linked to a conversation`);
+  }
 
   const sendDropyAsMessage = async (conversationId: number) => {
     await client.chatMessage.create({
@@ -140,4 +171,4 @@ const createOrUpdateChatConversation = async (dropy: Dropy): Promise<ChatConvers
     await sendDropyAsMessage(newConversation.id);
     return newConversation;
   }
-};
+}
