@@ -2,7 +2,7 @@
 CREATE TYPE "MediaType" AS ENUM ('NONE', 'TEXT', 'PICTURE', 'VIDEO', 'MUSIC');
 
 -- CreateEnum
-CREATE TYPE "Pronouns" AS ENUM ('UNKOWN', 'HE_HIM', 'SHE_HER');
+CREATE TYPE "Pronouns" AS ENUM ('UNKNOWN', 'HE_HIM', 'SHE_HER', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -16,7 +16,7 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "displayName" TEXT NOT NULL,
     "avatarUrl" TEXT,
-    "pronouns" "Pronouns" NOT NULL DEFAULT 'UNKOWN',
+    "pronouns" "Pronouns" NOT NULL DEFAULT 'UNKNOWN',
     "about" TEXT,
     "isDeveloper" BOOLEAN NOT NULL DEFAULT false,
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
