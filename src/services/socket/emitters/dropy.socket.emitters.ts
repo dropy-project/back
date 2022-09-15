@@ -41,6 +41,7 @@ export async function createDropy(
 
   callback({
     status: 200,
+    energy: clientSocket.user.energy,
   });
 }
 
@@ -55,6 +56,7 @@ export async function retrieveDropy(socket: AuthenticatedSocket, dropyId: number
   callback({
     status: 200,
     data: dropyWithUsers,
+    energy: socket.user.energy,
   });
 }
 

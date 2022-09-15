@@ -87,6 +87,7 @@ export async function userToProfile(user: User): Promise<Profile> {
     isBanned: user.isBanned,
     isDeveloper: user.isDeveloper,
     isPremium: user.isPremium,
+    energy: user.energy,
   };
 }
 
