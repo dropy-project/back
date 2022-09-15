@@ -63,6 +63,8 @@ model User {
 
   blockedUsers   User[] @relation("blockedUsers")
   blockedByUsers User[] @relation("blockedUsers")
+
+  energy Int @default(90)
 }
 
 model Dropy {
