@@ -24,6 +24,9 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<[Dropy
     throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
   }
 
+  if (emitter.energy <= 0) {
+    throw new HttpException(403, `User with emitterid ${dropy.emitterId} has not enough energy`);
+  }
   const newDropy = await client.dropy.update({
     where: { id: dropy.id },
     data: { retriever: { connect: { id: user.id } }, retrieveDate: new Date() },
