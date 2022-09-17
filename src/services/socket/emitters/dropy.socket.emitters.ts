@@ -49,7 +49,7 @@ export async function createDropy(
 export async function retrieveDropy(
   socket: AuthenticatedSocket,
   dropyId: number,
-  callback: SocketCallback<{ DropyWithUsers: DropyWithUsers; energy: number }>,
+  callback: SocketCallback<{ dropy: DropyWithUsers; energy: number }>,
 ) {
   const [dropyWithUsers, geohash] = await dropyService.retrieveDropy(socket.user, dropyId);
   await incrementUserEnergy(socket.user, RETRIEVE_ENERGY_COST);
