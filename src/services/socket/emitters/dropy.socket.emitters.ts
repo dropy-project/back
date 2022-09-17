@@ -60,7 +60,7 @@ export async function retrieveDropy(
 
   callback({
     status: 200,
-    data: { DropyWithUsers: dropyWithUsers, energy: socket.user.energy },
+    data: { dropy: dropyWithUsers, energy: socket.user.energy },
   });
 }
 
