@@ -15,7 +15,7 @@ export async function createDropy(
   longitude: number,
   mediaType: string,
   content: string | Buffer,
-  callback: SocketCallback<unknown>,
+  callback: SocketCallback<{ energy: number }>,
 ) {
   const dropy = await dropyService.createDropy(
     clientSocket.user,
