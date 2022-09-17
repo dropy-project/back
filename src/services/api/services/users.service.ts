@@ -145,22 +145,6 @@ export async function getProfilePicture(userId: number): Promise<string> {
   return user.avatarUrl;
 }
 
-/**
- * Modify the energy of a user
- * @param user The user which recover or drop a dropy
- * @param energyModification Can be positive or negative
- */
-export async function modifyEnergyLevelOfAnUser(user: User, energyModification: number): Promise<void> {
-  await client.user.update({
-    where: { id: user.id },
-    data: {
-      energy: {
-        increment: energyModification,
-      },
-    },
-  });
-}
-
 export async function updateDeviceToken(user: User, deviceToken: string): Promise<void> {
   await client.user.update({
     where: {

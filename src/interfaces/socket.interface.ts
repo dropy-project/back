@@ -1,7 +1,6 @@
 export interface SocketResponse<T> {
   status: number;
   data?: T;
-  energy?: number;
   error?: string;
 }
 
