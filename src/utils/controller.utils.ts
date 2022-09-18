@@ -20,6 +20,15 @@ export function isNotABoolean(...args: unknown[]) {
   return args.some(arg => typeof arg !== 'boolean');
 }
 
+export function isNotAnEmail(...args: unknown[]) {
+  return args.some(
+    arg =>
+      !/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+        arg as string,
+      ),
+  );
+}
+
 export function throwIfNull(...args: unknown[]) {
   if (isNull(...args)) {
     throw HttpException.MISSING_PARAMETER;
