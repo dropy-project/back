@@ -1,7 +1,6 @@
 import client from '@/client';
 import { HttpException } from '@/exceptions/HttpException';
 import { DropyWithUsers } from '@/interfaces/dropy.interface';
-import { sendPushNotification } from '@/notification';
 import { uploadPrivateContent } from '@/utils/content.utils';
 import { GEOHASH_SIZE } from '@/utils/geolocation.utils';
 import { ChatConversation, Dropy, MediaType, User } from '@prisma/client';
@@ -29,7 +28,7 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<[Dropy
   }
 
   if (user.energy <= 0) {
-    throw new HttpException(403, `User with emitterid ${dropy.emitterId} has not enough energy`);
+    throw new HttpException(406, `User with emitterid ${dropy.emitterId} has not enough energy`);
   }
 
   const newDropy = await client.dropy.update({
