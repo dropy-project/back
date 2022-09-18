@@ -1,21 +1,20 @@
 import client from '@/client';
 import { User } from '@prisma/client';
 
-export async function incrementUserEnergy(user: User, energyModification: number): Promise<void> {
-  if (user.energy + energyModification >= 90) {
-    user.energy = 90;
-  } else if (user.energy + energyModification <= 0) {
-    user.energy = 0;
+export async function incrementUserEnergy(user: User, energyIncrement: number): Promise<void> {
+  let newEnergyValue: number;
+  if (user.energy + energyIncrement >= 90) {
+    newEnergyValue = 90;
+  } else if (user.energy + energyIncrement <= 0) {
+    newEnergyValue = 0;
   } else {
-    user.energy += energyModification;
+    newEnergyValue += energyIncrement;
   }
   await client.user.update({
     where: { id: user.id },
     data: {
-      energy: {
-        increment: energyModification,
-      },
+      energy: newEnergyValue,
     },
   });
-  user.energy += energyModification;
+  user.energy = newEnergyValue;
 }
