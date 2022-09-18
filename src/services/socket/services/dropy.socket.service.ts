@@ -29,13 +29,6 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<[Dropy
     data: { retriever: { connect: { id: user.id } }, retrieveDate: new Date() },
   });
 
-  sendPushNotification({
-    user: emitter,
-    title: `${user.displayName} just found your drop !`,
-    body: 'Start chating with him !',
-    sound: 'message_sound.mp3',
-  });
-
   const dropyWithUsers: DropyWithUsers = {
     id: newDropy.id,
     conversationId: dropy.chatConversationId,
