@@ -10,4 +10,5 @@ export async function incrementUserEnergy(user: User, energyModification: number
       },
     },
   });
+  user.energy += energyModification;
 }
