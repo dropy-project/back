@@ -1,14 +1,13 @@
 import { Router } from 'express';
-import authMiddleware from '@middlewares/auth.middleware';
 import errorMiddleware from '@middlewares/error.middleware';
-import * as metricsController from '@services/api/controllers/metrics.controller';
+import * as metrics from '@services/api/services/metrics/metrics';
 
 const path = '/metrics';
 
 export function getRouter() {
   const router = Router();
 
-  router.get(`${path}/API`, metricsController.API, errorMiddleware);
+  router.get(`${path}/API`, metrics.API, errorMiddleware);
 
   return router;
 }
