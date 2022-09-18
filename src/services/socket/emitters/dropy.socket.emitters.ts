@@ -15,7 +15,7 @@ export async function createDropy(
   longitude: number,
   mediaType: string,
   content: string | Buffer,
-  callback: SocketCallback<unknown>,
+  callback: SocketCallback<{ energy: number }>,
 ) {
   const dropy = await dropyService.createDropy(
     clientSocket.user,
@@ -49,7 +49,7 @@ export async function createDropy(
 export async function retrieveDropy(
   socket: AuthenticatedSocket,
   dropyId: number,
-  callback: SocketCallback<{ DropyWithUsers: DropyWithUsers; energy: number }>,
+  callback: SocketCallback<{ dropy: DropyWithUsers; energy: number }>,
 ) {
   const [dropyWithUsers, geohash] = await dropyService.retrieveDropy(socket.user, dropyId);
   await incrementUserEnergy(socket.user, RETRIEVE_ENERGY_COST);
@@ -60,7 +60,7 @@ export async function retrieveDropy(
 
   callback({
     status: 200,
-    data: { DropyWithUsers: dropyWithUsers, energy: socket.user.energy },
+    data: { dropy: dropyWithUsers, energy: socket.user.energy },
   });
 }
 
