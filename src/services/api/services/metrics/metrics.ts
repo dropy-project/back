@@ -7,7 +7,7 @@ import { json } from 'stream/consumers';
 import { NextFunction, Response } from 'express';
 import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 
-export async function API(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<unknown> {
+export async function API(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   const limitDate = new Date(new Date().getTime() - 1000 * 60 * 60 * 24);
   const users = await client.user.count();
   const dropies = await client.dropy.count();
@@ -50,16 +50,23 @@ export async function API(req: AuthenticatedRequest, res: Response, next: NextFu
     },
   });
 
-  const metrics = {
-    total_users: users,
-    total_users_last_24h: activeUsers,
-    total_dropies: dropies,
-    total_dropies_dropped_last_24h: activeDropiesDropped,
-    total_dropies_found_last_24h: activeDropiesFound,
-    total_messages_last_24h: activeMessages,
-    total_reports_last_24h: activeReports,
-  };
-
-  //return metrics as a json in a http response
-  return res.json(metrics).status(200);
+  res.set('Content-Type', 'text/plain');
+  res.send(
+    `# HELP dropy_users_total Total number of users
+# TYPE dropy_users_total counter
+users_total ${users}
+active_users_total ${activeUsers}
+# HELP dropy_dropies_total Total number of dropies
+# TYPE dropy_dropies_total counter
+dropies_total ${dropies}
+active_dropies_dropped_total ${activeDropiesDropped}
+active_dropies_found_total ${activeDropiesFound}
+# HELP dropy_messages_total Total number of messages
+# TYPE dropy_messages_total counter
+messages_total ${activeMessages}
+# HELP dropy_reports_total Total number of reports
+# TYPE dropy_reports_total counter
+reports_total ${activeReports}
+`,
+  );
 }
