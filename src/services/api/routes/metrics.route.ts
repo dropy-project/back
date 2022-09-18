@@ -7,7 +7,7 @@ const path = '/metrics';
 export function getRouter() {
   const router = Router();
 
-  router.get(`${path}/API`, metrics.API, errorMiddleware);
+  router.get(`${path}`, metrics.API, errorMiddleware);
 
   return router;
 }
