@@ -20,11 +20,13 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<[Dropy
 
   const emitter = await client.user.findUnique({ where: { id: dropy.emitterId } });
 
+  const retriever = await client.user.findUnique({ where: { id: user.id } });
+
   if (emitter == undefined) {
     throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
   }
 
-  if (emitter.energy <= 0) {
+  if (retriever.energy <= 0) {
     throw new HttpException(403, `User with emitterid ${dropy.emitterId} has not enough energy`);
   }
   const newDropy = await client.dropy.update({
