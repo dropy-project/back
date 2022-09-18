@@ -47,6 +47,12 @@ export function throwIfNotString(...args: string[]) {
   }
 }
 
+export function throwIfNotEmail(...args: string[]) {
+  if (isNotAnEmail(...args) || isNull(...args)) {
+    throw HttpException.INVALID_PARAMETER;
+  }
+}
+
 export function throwIfNotBoolean(...args: boolean[]) {
   if (isNotABoolean(...args) || isNull(...args)) {
     throw HttpException.INVALID_PARAMETER;
