@@ -38,11 +38,11 @@ export async function createDropy(
       premium: clientSocket.user.isPremium,
     } as DropyAround,
   });
-  await incrementUserEnergy(clientSocket.user, EMIT_ENERGY_GAIN);
+  const energy = await incrementUserEnergy(clientSocket, EMIT_ENERGY_GAIN);
 
   callback({
     status: 200,
-    data: { energy: clientSocket.user.energy },
+    data: { energy },
   });
 }
 
@@ -52,7 +52,8 @@ export async function retrieveDropy(
   callback: SocketCallback<{ dropy: DropyWithUsers; energy: number }>,
 ) {
   const [dropyWithUsers, geohash] = await dropyService.retrieveDropy(socket.user, dropyId);
-  await incrementUserEnergy(socket.user, RETRIEVE_ENERGY_COST);
+  const energy = await incrementUserEnergy(socket, RETRIEVE_ENERGY_COST);
+
   dropyNamespace.to(`zone-${geohash}`).emit('dropy_retrieved', {
     status: 200,
     data: dropyId,
@@ -60,7 +61,7 @@ export async function retrieveDropy(
 
   callback({
     status: 200,
-    data: { dropy: dropyWithUsers, energy: socket.user.energy },
+    data: { dropy: dropyWithUsers, energy },
   });
 }
 

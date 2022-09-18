@@ -1,20 +1,22 @@
+import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 import client from '@/client';
-import { User } from '@prisma/client';
 
-export async function incrementUserEnergy(user: User, energyIncrement: number): Promise<void> {
-  let newEnergyValue = 0;
-  if (user.energy + energyIncrement >= 90) {
+export async function incrementUserEnergy(socket: AuthenticatedSocket, energyIncrement: number): Promise<number> {
+  let newEnergyValue = socket.user.energy + energyIncrement;
+
+  if (newEnergyValue >= 90) {
     newEnergyValue = 90;
-  } else if (user.energy + energyIncrement <= 0) {
+  } else if (newEnergyValue <= 0) {
     newEnergyValue = 0;
-  } else {
-    newEnergyValue += energyIncrement;
   }
-  await client.user.update({
-    where: { id: user.id },
+
+  const newUser = await client.user.update({
+    where: { id: socket.user.id },
     data: {
       energy: newEnergyValue,
     },
   });
-  user.energy = newEnergyValue;
+
+  socket.user = newUser;
+  return newEnergyValue;
 }

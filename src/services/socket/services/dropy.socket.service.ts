@@ -138,8 +138,6 @@ export async function linkConversationToDropy(dropy: Dropy): Promise<ChatConvers
     where: { dropyId: dropy.id },
   });
 
-  console.log(existingMessageWithThisDropy);
-
   if (existingMessageWithThisDropy != null) {
     throw new HttpException(409, `Dropy with id ${dropy.id} is already linked to a conversation`);
   }
