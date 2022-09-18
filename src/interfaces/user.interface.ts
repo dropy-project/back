@@ -16,6 +16,7 @@ export type Profile = Pick<
   | 'isAmbassador'
   | 'isBanned'
   | 'isPremium'
+  | 'energy'
 > & {
   emittedDropiesCount: number;
   retrievedDropiesCount: number;
