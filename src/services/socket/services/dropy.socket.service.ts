@@ -20,8 +20,6 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<[Dropy
 
   const emitter = await client.user.findUnique({ where: { id: dropy.emitterId } });
 
-  const retriever = await client.user.findUnique({ where: { id: user.id } });
-
   if (emitter == undefined) {
     throw new HttpException(404, `User with emitterid ${dropy.emitterId} not found`);
   }
@@ -30,7 +28,7 @@ export async function retrieveDropy(user: User, dropyId: number): Promise<[Dropy
     throw new HttpException(403, `User with id ${user.id} cannot retrieve his own dropy`);
   }
 
-  if (retriever.energy <= 0) {
+  if (user.energy <= 0) {
     throw new HttpException(403, `User with emitterid ${dropy.emitterId} has not enough energy`);
   }
 
@@ -131,7 +129,6 @@ export async function createDropy(
 }
 
 export async function linkConversationToDropy(dropy: Dropy): Promise<ChatConversation> {
-  console.log(dropy);
   if (dropy.emitterId == undefined || dropy.retrieverId == undefined) {
     throw 'Cant link a conversatin to a Dropy that has no emitter or retriever';
   }
