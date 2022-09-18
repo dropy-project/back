@@ -26,7 +26,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
     const { email, displayName, password, newsLetter } = req.body;
     utils.throwIfNotString(email, displayName, password);
     utils.throwIfNotBoolean(newsLetter);
-
+    utils.throwIfNotEmail(email);
     const createUserData = await authService.register(displayName, email, password, newsLetter);
 
     res.status(201).json(createUserData);
@@ -39,7 +39,7 @@ export async function logIn(req: Request, res: Response, next: NextFunction): Pr
   try {
     const { email, password } = req.body;
     utils.throwIfNotString(email, password);
-
+    utils.throwIfNotEmail(email);
     const authData = await authService.login(email, password);
     res.status(200).json(authData);
   } catch (error) {
