@@ -8,7 +8,6 @@ generator client {
 }
 
 enum MediaType {
-  NONE
   TEXT
   PICTURE
   VIDEO
@@ -84,7 +83,7 @@ model Dropy {
 
   mediaUrl  String?
   mediaData String?
-  mediaType MediaType @default(NONE)
+  mediaType MediaType
 
   chatConversation   ChatConversation? @relation(fields: [chatConversationId], references: [id])
   chatConversationId Int?
