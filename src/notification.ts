@@ -60,7 +60,7 @@ export async function sendPushNotification(notification: Notification | BatchedN
       title: notification.title,
       body: notification.body,
       sound: notification.sound ?? 'default',
-      badge: notification.badge,
+      badge: single.user.notificationBadgeCount,
       contentAvailable: true,
       clickAction: notification.payload ? JSON.stringify(notification.payload) : undefined,
     });

@@ -48,6 +48,15 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
   console.log(`Send notification : ${canSendNotification}`);
   console.log('-------------------');
 
+  user = await client.user.update({
+    where: { id: user.id },
+    data: {
+      notificationBadgeCount: {
+        increment: 1,
+      },
+    },
+  });
+
   sendPushNotification({
     user,
     title: `${dropiesAround.length} Drops found near your position!`,

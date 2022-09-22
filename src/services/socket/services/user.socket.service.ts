@@ -1,5 +1,6 @@
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 import client from '@/client';
+import { User } from '@prisma/client';
 
 export async function incrementUserEnergy(socket: AuthenticatedSocket, energyIncrement: number): Promise<number> {
   let newEnergyValue = socket.user.energy + energyIncrement;
@@ -19,4 +20,26 @@ export async function incrementUserEnergy(socket: AuthenticatedSocket, energyInc
 
   socket.user = newUser;
   return newEnergyValue;
+}
+
+export async function incrementUserBadgeNotification(user: User): Promise<User> {
+  const newUser = await client.user.update({
+    where: { id: user.id },
+    data: {
+      notificationBadgeCount: user.notificationBadgeCount + 1,
+    },
+  });
+
+  return newUser;
+}
+
+export async function resetUserBadgeNotification(user: User): Promise<User> {
+  const newUser = await client.user.update({
+    where: { id: user.id },
+    data: {
+      notificationBadgeCount: 0,
+    },
+  });
+
+  return newUser;
 }

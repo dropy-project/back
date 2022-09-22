@@ -65,6 +65,7 @@ model User {
   blockedByUsers User[] @relation("blockedUsers")
 
   energy Int @default(90)
+  notificationBadgeCount Int @default(0)
 }
 
 model Dropy {
