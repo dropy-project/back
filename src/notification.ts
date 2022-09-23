@@ -11,10 +11,6 @@ export interface Notification {
   badge?: number;
 }
 
-export interface BatchedNotification extends Omit<Notification, 'user'> {
-  users: User[];
-}
-
 let apnKey;
 if (fs.existsSync('./certNotification.p8')) {
   apnKey = fs.readFileSync('./certNotification.p8');
@@ -36,19 +32,11 @@ const push = new PushNotifications({
   },
 });
 
-export async function sendPushNotification(notification: Notification | BatchedNotification): Promise<Result[]> {
+export async function sendPushNotification(notification: Notification): Promise<Result[]> {
   const tokens = [];
 
   const single = notification as Notification;
-  const batched = notification as BatchedNotification;
-
-  if (batched.users != undefined) {
-    if (batched.users.length === 0) return;
-
-    batched.users.forEach(user => {
-      tokens.push(user.deviceToken);
-    });
-  } else if (single.user != undefined) {
+  if (single.user != undefined) {
     if (single.user != undefined) return;
 
     tokens.push(single.user.deviceToken);
