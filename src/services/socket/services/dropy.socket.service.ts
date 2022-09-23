@@ -70,11 +70,16 @@ export async function createDropy(
   content: string | Buffer,
   Authorization: string,
 ): Promise<Dropy> {
+  const mediaType: MediaType = MediaType[rawMediaType.toUpperCase()];
+  if (mediaType == undefined) {
+    throw new HttpException(400, `Invalid mediaType ${rawMediaType}`);
+  }
   const dropy = await client.dropy.create({
     data: {
       emitterId: user.id,
       latitude,
       longitude,
+      mediaType,
       geohash: Geohash.encode_int(latitude, longitude, GEOHASH_SIZE).toString(),
     },
   });
@@ -83,9 +88,7 @@ export async function createDropy(
     throw new HttpException(403, `User is not allowed to add a media for this dropy`);
   }
 
-  const mediaType: MediaType = MediaType[rawMediaType.toUpperCase()];
-
-  if (dropy.mediaType !== MediaType.NONE) {
+  if (dropy.mediaType !== undefined) {
     throw new HttpException(409, `Dropy with id ${dropy.id} has already a linked media`);
   }
 
