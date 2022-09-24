@@ -91,10 +91,10 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     },
   });
   const notBlockedDisconnectedUsersWithBadges = [];
-  notBlockedDisconnectedUsers.forEach(async User => {
-    await incrementUserBadgeNotification(User);
-    notBlockedDisconnectedUsersWithBadges.push(User);
-  });
+  for (const disconnectedUser of notBlockedDisconnectedUsers) {
+    const userWithBadge = await incrementUserBadgeNotification(disconnectedUser);
+    notBlockedDisconnectedUsersWithBadges.push(userWithBadge);
+  }
   notBlockedDisconnectedUsersWithBadges.forEach(disconnectedUser => {
     sendPushNotification({
       user: disconnectedUser,
