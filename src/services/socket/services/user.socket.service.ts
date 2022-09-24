@@ -26,7 +26,9 @@ export async function incrementUserBadgeNotification(user: User): Promise<User> 
   const newUser = await client.user.update({
     where: { id: user.id },
     data: {
-      notificationBadgeCount: user.notificationBadgeCount + 1,
+      notificationBadgeCount: {
+        increment: 1,
+      },
     },
   });
 

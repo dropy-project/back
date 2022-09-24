@@ -96,14 +96,14 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     notBlockedDisconnectedUsersWithBadges.push(User);
   });
   notBlockedDisconnectedUsersWithBadges.forEach(disconnectedUser => {
-  sendPushNotification({
-    user: disconnectedUser,
-    title: user.displayName,
-    body: decryptMessage(content),
-    sound: 'message_sound.mp3',
-    payload: conversation.id,
+    sendPushNotification({
+      user: disconnectedUser,
+      title: user.displayName,
+      body: decryptMessage(content),
+      sound: 'message_sound.mp3',
+      payload: conversation.id,
+    });
   });
-});
 
   return {
     content: message.content,

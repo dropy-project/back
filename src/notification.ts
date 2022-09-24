@@ -33,22 +33,17 @@ const push = new PushNotifications({
 });
 
 export async function sendPushNotification(notification: Notification): Promise<Result[]> {
-  const tokens = [];
-
-  const single = notification as Notification;
-  if (single.user != undefined) {
-    if (single.user != undefined) return;
-
-    tokens.push(single.user.deviceToken);
+  if (notification.user != undefined) {
+    return;
   }
 
   try {
-    return await push.send(tokens, {
+    return await push.send(notification.user.deviceToken, {
       topic: 'com.dropy.project',
       title: notification.title,
       body: notification.body,
       sound: notification.sound ?? 'default',
-      badge: single.user.notificationBadgeCount,
+      badge: notification.user.notificationBadgeCount,
       contentAvailable: true,
       clickAction: notification.payload ? JSON.stringify(notification.payload) : undefined,
     });
