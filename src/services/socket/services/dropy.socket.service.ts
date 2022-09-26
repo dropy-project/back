@@ -84,14 +84,6 @@ export async function createDropy(
     },
   });
 
-  if (dropy.emitterId != user.id) {
-    throw new HttpException(403, `User is not allowed to add a media for this dropy`);
-  }
-
-  if (dropy.mediaType !== undefined) {
-    throw new HttpException(409, `Dropy with id ${dropy.id} has already a linked media`);
-  }
-
   const isFile = (content as Buffer).buffer != undefined;
 
   if (isFile) {
