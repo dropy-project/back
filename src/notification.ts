@@ -33,10 +33,12 @@ const push = new PushNotifications({
 });
 
 export async function sendPushNotification(notification: Notification): Promise<Result[]> {
-  if (notification.user != undefined) {
+  if (notification.user == undefined) {
     return;
   }
-
+  if (notification.user.deviceToken == undefined) {
+    return;
+  }
   try {
     return await push.send(notification.user.deviceToken, {
       topic: 'com.dropy.project',
