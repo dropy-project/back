@@ -60,7 +60,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "node-config": "^0.0.2",
     "node-gyp": "^8.1.0",
-    "nodemon": "^2.0.9",
+    "nodemon": "^2.0.20",
     "prettier": "^2.3.2",
     "prisma": "^4.3.0",
     "ts-node": "^10.4.0",
