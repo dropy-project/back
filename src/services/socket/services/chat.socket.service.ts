@@ -90,20 +90,21 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
       read: connectedUsers.some(connectedUser => connectedUser.id !== user.id),
     },
   });
-  const notBlockedDisconnectedUsersWithBadges = [];
   for (const disconnectedUser of notBlockedDisconnectedUsers) {
-    const userWithBadge = await incrementUserBadgeNotification(disconnectedUser);
-    notBlockedDisconnectedUsersWithBadges.push(userWithBadge);
+    incrementUserBadgeNotification(disconnectedUser)
+      .then(disconnectedUser =>
+        sendPushNotification({
+          user: disconnectedUser,
+          title: user.displayName,
+          body: decryptMessage(content),
+          sound: 'message_sound.mp3',
+          payload: conversation.id,
+        }),
+      )
+      .catch(error => {
+        console.error(error);
+      });
   }
-  notBlockedDisconnectedUsersWithBadges.forEach(disconnectedUser => {
-    sendPushNotification({
-      user: disconnectedUser,
-      title: user.displayName,
-      body: decryptMessage(content),
-      sound: 'message_sound.mp3',
-      payload: conversation.id,
-    });
-  });
 
   return {
     content: message.content,
