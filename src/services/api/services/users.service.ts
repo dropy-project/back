@@ -290,7 +290,7 @@ export async function deleteUser(user: User): Promise<void> {
       email: `deleted${new Date()}`,
       password: 'deleted',
       username: `deleted${new Date()}`,
-      displayName: 'deleted',
+      displayName: 'Deleted User',
       pronouns: 'UNKNOWN',
       about: '',
       isDeveloper: false,
