@@ -102,7 +102,7 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
         }),
       )
       .catch(error => {
-        console.error(error);
+        console.error('SERVER SIDE ERROR >> Notifs with badges', error);
       });
   }
 
