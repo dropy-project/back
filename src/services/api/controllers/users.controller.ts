@@ -168,3 +168,12 @@ export async function unblockUser(req: AuthenticatedRequest, res: Response, next
     next(error);
   }
 }
+
+export async function deleteUser(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    await userService.deleteUser(req.user);
+    res.status(200).json('User has been deleted');
+  } catch (error) {
+    next(error);
+  }
+}

@@ -281,3 +281,23 @@ export async function unblockUser(unblockedId: number, sender: User): Promise<vo
     },
   });
 }
+
+export async function deleteUser(user: User): Promise<void> {
+  await client.user.update({
+    where: { id: user.id },
+    data: {
+      isDeleted: true,
+      email: `deleted${new Date()}`,
+      password: 'deleted',
+      username: `deleted${new Date()}`,
+      displayName: 'deleted',
+      pronouns: 'UNKNOWN',
+      about: '',
+      isDeveloper: false,
+      isAdmin: false,
+      isAmbassador: false,
+      isPremium: false,
+      isBanned: false,
+    },
+  });
+}
