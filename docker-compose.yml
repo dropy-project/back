@@ -29,7 +29,7 @@ services:
       API_PORT: '${API_PORT}'
     networks:
       - back
-      - monitoring_api-req
+      - api-req
 
   studio:
     build:
@@ -78,5 +78,5 @@ services:
 
 networks:
   back:
-  monitoring_api-req:
-    external: true
+  api-req:
+    driver: bridge
