@@ -5,7 +5,6 @@ import { sendPushNotification } from '@/notification';
 import { decryptMessage } from '@/utils/encrypt';
 import { SimplifiedDropy } from '@/interfaces/dropy.interface';
 import { incrementUserBadgeNotification } from './user.socket.service';
-import { Console } from 'console';
 
 export async function getConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
   return await client.chatConversation.findFirst({
@@ -92,7 +91,6 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
     },
   });
   const decryptMessageContent = decryptMessage(content);
-  console.log('decryptMessageContent', decryptMessageContent);
   for (const disconnectedUser of notBlockedDisconnectedUsers) {
     incrementUserBadgeNotification(disconnectedUser)
       .then(disconnectedUser =>
