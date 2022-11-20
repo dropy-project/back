@@ -4,6 +4,7 @@ import { UserMessage, UserConversation } from '@interfaces/chat.interface';
 import { sendPushNotification } from '@/notification';
 import { decryptMessage } from '@/utils/encrypt';
 import { SimplifiedDropy } from '@/interfaces/dropy.interface';
+import { incrementUserBadgeNotification } from './user.socket.service';
 
 export async function getConversationByIdWithUsers(conversationId: number): Promise<ChatConversation & { users: User[] }> {
   return await client.chatConversation.findFirst({
@@ -89,14 +90,22 @@ export async function addMessage(user: User, connectedUsers: User[], content: st
       read: connectedUsers.some(connectedUser => connectedUser.id !== user.id),
     },
   });
-
-  sendPushNotification({
-    users: notBlockedDisconnectedUsers,
-    title: user.displayName,
-    body: decryptMessage(content),
-    sound: 'message_sound.mp3',
-    payload: conversation.id,
-  });
+  const decryptMessageContent = decryptMessage(content);
+  for (const disconnectedUser of notBlockedDisconnectedUsers) {
+    incrementUserBadgeNotification(disconnectedUser)
+      .then(disconnectedUser =>
+        sendPushNotification({
+          user: disconnectedUser,
+          title: user.displayName,
+          body: decryptMessageContent,
+          sound: 'message_sound.mp3',
+          payload: conversation.id,
+        }),
+      )
+      .catch(error => {
+        console.error('SERVER SIDE ERROR >> Notifs with badges', error);
+      });
+  }
 
   return {
     content: message.content,

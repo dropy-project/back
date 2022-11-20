@@ -8,10 +8,12 @@ import { handleSocketRawError } from '@utils/socket.utils';
 
 import * as dropySocket from '@services/socket/emitters/dropy.socket.emitters';
 import { HttpException } from '@/exceptions/HttpException';
+import { resetUserBadgeNotification } from '../services/user.socket.service';
 
 export function startSocket() {
   dropyNamespace.on('connection', async (socket: AuthenticatedSocket) => {
     const logger = new Logger('Dropy Socket', socket.user);
+    socket.user = await resetUserBadgeNotification(socket.user);
 
     logger.log('Connected');
 

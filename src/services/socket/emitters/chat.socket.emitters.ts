@@ -14,6 +14,7 @@ import * as dropySocket from '../services/dropy.socket.service';
 import { getUserConversationWithUsers } from '@services/socket/services/chat.socket.service';
 import { getDropyById } from '@/utils/dropy.utils';
 import { sendPushNotification } from '@/notification';
+import { incrementUserBadgeNotification } from '../services/user.socket.service';
 
 export async function joinConversation(clientSocket: AuthenticatedSocket, conversationId: number, callback: SocketCallback<UserMessage[]>) {
   await clientSocket.join(`conversation-${conversationId}`);
@@ -50,7 +51,8 @@ export async function createConversation(clientSocket: AuthenticatedSocket, drop
       data: userConversation,
     });
   });
-  const otherUser = chatConversationwithusers.users.find((u: User) => u.id !== clientSocket.user.id);
+  let otherUser = chatConversationwithusers.users.find((u: User) => u.id !== clientSocket.user.id);
+  otherUser = await incrementUserBadgeNotification(otherUser);
   sendPushNotification({
     user: otherUser,
     title: `${clientSocket.user.displayName} just found your drop !`,

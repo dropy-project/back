@@ -11,10 +11,6 @@ export interface Notification {
   badge?: number;
 }
 
-export interface BatchedNotification extends Omit<Notification, 'user'> {
-  users: User[];
-}
-
 let apnKey;
 if (fs.existsSync('./certNotification.p8')) {
   apnKey = fs.readFileSync('./certNotification.p8');
@@ -36,31 +32,20 @@ const push = new PushNotifications({
   },
 });
 
-export async function sendPushNotification(notification: Notification | BatchedNotification): Promise<Result[]> {
-  const tokens = [];
-
-  const single = notification as Notification;
-  const batched = notification as BatchedNotification;
-
-  if (batched.users != undefined) {
-    if (batched.users.length === 0) return;
-
-    batched.users.forEach(user => {
-      tokens.push(user.deviceToken);
-    });
-  } else if (single.user != undefined) {
-    if (single.user != undefined) return;
-
-    tokens.push(single.user.deviceToken);
+export async function sendPushNotification(notification: Notification): Promise<Result[]> {
+  if (notification.user == undefined) {
+    return;
   }
-
+  if (notification.user.deviceToken == undefined) {
+    return;
+  }
   try {
-    return await push.send(tokens, {
+    return await push.send(notification.user.deviceToken, {
       topic: 'com.dropy.project',
       title: notification.title,
       body: notification.body,
       sound: notification.sound ?? 'default',
-      badge: notification.badge,
+      badge: notification.user.notificationBadgeCount,
       contentAvailable: true,
       clickAction: notification.payload ? JSON.stringify(notification.payload) : undefined,
     });
