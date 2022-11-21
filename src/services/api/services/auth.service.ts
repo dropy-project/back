@@ -57,3 +57,8 @@ export async function refreshAuthToken(refreshToken: string): Promise<UserTokens
   const user = await client.user.findUnique({ where: { id: userId } });
   return createUserToken(user);
 }
+
+export async function emailAvailable(email: string): Promise<boolean> {
+  const user = await client.user.findUnique({ where: { email } });
+  return user ? false : true;
+}

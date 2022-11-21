@@ -58,3 +58,20 @@ export async function refreshAuthToken(req: Request, res: Response, next: NextFu
     next(error);
   }
 }
+
+export async function emailAvailable(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email } = req.body;
+    utils.throwIfNotString(email);
+    utils.throwIfNotEmail(email);
+
+    const isEmailAvailable = await authService.emailAvailable(email);
+    if (isEmailAvailable) {
+      res.status(200).json('Email available');
+    } else {
+      throw new HttpException(409, 'Email already used');
+    }
+  } catch (error) {
+    next(error);
+  }
+}
