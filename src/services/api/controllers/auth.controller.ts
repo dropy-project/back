@@ -66,11 +66,7 @@ export async function emailAvailable(req: Request, res: Response, next: NextFunc
     utils.throwIfNotEmail(email);
 
     const isEmailAvailable = await authService.emailAvailable(email);
-    if (isEmailAvailable) {
-      res.status(200).json('Email available');
-    } else {
-      throw new HttpException(409, 'Email already used');
-    }
+    res.status(200).json(isEmailAvailable);
   } catch (error) {
     next(error);
   }
