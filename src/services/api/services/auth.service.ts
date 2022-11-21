@@ -38,6 +38,8 @@ export async function login(email: string, password: string): Promise<UserTokens
   const user: User = await client.user.findUnique({ where: { email } });
   if (!user) throw new HttpException(404, 'No user found with this email');
 
+  if (user.isDeleted) throw new HttpException(403, 'User deleted');
+
   const hash = crypto.SHA256(password).toString();
   if (hash !== user.password) throw new HttpException(403, 'Wrong password');
 

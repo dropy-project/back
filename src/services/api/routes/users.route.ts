@@ -24,5 +24,7 @@ export function getRouter() {
   router.get(`${path}/blocked`, authMiddleware as any, usersController.getBlockedUsers, errorMiddleware);
   router.post(`${path}/unblock/:userId`, authMiddleware as any, usersController.unblockUser, errorMiddleware);
 
+  router.delete(`${path}/delete`, authMiddleware as any, usersController.deleteUser, errorMiddleware);
+
   return router;
 }

@@ -22,7 +22,7 @@ export async function findDropiesByGeohash(user: User, zones: string[], excludeU
   const blockedUsersId = userWithBlockedUsers.blockedUsers.map(users => users.id);
 
   const cleanedDropies = dropiesByGeohash
-    .filter(dropy => dropy.emitter.isBanned == false || dropy.emitterId === user.id)
+    .filter(dropy => (dropy.emitter.isBanned === false || dropy.emitterId === user.id) && dropy.emitter.isDeleted === false)
     .filter(dropy => !blockedUsersId.includes(dropy.emitterId));
 
   return cleanedDropies.map(dropy => {
