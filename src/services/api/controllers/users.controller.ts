@@ -177,3 +177,24 @@ export async function deleteUser(req: AuthenticatedRequest, res: Response, next:
     next(error);
   }
 }
+
+export async function getNotificationsSettings(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const settings = await userService.getNotificationsSettings(req.user);
+    res.status(200).json(settings);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateNotificationsSettings(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { dailyDropyReminder, dropyCollected, newFeature } = req.body;
+    utils.throwIfNotBoolean(dailyDropyReminder, dropyCollected, newFeature);
+
+    await userService.updateNotificationsSettings(req.user, req.body);
+    res.status(200).json('Notifications settings updated');
+  } catch (error) {
+    next(error);
+  }
+}

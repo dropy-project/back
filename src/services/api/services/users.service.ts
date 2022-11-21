@@ -2,7 +2,7 @@ import { User } from '@prisma/client';
 import { sendPushNotification } from '../../../notification';
 import client from '@/client';
 import { findDropiesByGeohash, GEOHASH_SIZE } from '@utils/geolocation.utils';
-import { Profile, SimplifiedUser, UpdatableProfileInfos } from '@interfaces/user.interface';
+import { NotificationsSettings, NotificationsSettingsBitValue, Profile, SimplifiedUser, UpdatableProfileInfos } from '@interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 import { deleteContent, uploadContent } from '@/utils/content.utils';
@@ -299,5 +299,26 @@ export async function deleteUser(user: User): Promise<void> {
       isPremium: false,
       isBanned: false,
     },
+  });
+}
+
+export async function getNotificationsSettings(user: User): Promise<NotificationsSettings> {
+  return {
+    dailyDropyReminder: user.notificationSettings & NotificationsSettingsBitValue.DAILY_DROPY_REMINDER ? true : false,
+    dropyCollected: user.notificationSettings & NotificationsSettingsBitValue.DROPY_COLLECTED ? true : false,
+    newFeature: user.notificationSettings & NotificationsSettingsBitValue.NEW_FEATURE ? true : false,
+  };
+}
+
+export async function updateNotificationsSettings(user: User, settings: NotificationsSettings): Promise<void> {
+  let settings_binary = 0;
+
+  if (settings.dailyDropyReminder) settings_binary = settings_binary | NotificationsSettingsBitValue.DAILY_DROPY_REMINDER;
+  if (settings.dropyCollected) settings_binary = settings_binary | NotificationsSettingsBitValue.DROPY_COLLECTED;
+  if (settings.newFeature) settings_binary = settings_binary | NotificationsSettingsBitValue.NEW_FEATURE;
+
+  await client.user.update({
+    where: { id: user.id },
+    data: { notificationSettings: settings_binary },
   });
 }
