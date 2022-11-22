@@ -6,7 +6,7 @@ import { NotificationsSettings, NotificationsSettingsBitValue, Profile, Simplifi
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 import { deleteContent, uploadContent } from '@/utils/content.utils';
-import { displayNameToUsername } from '@/utils/user.utils';
+import { displayNameToUsername, hasNotificationsSettings } from '@/utils/user.utils';
 import Geohash from 'ngeohash';
 
 const NB_REPORTS_TO_BAN = 15;
@@ -304,9 +304,9 @@ export async function deleteUser(user: User): Promise<void> {
 
 export async function getNotificationsSettings(user: User): Promise<NotificationsSettings> {
   return {
-    dailyDropyReminder: user.notificationSettings & NotificationsSettingsBitValue.DAILY_DROPY_REMINDER ? true : false,
-    dropyCollected: user.notificationSettings & NotificationsSettingsBitValue.DROPY_COLLECTED ? true : false,
-    newFeature: user.notificationSettings & NotificationsSettingsBitValue.NEW_FEATURE ? true : false,
+    dailyDropyReminder: hasNotificationsSettings(user, NotificationsSettingsBitValue.DAILY_DROPY_REMINDER),
+    dropyCollected: hasNotificationsSettings(user, NotificationsSettingsBitValue.DROPY_COLLECTED),
+    newFeature: hasNotificationsSettings(user, NotificationsSettingsBitValue.NEW_FEATURE),
   };
 }
 
