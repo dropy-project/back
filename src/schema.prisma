@@ -65,7 +65,7 @@ model User {
 
   energy Int @default(90)
   notificationBadgeCount Int @default(0)
-  notificationSettings Int @default(0)
+  notificationSettings Int @default(14)
 }
 
 model Dropy {

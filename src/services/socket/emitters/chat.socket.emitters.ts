@@ -15,6 +15,7 @@ import { getUserConversationWithUsers } from '@services/socket/services/chat.soc
 import { getDropyById } from '@/utils/dropy.utils';
 import { sendPushNotification } from '@/notification';
 import { incrementUserBadgeNotification } from '../services/user.socket.service';
+import { NotificationsSettingsBitValue } from '@/interfaces/user.interface';
 
 export async function joinConversation(clientSocket: AuthenticatedSocket, conversationId: number, callback: SocketCallback<UserMessage[]>) {
   await clientSocket.join(`conversation-${conversationId}`);
@@ -51,14 +52,17 @@ export async function createConversation(clientSocket: AuthenticatedSocket, drop
       data: userConversation,
     });
   });
-  let otherUser = chatConversationwithusers.users.find((u: User) => u.id !== clientSocket.user.id);
-  otherUser = await incrementUserBadgeNotification(otherUser);
-  sendPushNotification({
-    user: otherUser,
-    title: `${clientSocket.user.displayName} just found your drop !`,
-    body: 'Start chating with him !',
-    sound: 'message_sound.mp3',
-  });
+
+  if (clientSocket.user.notificationSettings & NotificationsSettingsBitValue.DROPY_COLLECTED) {
+    let otherUser = chatConversationwithusers.users.find((u: User) => u.id !== clientSocket.user.id);
+    otherUser = await incrementUserBadgeNotification(otherUser);
+    sendPushNotification({
+      user: otherUser,
+      title: `${clientSocket.user.displayName} just found your drop !`,
+      body: 'Start chating with him !',
+      sound: 'message_sound.mp3',
+    });
+  }
 
   callback({
     status: 200,
