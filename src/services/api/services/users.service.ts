@@ -313,9 +313,9 @@ export async function getNotificationsSettings(user: User): Promise<Notification
 export async function updateNotificationsSettings(user: User, settings: NotificationsSettings): Promise<void> {
   let settings_binary = 0;
 
-  if (settings.dailyDropyReminder) settings_binary = settings_binary | NotificationsSettingsBitValue.DAILY_DROPY_REMINDER;
-  if (settings.dropyCollected) settings_binary = settings_binary | NotificationsSettingsBitValue.DROPY_COLLECTED;
-  if (settings.newFeature) settings_binary = settings_binary | NotificationsSettingsBitValue.NEW_FEATURE;
+  if (settings.dailyDropyReminder) settings_binary |= NotificationsSettingsBitValue.DAILY_DROPY_REMINDER;
+  if (settings.dropyCollected) settings_binary |= NotificationsSettingsBitValue.DROPY_COLLECTED;
+  if (settings.newFeature) settings_binary |= NotificationsSettingsBitValue.NEW_FEATURE;
 
   await client.user.update({
     where: { id: user.id },
