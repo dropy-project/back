@@ -3,7 +3,7 @@ import { Namespace } from 'socket.io';
 import { getUsersSockets } from '@/utils/socket.utils';
 import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 
-const doubleSocketMiddleware = async (socket: AuthenticatedSocket, namespace: Namespace, next: NextFunction) => {
+const doubleSocketMiddleware = async (socket: AuthenticatedSocket, namespace: Namespace) => {
   try {
     const sockets = await getUsersSockets(namespace, [socket.user]);
     if (sockets.length > 1) {
