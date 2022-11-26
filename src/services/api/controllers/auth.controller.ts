@@ -3,6 +3,7 @@ import * as authService from '@services/api/services/auth.service';
 import * as utils from '@utils/controller.utils';
 import versionsJSON from '../../../../versions.json';
 import { HttpException } from '@/exceptions/HttpException';
+import { isVersionSuperiorOrEqual } from '@/utils/auth.utils';
 
 export async function versionCheck(req: Request, res: Response, next: NextFunction) {
   try {
@@ -11,7 +12,7 @@ export async function versionCheck(req: Request, res: Response, next: NextFuncti
 
     const minimumVersion = versionsJSON.minimumCompatibleVersion;
 
-    if (frontServerVersion >= minimumVersion) {
+    if (isVersionSuperiorOrEqual(frontServerVersion, minimumVersion)) {
       res.status(200).json('Correct current version');
     } else {
       throw new HttpException(418, `Current version outdated`);
@@ -54,6 +55,19 @@ export async function refreshAuthToken(req: Request, res: Response, next: NextFu
 
     const tokens = await authService.refreshAuthToken(refreshToken);
     res.status(200).json(tokens);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function emailAvailable(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email } = req.body;
+    utils.throwIfNotString(email);
+    utils.throwIfNotEmail(email);
+
+    const isEmailAvailable = await authService.emailAvailable(email);
+    res.status(200).json(isEmailAvailable);
   } catch (error) {
     next(error);
   }

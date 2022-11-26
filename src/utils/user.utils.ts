@@ -3,6 +3,7 @@ import client from '@/client';
 
 import { DataStoredInToken, UserTokens } from '@/interfaces/auth.interface';
 import { User } from '@prisma/client';
+import { NotificationsSettingsBitValue } from '@/interfaces/user.interface';
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 const ONE_MONTH_IN_SECONDS = 30 * 24 * 60 * 60;
@@ -36,4 +37,8 @@ export function createUserToken(user: User): UserTokens {
     refreshToken,
     expires: ONE_DAY_IN_SECONDS,
   };
+}
+
+export function hasNotificationsSettings(user: User, value: NotificationsSettingsBitValue): boolean {
+  return (user.notificationSettings & value) > 0;
 }

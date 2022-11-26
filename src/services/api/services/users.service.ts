@@ -2,11 +2,11 @@ import { User } from '@prisma/client';
 import { sendPushNotification } from '../../../notification';
 import client from '@/client';
 import { findDropiesByGeohash, GEOHASH_SIZE } from '@utils/geolocation.utils';
-import { Profile, SimplifiedUser, UpdatableProfileInfos } from '@interfaces/user.interface';
+import { NotificationsSettings, NotificationsSettingsBitValue, Profile, SimplifiedUser, UpdatableProfileInfos } from '@interfaces/user.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 import { deleteContent, uploadContent } from '@/utils/content.utils';
-import { displayNameToUsername } from '@/utils/user.utils';
+import { displayNameToUsername, hasNotificationsSettings } from '@/utils/user.utils';
 import Geohash from 'ngeohash';
 
 const NB_REPORTS_TO_BAN = 15;
@@ -279,5 +279,46 @@ export async function unblockUser(unblockedId: number, sender: User): Promise<vo
         },
       },
     },
+  });
+}
+
+export async function deleteUser(user: User): Promise<void> {
+  await client.user.update({
+    where: { id: user.id },
+    data: {
+      isDeleted: true,
+      email: `deleted${new Date()}`,
+      password: 'deleted',
+      username: `deleted${new Date()}`,
+      displayName: 'Deleted User',
+      pronouns: 'UNKNOWN',
+      about: '',
+      isDeveloper: false,
+      isAdmin: false,
+      isAmbassador: false,
+      isPremium: false,
+      isBanned: false,
+    },
+  });
+}
+
+export async function getNotificationsSettings(user: User): Promise<NotificationsSettings> {
+  return {
+    dailyDropyReminder: hasNotificationsSettings(user, NotificationsSettingsBitValue.DAILY_DROPY_REMINDER),
+    dropyCollected: hasNotificationsSettings(user, NotificationsSettingsBitValue.DROPY_COLLECTED),
+    newFeature: hasNotificationsSettings(user, NotificationsSettingsBitValue.NEW_FEATURE),
+  };
+}
+
+export async function updateNotificationsSettings(user: User, settings: NotificationsSettings): Promise<void> {
+  let settings_binary = 0;
+
+  if (settings.dailyDropyReminder) settings_binary |= NotificationsSettingsBitValue.DAILY_DROPY_REMINDER;
+  if (settings.dropyCollected) settings_binary |= NotificationsSettingsBitValue.DROPY_COLLECTED;
+  if (settings.newFeature) settings_binary |= NotificationsSettingsBitValue.NEW_FEATURE;
+
+  await client.user.update({
+    where: { id: user.id },
+    data: { notificationSettings: settings_binary },
   });
 }

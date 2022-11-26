@@ -24,5 +24,10 @@ export function getRouter() {
   router.get(`${path}/blocked`, authMiddleware as any, usersController.getBlockedUsers, errorMiddleware);
   router.post(`${path}/unblock/:userId`, authMiddleware as any, usersController.unblockUser, errorMiddleware);
 
+  router.delete(`${path}/delete`, authMiddleware as any, usersController.deleteUser, errorMiddleware);
+
+  router.get(`${path}/notificationsSettings`, authMiddleware as any, usersController.getNotificationsSettings, errorMiddleware);
+  router.post(`${path}/notificationsSettings`, authMiddleware as any, usersController.updateNotificationsSettings, errorMiddleware);
+
   return router;
 }

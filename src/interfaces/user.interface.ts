@@ -25,3 +25,15 @@ export type Profile = Pick<
 export type UpdatableProfileInfos = Pick<User, 'about' | 'pronouns' | 'displayName'>;
 
 export type SimplifiedUser = Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl'>;
+
+export interface NotificationsSettings {
+  dropyCollected: boolean;
+  dailyDropyReminder: boolean;
+  newFeature: boolean;
+}
+
+export enum NotificationsSettingsBitValue {
+  DROPY_COLLECTED = 2,
+  DAILY_DROPY_REMINDER = 4,
+  NEW_FEATURE = 8,
+}
