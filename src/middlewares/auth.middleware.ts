@@ -3,7 +3,6 @@ import { JsonWebTokenError, verify } from 'jsonwebtoken';
 import { NextFunction, Response } from 'express';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, AuthenticatedRequest, AuthenticatedSocket } from '@/interfaces/auth.interface';
-
 import errorMiddleware from './error.middleware';
 import { Socket } from 'socket.io';
 
@@ -34,7 +33,6 @@ const authMiddleware = async (req: AuthenticatedRequest | AuthenticatedSocket, r
       if (!isSocket) errorMiddleware(HttpException.INVALID_TOKEN, req, res, next);
       return;
     }
-
     req.user = user;
     next();
   } catch (error) {
