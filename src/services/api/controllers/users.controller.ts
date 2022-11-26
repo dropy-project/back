@@ -55,8 +55,8 @@ export async function getProfile(req: AuthenticatedRequest, res: Response, next:
 
 export async function updateUserProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { about, pronouns, displayName } = req.body;
-    utils.throwIfNotString(about, pronouns, displayName);
+    const { about, displayName } = req.body;
+    utils.throwIfNotString(about, displayName);
 
     const profile = await userService.updateUserProfile(req.user, req.body);
     res.status(200).json(profile);

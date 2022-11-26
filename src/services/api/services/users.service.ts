@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { Pronouns, User } from '@prisma/client';
 import { sendPushNotification } from '../../../notification';
 import client from '@/client';
 import { findDropiesByGeohash, GEOHASH_SIZE } from '@utils/geolocation.utils';
@@ -96,6 +96,7 @@ export async function updateUserProfile(user: User, profileInfos: UpdatableProfi
   if (profileInfos.displayName !== user.displayName) {
     username = await displayNameToUsername(profileInfos.displayName);
   }
+  if (profileInfos.pronouns == null) profileInfos.pronouns = Pronouns.UNKNOWN;
 
   const updatedUser = await client.user.update({
     where: { id: user.id },
