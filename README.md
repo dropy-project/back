@@ -96,6 +96,11 @@ APN_KEYID=
 APN_TEAMID=
 FCM_KEY=
 
+#################-> WEBHOOKS 
+
+# Que pour la prod
+DISCORD_WEBHOOK_ERROR=""
+
 #################
 ```
 
