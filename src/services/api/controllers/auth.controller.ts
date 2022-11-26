@@ -3,6 +3,7 @@ import * as authService from '@services/api/services/auth.service';
 import * as utils from '@utils/controller.utils';
 import versionsJSON from '../../../../versions.json';
 import { HttpException } from '@/exceptions/HttpException';
+import { isVersionSuperiorOrEqual } from '@/utils/auth.utils';
 
 export async function versionCheck(req: Request, res: Response, next: NextFunction) {
   try {
@@ -11,7 +12,7 @@ export async function versionCheck(req: Request, res: Response, next: NextFuncti
 
     const minimumVersion = versionsJSON.minimumCompatibleVersion;
 
-    if (frontServerVersion >= minimumVersion) {
+    if (isVersionSuperiorOrEqual(frontServerVersion, minimumVersion)) {
       res.status(200).json('Correct current version');
     } else {
       throw new HttpException(418, `Current version outdated`);
