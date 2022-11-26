@@ -19,13 +19,18 @@ const io = new Server(socketPort, {
 export const chatNamespace = io.of('/chat');
 chatNamespace.use((socket, next: NextFunction) => {
   authMiddleware(socket as AuthenticatedSocket, null, next);
-  doubleSocketMiddleware(socket as AuthenticatedSocket, chatNamespace);
+});
+
+chatNamespace.use((socket, next: NextFunction) => {
+  doubleSocketMiddleware(socket as AuthenticatedSocket, chatNamespace, next);
 });
 
 export const dropyNamespace = io.of('/dropy');
 dropyNamespace.use((socket, next: NextFunction) => {
   authMiddleware(socket as AuthenticatedSocket, null, next);
-  doubleSocketMiddleware(socket as AuthenticatedSocket, dropyNamespace);
+});
+dropyNamespace.use((socket, next: NextFunction) => {
+  doubleSocketMiddleware(socket as AuthenticatedSocket, chatNamespace, next);
 });
 
 dropySocket.startSocket();
