@@ -69,6 +69,17 @@ export async function userRetrievedDropies(req: AuthenticatedRequest, res: Respo
   }
 }
 
+export async function getDropyInfos(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const dropyId = Number(req.params.id);
+    utils.throwIfNotNumber(dropyId);
+    const dropy = await dropyService.getDropyInfos(dropyId);
+    res.status(200).json(dropy);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function deleteDropy(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const dropyId = Number(req.params.id);

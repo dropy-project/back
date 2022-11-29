@@ -2,7 +2,8 @@ import client from '@/client';
 import { HttpException } from '@exceptions/HttpException';
 import { MediaType, User } from '@prisma/client';
 import { deleteContent } from '@/utils/content.utils';
-import { DropyWithUsers } from '@/interfaces/dropy.interface';
+import { DropyAround, DropyWithUsers } from '@/interfaces/dropy.interface';
+import { SimplifiedUser } from '@/interfaces/user.interface';
 
 export async function getDropy(dropyId: number): Promise<DropyWithUsers> {
   const dropy = await client.dropy.findUnique({
@@ -123,4 +124,27 @@ export async function deleteDropy(dropyId: number, user: User, Authorization: st
   }
 
   await client.dropy.delete({ where: { id: dropyId } });
+}
+
+export async function getDropyInfos(dropyId: number): Promise<DropyAround & SimplifiedUser> {
+  const dropy = await client.dropy.findUnique({
+    where: { id: dropyId },
+    include: { emitter: true, retriever: true },
+  });
+
+  if (dropy == undefined) {
+    throw new HttpException(404, `Dropy with id ${dropyId} not found`);
+  }
+  return {
+    id: dropy.id,
+    latitude: dropy.latitude,
+    longitude: dropy.longitude,
+    emitterId: dropy.emitterId,
+    creationDate: dropy.creationDate,
+    premium: dropy.emitter.isPremium,
+    ambassador: dropy.emitter.isAmbassador,
+    username: dropy.emitter.username,
+    displayName: dropy.emitter.displayName,
+    avatarUrl: dropy.emitter.avatarUrl,
+  };
 }
