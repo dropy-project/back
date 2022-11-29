@@ -8,8 +8,7 @@ const doubleSocketMiddleware = async (socket: AuthenticatedSocket, namespace: Na
     const sockets = await getUsersSockets(namespace, [socket.user]);
     console.log(`[Double socket] >> ${socket.user.username} has ${sockets.length} sockets`);
     if (sockets.length >= 1) {
-      console.log('Double socket detected');
-      socket.disconnect(true);
+      socket.emit('doubleConnection');
     }
     next();
   } catch (error) {
