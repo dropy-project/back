@@ -135,6 +135,10 @@ export async function getDropyInfos(dropyId: number): Promise<DropyAround & Simp
   if (dropy == undefined) {
     throw new HttpException(404, `Dropy with id ${dropyId} not found`);
   }
+
+  if (dropy.retrieverId != null) {
+    throw new HttpException(403, `Dropy with id ${dropyId} has already been retrieved`);
+  }
   return {
     id: dropy.id,
     latitude: dropy.latitude,
