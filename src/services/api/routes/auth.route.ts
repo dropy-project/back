@@ -12,7 +12,7 @@ export function getRouter() {
   router.post(`${path}login`, authController.logIn, errorMiddleware);
   router.post(`${path}refresh`, authController.refreshAuthToken, errorMiddleware);
 
-  router.get(`${path}emailAvailable`, authController.emailAvailable, errorMiddleware);
+  router.get(`${path}emailAvailable/:email`, authController.emailAvailable, errorMiddleware);
 
   return router;
 }
