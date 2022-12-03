@@ -7,7 +7,7 @@ import { isVersionSuperiorOrEqual } from '@/utils/auth.utils';
 
 export async function versionCheck(req: Request, res: Response, next: NextFunction) {
   try {
-    const frontServerVersion = req.params.serverVersion;
+    const { frontServerVersion } = req.params;
     utils.throwIfNotString(frontServerVersion);
 
     const minimumVersion = versionsJSON.minimumCompatibleVersion;
@@ -62,7 +62,7 @@ export async function refreshAuthToken(req: Request, res: Response, next: NextFu
 
 export async function emailAvailable(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email } = req.body;
+    const { email } = req.params;
     utils.throwIfNotString(email);
     utils.throwIfNotEmail(email);
 
