@@ -7,7 +7,7 @@ import { isVersionSuperiorOrEqual } from '@/utils/auth.utils';
 
 export async function versionCheck(req: Request, res: Response, next: NextFunction) {
   try {
-    const { frontServerVersion } = req.params;
+    const { serverVersion: frontServerVersion } = req.params;
     utils.throwIfNotString(frontServerVersion);
 
     const minimumVersion = versionsJSON.minimumCompatibleVersion;
