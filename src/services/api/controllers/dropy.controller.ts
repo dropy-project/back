@@ -69,11 +69,11 @@ export async function userRetrievedDropies(req: AuthenticatedRequest, res: Respo
   }
 }
 
-export async function getDropyInfos(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+export async function getUnretrievedDropyInfos(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const dropyId = Number(req.params.id);
     utils.throwIfNotNumber(dropyId);
-    const dropy = await dropyService.getDropyInfos(dropyId);
+    const dropy = await dropyService.getUnretrievedDropyInfos(dropyId);
     res.status(200).json(dropy);
   } catch (error) {
     next(error);

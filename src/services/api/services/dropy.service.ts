@@ -126,7 +126,7 @@ export async function deleteDropy(dropyId: number, user: User, Authorization: st
   await client.dropy.delete({ where: { id: dropyId } });
 }
 
-export async function getDropyInfos(dropyId: number): Promise<DropyAround & SimplifiedUser> {
+export async function getUnretrievedDropyInfos(dropyId: number): Promise<DropyAround & SimplifiedUser> {
   const dropy = await client.dropy.findUnique({
     where: { id: dropyId },
     include: { emitter: true, retriever: true },
@@ -139,6 +139,7 @@ export async function getDropyInfos(dropyId: number): Promise<DropyAround & Simp
   if (dropy.retrieverId != null) {
     throw new HttpException(403, `Dropy with id ${dropyId} has already been retrieved`);
   }
+
   return {
     id: dropy.id,
     latitude: dropy.latitude,
