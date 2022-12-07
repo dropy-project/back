@@ -13,6 +13,7 @@ export function getRouter() {
 
   router.delete(`${path}/:id`, authMiddleware as any, dropyController.deleteDropy, errorMiddleware);
 
+  router.get(`${path}/unretrievedDropyInfos/:id`, authMiddleware as any, dropyController.getUnretrievedDropyInfos, errorMiddleware);
   router.get(`${path}/:id/media`, authMiddleware as any, dropyController.getDropyMedia, errorMiddleware);
   router.get(`${path}/:id`, authMiddleware as any, dropyController.getDropy, errorMiddleware);
 
