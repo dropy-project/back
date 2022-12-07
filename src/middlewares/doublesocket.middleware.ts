@@ -6,13 +6,13 @@ import { AuthenticatedSocket } from '@/interfaces/auth.interface';
 const doubleSocketMiddleware = async (socket: AuthenticatedSocket, namespace: Namespace, next: NextFunction) => {
   try {
     const sockets = await getUsersSockets(namespace, [socket.user]);
-    console.log(`[Double socket] >> ${socket.user.username} has ${sockets.length} sockets`);
     if (sockets.length >= 1) {
-      socket.emit('doubleConnection');
+      socket.emit('double_connection');
+      console.log(`[Double socket] >> ${socket.user.username} has ${sockets.length} sockets`);
     }
     next();
   } catch (error) {
-    console.log('ERROR : Somebody is connecting using two devices');
+    console.log('Double socket middleware error', error);
     next();
   }
 };
