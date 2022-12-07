@@ -4,7 +4,7 @@ import { AuthenticatedSocket } from '@interfaces/auth.interface';
 
 import { throwIfNotFunction, throwIfNotNumber, throwIfNotString } from '@utils/controller.utils';
 import { Logger } from '@utils/logs.utils';
-import { handleSocketRawError } from '@utils/socket.utils';
+import { handleSocketRawError, getUsersSockets } from '@utils/socket.utils';
 
 import * as chatSocket from '../emitters/chat.socket.emitters';
 
