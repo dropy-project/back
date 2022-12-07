@@ -126,7 +126,7 @@ export async function deleteDropy(dropyId: number, user: User, Authorization: st
   await client.dropy.delete({ where: { id: dropyId } });
 }
 
-export async function getUnretrievedDropyInfos(dropyId: number): Promise<DropyAround & SimplifiedUser> {
+export async function getUnretrievedDropyInfos(dropyId: number): Promise<DropyAround & { emitter: SimplifiedUser }> {
   const dropy = await client.dropy.findUnique({
     where: { id: dropyId },
     include: { emitter: true, retriever: true },
@@ -148,8 +148,11 @@ export async function getUnretrievedDropyInfos(dropyId: number): Promise<DropyAr
     creationDate: dropy.creationDate,
     premium: dropy.emitter.isPremium,
     ambassador: dropy.emitter.isAmbassador,
-    username: dropy.emitter.username,
-    displayName: dropy.emitter.displayName,
-    avatarUrl: dropy.emitter.avatarUrl,
+    emitter: {
+      id: dropy.emitter.id,
+      username: dropy.emitter.username,
+      avatarUrl: dropy.emitter.avatarUrl,
+      displayName: dropy.emitter.displayName,
+    },
   };
 }
