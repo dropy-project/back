@@ -16,6 +16,7 @@
     "prisma:init": "prisma init",
     "prisma:migrate": "prisma migrate dev --preview-feature",
     "prisma:generate": "prisma generate"
+    "migrate:start": "npx prisma migrate deploy && npm run start"
   },
   "prisma": {
     "schema": "src/schema.prisma"
