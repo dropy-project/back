@@ -1,7 +1,7 @@
 import { HttpException } from '@/exceptions/HttpException';
 import { AuthenticatedRequest } from '@/interfaces/auth.interface';
 import { NextFunction, Response } from 'express';
-import fs from 'fs';
+import fs, { writeFile } from 'fs';
 import { UploadedFile } from 'express-fileupload';
 import { throwIfNotString } from '@/utils/controller.utils';
 import crypto from 'crypto-js';
@@ -123,6 +123,44 @@ export async function postPrivateContent(req: AuthenticatedRequest, res: Respons
       fileUrl: `${process.env.CONTENT_URL_PUBLIC}/private/${fileName}`,
       accessToken,
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function postPrivateLogFiles(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const sessionId = new Date().getTime();
+
+    const foldersInfo = req.body;
+
+    const folderInfoPath = PRIVATE_PATH_PREFIX + sessionId + '_' + req.user.id + '_logInfo.json';
+
+    writeFile(folderInfoPath, JSON.stringify(foldersInfo), err => {
+      if (err) {
+        throw new HttpException(500, 'Error while saving log file');
+      }
+    });
+
+    const folders = req.files;
+
+    for (const key in folders) {
+      const folder = folders[key] as UploadedFile;
+      const extensionFile = folder.mimetype.split('/').pop();
+
+      const now = new Date().getTime();
+      const fileId = now + Math.round(Math.random() * 100);
+
+      const folderName = sessionId + '_' + fileId + '_' + req.user.id + '.' + extensionFile;
+
+      console.log(folderName);
+
+      const folderPath = PRIVATE_PATH_PREFIX + folderName;
+
+      folder.mv(folderPath);
+    }
+
+    res.status(200).send('Log files saved');
   } catch (error) {
     next(error);
   }
