@@ -157,7 +157,7 @@ export async function postLogFiles(req: AuthenticatedRequest, res: Response, nex
 
     writeFile(fileInfoPath, JSON.stringify(filesInfo), err => {
       if (err) {
-        throw new HttpException(500, err.message);
+        throw new HttpException(500, 'Error while saving log files info');
       }
     });
 
