@@ -14,5 +14,7 @@ export function getRouter() {
   router.post('/private', authMiddleware as any, contentController.postPrivateContent, errorMiddleware);
   router.get('/private/:fileName', authMiddleware as any, contentController.getPrivateContent, errorMiddleware);
 
+  router.post('/log/logFiles', authMiddleware as any, contentController.postLogFiles, errorMiddleware);
+
   return router;
 }
