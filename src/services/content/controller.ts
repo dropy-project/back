@@ -8,6 +8,7 @@ import crypto from 'crypto-js';
 
 const PUBLIC_PATH_PREFIX = process.cwd() + '/.content/public/';
 const PRIVATE_PATH_PREFIX = process.cwd() + '/.content/private/';
+const LOG_PATH_PREFIX = process.cwd() + '/.content/log/';
 
 export async function getContent(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
@@ -128,37 +129,37 @@ export async function postPrivateContent(req: AuthenticatedRequest, res: Respons
   }
 }
 
-export async function postPrivateLogFiles(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function postLogFiles(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     const sessionId = new Date().getTime();
 
-    const foldersInfo = req.body;
+    const files = req.files;
 
-    const folderInfoPath = PRIVATE_PATH_PREFIX + sessionId + '_' + req.user.id + '_logInfo.json';
-
-    writeFile(folderInfoPath, JSON.stringify(foldersInfo), err => {
-      if (err) {
-        throw new HttpException(500, 'Error while saving log file');
-      }
-    });
-
-    const folders = req.files;
-
-    for (const key in folders) {
-      const folder = folders[key] as UploadedFile;
-      const extensionFile = folder.mimetype.split('/').pop();
+    for (const key in files) {
+      const file = files[key] as UploadedFile;
+      const extensionFile = file.mimetype.split('/').pop();
 
       const now = new Date().getTime();
       const fileId = now + Math.round(Math.random() * 100);
 
-      const folderName = sessionId + '_' + fileId + '_' + req.user.id + '.' + extensionFile;
+      const fileName = sessionId + '_' + fileId + '_' + req.user.id + '.' + extensionFile;
 
-      console.log(folderName);
+      console.log(fileName);
 
-      const folderPath = PRIVATE_PATH_PREFIX + folderName;
+      const filePath = LOG_PATH_PREFIX + fileName;
 
-      folder.mv(folderPath);
+      file.mv(filePath);
     }
+
+    const filesInfo = req.body;
+
+    const fileInfoPath = LOG_PATH_PREFIX + sessionId + '_' + req.user.id + '_logInfo.json';
+
+    writeFile(fileInfoPath, JSON.stringify(filesInfo), err => {
+      if (err) {
+        throw new HttpException(500, err.message);
+      }
+    });
 
     res.status(200).send('Log files saved');
   } catch (error) {
