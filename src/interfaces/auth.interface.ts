@@ -12,6 +12,18 @@ export interface UserTokens {
   expires: number;
 }
 
+export interface ResetPasswordToken {
+  resetPasswordToken: string;
+  expires: number;
+}
+
+export interface DataStoredInResetPasswordToken {
+  userId: number;
+  avatarUrl: string;
+  username: string;
+  displayName: string;
+}
+
 export interface AuthenticatedRequest extends Request {
   user: User;
 }
