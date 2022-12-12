@@ -2,7 +2,7 @@ import client from '@/client';
 import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInResetPasswordToken, DataStoredInToken, ResetPasswordToken, UserTokens } from '@interfaces/auth.interface';
+import { DataStoredInResetPasswordToken, DataStoredInToken, UserTokens } from '@interfaces/auth.interface';
 import { createUserToken, displayNameToUsername } from '@/utils/user.utils';
 import { Profile } from '@interfaces/user.interface';
 import * as userService from './users.service';
@@ -66,7 +66,7 @@ export async function emailAvailable(email: string): Promise<boolean> {
   return user == null;
 }
 
-export async function requestResetPassword(email: string): Promise<ResetPasswordToken> {
+export async function requestResetPassword(email: string): Promise<string> {
   const user = await client.user.findUnique({ where: { email } });
   if (!user) throw new HttpException(404, 'No user found with this email');
 

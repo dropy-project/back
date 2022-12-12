@@ -76,13 +76,12 @@ export async function emailAvailable(req: Request, res: Response, next: NextFunc
 
 export async function requestResetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    if (!process.env.MAIL_ADDRESS || !process.env.MAIL_PASSWORD) return;
+
     const { email } = req.body;
-    utils.throwIfNotString(email);
     utils.throwIfNotEmail(email);
 
     const resetPasswordToken = await authService.requestResetPassword(email);
-
-    console.log(resetPasswordToken);
 
     const mailAddress = process.env.MAIL_ADDRESS;
     const mailPassword = process.env.MAIL_PASSWORD;
@@ -101,12 +100,11 @@ export async function requestResetPassword(req: Request, res: Response, next: Ne
       from: mailAddress,
       to: email,
       subject: 'DROPY-APP - Reset password',
-      html: `<p>Click <a href="https://dropy-app.com/reset-password?token=${resetPasswordToken.resetPasswordToken}">here</a> to reset your password</p>`,
+      html: `<p>Click <a href="https://dropy-app.com/reset-password?token=${resetPasswordToken}">here</a> to reset your password</p>`,
     };
 
     transporter.sendMail(mailOptions, error => {
       if (error) {
-        console.log(error);
         res.status(500).json('MAIL - ' + error.message);
       } else {
         res.status(200).json('Reset password request sent');
