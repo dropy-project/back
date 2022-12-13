@@ -14,5 +14,8 @@ export function getRouter() {
 
   router.get(`${path}emailAvailable/:email`, authController.emailAvailable, errorMiddleware);
 
+  router.post(`${path}requestResetPassword`, authController.requestResetPassword, errorMiddleware);
+  router.post(`${path}resetPassword`, authController.resetPassword, errorMiddleware);
+
   return router;
 }

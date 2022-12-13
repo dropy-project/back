@@ -2,11 +2,12 @@ import client from '@/client';
 import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, UserTokens } from '@interfaces/auth.interface';
+import { DataStoredInResetPasswordToken, DataStoredInToken, UserTokens } from '@interfaces/auth.interface';
 import { createUserToken, displayNameToUsername } from '@/utils/user.utils';
 import { Profile } from '@interfaces/user.interface';
 import * as userService from './users.service';
 import crypto from 'crypto-js';
+import { createResetPasswordToken } from '@/utils/auth.utils';
 
 export async function register(
   displayName: string,
@@ -63,4 +64,26 @@ export async function refreshAuthToken(refreshToken: string): Promise<UserTokens
 export async function emailAvailable(email: string): Promise<boolean> {
   const user = await client.user.findUnique({ where: { email } });
   return user == null;
+}
+
+export async function requestResetPassword(email: string): Promise<string> {
+  const user = await client.user.findUnique({ where: { email } });
+  if (!user) throw new HttpException(404, 'No user found with this email');
+
+  return createResetPasswordToken(user);
+}
+
+export async function resetPassword(token: string, password: string): Promise<void> {
+  const secretKey = process.env.RESET_PASSWORD_SECRET_KEY;
+  const { userId } = (await jwt.verify(token, secretKey)) as DataStoredInResetPasswordToken;
+
+  const user = await client.user.findUnique({ where: { id: userId } });
+  if (!user) throw new HttpException(404, 'No user found with this id');
+
+  const hashedPassword = crypto.SHA256(password).toString();
+
+  await client.user.update({
+    where: { id: user.id },
+    data: { password: hashedPassword },
+  });
 }

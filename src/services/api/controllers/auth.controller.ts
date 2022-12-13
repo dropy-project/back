@@ -1,4 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
+import nodemailer from 'nodemailer';
+import path from 'path';
+import fs from 'fs';
+import handlebars from 'handlebars';
 import * as authService from '@services/api/services/auth.service';
 import * as utils from '@utils/controller.utils';
 import versionsJSON from '../../../../versions.json';
@@ -68,6 +72,69 @@ export async function emailAvailable(req: Request, res: Response, next: NextFunc
 
     const isEmailAvailable = await authService.emailAvailable(email);
     res.status(200).json(isEmailAvailable);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function requestResetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    if (!process.env.MAIL_ADDRESS || !process.env.MAIL_PASSWORD) return;
+
+    const { email } = req.body;
+    utils.throwIfNotEmail(email);
+
+    const resetPasswordToken = await authService.requestResetPassword(email);
+
+    const mailAddress = process.env.MAIL_ADDRESS;
+    const mailPassword = process.env.MAIL_PASSWORD;
+
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.ionos.fr',
+      port: 465,
+      secure: true,
+      auth: {
+        user: mailAddress,
+        pass: mailPassword,
+      },
+    });
+
+    const filePath = path.join(__dirname, '../../../templates/resetPasswordMail.hbs');
+    const source = await fs.readFileSync(filePath, 'utf8').toString();
+    const template = handlebars.compile(source);
+    const replacements = {
+      resetPasswordToken,
+    };
+    const htmlToSend = template(replacements);
+
+    const mailOptions = {
+      from: mailAddress,
+      to: email,
+      subject: 'DROPY-APP - Reset password',
+      html: htmlToSend,
+    };
+
+    transporter.sendMail(mailOptions, error => {
+      if (error) {
+        res.status(500).json('Reset password Mail - ' + error.message);
+      } else {
+        res.status(200).json('Reset password request sent');
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { resetPasswordToken, password } = req.body;
+    utils.throwIfNotString(resetPasswordToken);
+    utils.throwIfNotString(password);
+
+    await authService.resetPassword(resetPasswordToken, password);
+
+    res.status(200).json('Password reset');
   } catch (error) {
     next(error);
   }
