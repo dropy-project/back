@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
+import path from 'path';
+import fs from 'fs';
+import handlebars from 'handlebars';
 import * as authService from '@services/api/services/auth.service';
 import * as utils from '@utils/controller.utils';
 import versionsJSON from '../../../../versions.json';
@@ -96,16 +99,24 @@ export async function requestResetPassword(req: Request, res: Response, next: Ne
       },
     });
 
+    const filePath = path.join(__dirname, '../../../templates/resetPasswordMail.hbs');
+    const source = await fs.readFileSync(filePath, 'utf8').toString();
+    const template = handlebars.compile(source);
+    const replacements = {
+      resetPasswordToken,
+    };
+    const htmlToSend = template(replacements);
+
     const mailOptions = {
       from: mailAddress,
       to: email,
       subject: 'DROPY-APP - Reset password',
-      html: `<p>Click <a href="https://dropy-app.com/reset-password?token=${resetPasswordToken}">here</a> to reset your password</p>`,
+      html: htmlToSend,
     };
 
     transporter.sendMail(mailOptions, error => {
       if (error) {
-        res.status(500).json('MAIL - ' + error.message);
+        res.status(500).json('Reset password Mail - ' + error.message);
       } else {
         res.status(200).json('Reset password request sent');
       }

@@ -80,8 +80,10 @@ export async function resetPassword(token: string, password: string): Promise<vo
   const user = await client.user.findUnique({ where: { id: userId } });
   if (!user) throw new HttpException(404, 'No user found with this id');
 
+  const hashedPassword = crypto.SHA256(password).toString();
+
   await client.user.update({
     where: { id: user.id },
-    data: { password: password },
+    data: { password: hashedPassword },
   });
 }

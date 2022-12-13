@@ -1,4 +1,4 @@
-import { DataStoredInResetPasswordToken, ResetPasswordToken } from '@/interfaces/auth.interface';
+import { DataStoredInResetPasswordToken } from '@/interfaces/auth.interface';
 import { User } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
@@ -26,7 +26,7 @@ export function isVersionSuperiorOrEqual(version: string, minimumVersion: string
   return true;
 }
 
-export function createResetPasswordToken(user: User): ResetPasswordToken {
+export function createResetPasswordToken(user: User): string {
   const dataStoredInToken: DataStoredInResetPasswordToken = {
     userId: user.id,
     avatarUrl: user.avatarUrl,
@@ -38,8 +38,5 @@ export function createResetPasswordToken(user: User): ResetPasswordToken {
 
   const resetPasswordToken = jwt.sign(dataStoredInToken, resetPasswordKey, { expiresIn: FIFTEEN_MINUTES_IN_SECONDS });
 
-  return {
-    resetPasswordToken,
-    expires: FIFTEEN_MINUTES_IN_SECONDS,
-  };
+  return resetPasswordToken;
 }
