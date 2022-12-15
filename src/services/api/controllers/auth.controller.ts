@@ -79,7 +79,11 @@ export async function emailAvailable(req: Request, res: Response, next: NextFunc
 
 export async function requestResetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    if (!process.env.MAIL_ADDRESS || !process.env.MAIL_PASSWORD) return;
+    if (!process.env.MAIL_ADDRESS || !process.env.MAIL_PASSWORD) {
+      res.status(500).json('Server does not support password reset');
+      next();
+      return;
+    }
 
     const { email } = req.body;
     utils.throwIfNotEmail(email);
@@ -104,6 +108,7 @@ export async function requestResetPassword(req: Request, res: Response, next: Ne
     const template = handlebars.compile(source);
     const replacements = {
       resetPasswordToken,
+      production: process.env.NODE_ENV == 'production',
     };
     const htmlToSend = template(replacements);
 
