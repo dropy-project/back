@@ -29,5 +29,7 @@ export function getRouter() {
   router.get(`${path}/notificationsSettings`, authMiddleware as any, usersController.getNotificationsSettings, errorMiddleware);
   router.post(`${path}/notificationsSettings`, authMiddleware as any, usersController.updateNotificationsSettings, errorMiddleware);
 
+  router.get(`${path}/requestUserPersonalData`, authMiddleware as any, usersController.requestUserPersonalData, errorMiddleware);
+
   return router;
 }

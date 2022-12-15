@@ -324,3 +324,21 @@ export async function updateNotificationsSettings(user: User, settings: Notifica
     data: { notificationSettings: settings_binary },
   });
 }
+
+export async function requestUserPersonalData(user: User): Promise<string> {
+  let userPersonalData = {};
+
+  const userData = await client.user.findUnique({
+    where: { id: user.id },
+  });
+
+  if (userData != null) {
+    userPersonalData = {
+      userData,
+    };
+  }
+
+  // const userMessages = await client.message.findMany({
+  //   where: { senderId: user.id },
+  // });
+}

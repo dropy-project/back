@@ -198,3 +198,12 @@ export async function updateNotificationsSettings(req: AuthenticatedRequest, res
     next(error);
   }
 }
+
+export async function requestUserPersonalData(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const userPersonalData = await userService.requestUserPersonalData(req.user);
+    res.status(200).json('Personal data send to user email');
+  } catch (error) {
+    next(error);
+  }
+}
