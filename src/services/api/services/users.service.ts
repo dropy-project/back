@@ -52,7 +52,7 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
   const pluralSuffix = plural ? 's' : '';
   sendPushNotification({
     user,
-    title: `Il y a ${dropiesAround.length} Drop${pluralSuffix} â côté de toi !`,
+    title: `Il y a ${dropiesAround.length} drop${pluralSuffix} à côté de toi !`,
     body: `Ouvre l'app pour ${plural ? 'les' : 'le'} voir !`,
     sound: 'dropy_sound.mp3',
   });
