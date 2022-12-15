@@ -59,8 +59,8 @@ export async function createConversation(clientSocket: AuthenticatedSocket, drop
     otherUser = await incrementUserBadgeNotification(otherUser);
     sendPushNotification({
       user: otherUser,
-      title: `${clientSocket.user.displayName} just found your drop !`,
-      body: 'Start chating with him !',
+      title: `${clientSocket.user.displayName} vient de trouver ton drop !`,
+      body: 'Dis lui bonjour !',
       sound: 'message_sound.mp3',
     });
   }

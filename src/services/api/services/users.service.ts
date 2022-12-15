@@ -48,10 +48,12 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
   console.log(`Send notification : ${canSendNotification}`);
   console.log('-------------------');
 
+  const plural = dropiesAround.length > 1;
+  const pluralSuffix = plural ? 's' : '';
   sendPushNotification({
     user,
-    title: `${dropiesAround.length} Drops found near your position!`,
-    body: `Open the app to see ${dropiesAround.length > 1 ? 'them' : 'it'}!`,
+    title: `Il y a ${dropiesAround.length} drop${pluralSuffix} à côté de toi !`,
+    body: `Ouvre l'app pour ${plural ? 'les' : 'le'} voir !`,
     sound: 'dropy_sound.mp3',
   });
 }
