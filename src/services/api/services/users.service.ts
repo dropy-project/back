@@ -53,7 +53,7 @@ export async function backgroundGeolocationPing(user: User, latitude: number, lo
   sendPushNotification({
     user,
     title: `Il y a ${dropiesAround.length} Drop${pluralSuffix} â côté de toi !`,
-    body: `Ouvre l'app pour ${plural ? 'les' : 'le'} voir${pluralSuffix} !`,
+    body: `Ouvre l'app pour ${plural ? 'les' : 'le'} voir !`,
     sound: 'dropy_sound.mp3',
   });
 }
