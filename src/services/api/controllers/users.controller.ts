@@ -1,4 +1,8 @@
 import { NextFunction, Response } from 'express';
+import nodemailer from 'nodemailer';
+import path from 'path';
+import fs from 'fs';
+import admZip from 'adm-zip';
 import { AuthenticatedRequest } from '@interfaces/auth.interface';
 import * as userService from '@services/api/services/users.service';
 import * as utils from '@utils/controller.utils';
@@ -202,7 +206,67 @@ export async function updateNotificationsSettings(req: AuthenticatedRequest, res
 export async function requestUserPersonalData(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const userPersonalData = await userService.requestUserPersonalData(req.user);
-    res.status(200).json('Personal data send to user email');
+    const userPersonalDataFileName = 'userPersonalData.json';
+
+    console.log(JSON.stringify(userPersonalData));
+
+    fs.writeFileSync(userPersonalDataFileName, JSON.stringify(userPersonalData));
+
+    const userPersonalDataZipFileName = 'userPersonalData.zip';
+    const zip = new admZip();
+    zip.addLocalFile(userPersonalDataFileName);
+    zip.writeZip(userPersonalDataZipFileName);
+
+    const userEmail = req.user.email;
+
+    const mailAddress = process.env.MAIL_ADDRESS;
+    const mailPassword = process.env.MAIL_PASSWORD;
+
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.ionos.fr',
+      port: 465,
+      secure: true,
+      auth: {
+        user: mailAddress,
+        pass: mailPassword,
+      },
+    });
+
+    const filePath = path.join(__dirname, '../../../templates/requestUserPersonalData.html');
+    const source = await fs.readFileSync(filePath, 'utf8').toString();
+
+    const mailOptions = {
+      from: mailAddress,
+      to: userEmail,
+      subject: 'DROPY-APP - User personal data',
+      html: source,
+      attachments: [
+        {
+          filename: userPersonalDataZipFileName,
+          path: path.join(__dirname, '../../../../userPersonalData.zip'),
+        },
+      ],
+    };
+
+    transporter.sendMail(mailOptions, error => {
+      if (error) {
+        res.status(500).json('User personal data Mail - ' + error.message);
+      } else {
+        res.status(200).json('Personal data send to user email');
+      }
+
+      fs.rm(path.join(__dirname, '../../../../userPersonalData.zip'), error => {
+        if (error) {
+          console.log('REQUEST USER PERSONAL DATA ZIP - ' + error);
+        }
+      });
+
+      fs.rm(path.join(__dirname, '../../../../userPersonalData.json'), error => {
+        if (error) {
+          console.log('REQUEST USER PERSONAL DATA JSON - ' + error);
+        }
+      });
+    });
   } catch (error) {
     next(error);
   }

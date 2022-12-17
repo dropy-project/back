@@ -325,7 +325,7 @@ export async function updateNotificationsSettings(user: User, settings: Notifica
   });
 }
 
-export async function requestUserPersonalData(user: User): Promise<string> {
+export async function requestUserPersonalData(user: User): Promise<{}> {
   let userPersonalData = {};
 
   const userData = await client.user.findUnique({
@@ -334,11 +334,30 @@ export async function requestUserPersonalData(user: User): Promise<string> {
 
   if (userData != null) {
     userPersonalData = {
-      userData,
+      email: userData.email,
+      username: userData.username,
+      registerData: userData.registerDate.toDateString(),
+      avatarUrl: userData.avatarUrl,
+      pronouns: userData.pronouns,
+      about: userData.about,
+      isPremium: userData.isPremium,
+      isAmbassador: userData.isAmbassador,
     };
   }
 
-  // const userMessages = await client.message.findMany({
-  //   where: { senderId: user.id },
-  // });
+  const userMessages = await client.chatMessage.findMany({
+    where: { senderId: user.id },
+    include: { conversation: true },
+  });
+
+  if (userMessages.length > 0) {
+    userPersonalData['messages'] = userMessages.map(message => {
+      return {
+        date: message.date.toDateString(),
+        content: message.content,
+      };
+    });
+  }
+
+  return userPersonalData;
 }
