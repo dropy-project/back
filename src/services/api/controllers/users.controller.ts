@@ -208,7 +208,6 @@ export async function requestUserPersonalData(req: AuthenticatedRequest, res: Re
     const userPersonalData = await userService.requestUserPersonalData(req.user);
     const userPersonalDataFileName = 'userPersonalData.json';
 
-    console.log(JSON.stringify(userPersonalData));
 
     fs.writeFileSync(userPersonalDataFileName, JSON.stringify(userPersonalData));
 
