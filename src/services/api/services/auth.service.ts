@@ -58,6 +58,8 @@ export async function refreshAuthToken(refreshToken: string): Promise<UserTokens
   const { userId } = (await jwt.verify(refreshToken, secretKey)) as DataStoredInToken;
 
   const user = await client.user.findUnique({ where: { id: userId } });
+  if (!user) throw new HttpException(404, "Can't refresh token, user not found");
+
   return createUserToken(user);
 }
 
