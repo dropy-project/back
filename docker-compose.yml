@@ -73,6 +73,7 @@ services:
       SOCKET_PORT: '${SOCKET_PORT}'
     ports:
       - '127.0.0.1:${SOCKET_PORT}:4000'
+      - '127.0.0.1:${SOCKET_METRICS_PORT}:4001'
     networks:
      - back
 

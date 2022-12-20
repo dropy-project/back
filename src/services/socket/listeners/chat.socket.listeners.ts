@@ -4,9 +4,10 @@ import { AuthenticatedSocket } from '@interfaces/auth.interface';
 
 import { throwIfNotFunction, throwIfNotNumber, throwIfNotString } from '@utils/controller.utils';
 import { Logger } from '@utils/logs.utils';
-import { handleSocketRawError, getUsersSockets } from '@utils/socket.utils';
+import { handleSocketRawError } from '@utils/socket.utils';
 
 import * as chatSocket from '../emitters/chat.socket.emitters';
+import { totalUsersOnSocket } from '@services/socket/metrics/metrics.socket';
 
 export function startSocket() {
   chatNamespace.on('connection', async (socket: AuthenticatedSocket) => {
@@ -16,6 +17,7 @@ export function startSocket() {
       handleSocketRawError(null, error);
     }
     const logger = new Logger('Chat Socket', socket.user);
+    totalUsersOnSocket.inc();
     logger.log('Connected');
 
     socket.on('join_conversation', async (data, callback) => {
@@ -106,6 +108,7 @@ export function startSocket() {
     socket.on('disconnecting', async () => {
       try {
         await chatSocket.sendConnectionStatus(socket, false);
+        totalUsersOnSocket.dec();
         logger.log('Disconnected');
       } catch (error) {
         console.error('Disconnection handling error', error);
