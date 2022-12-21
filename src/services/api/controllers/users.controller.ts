@@ -205,9 +205,14 @@ export async function updateNotificationsSettings(req: AuthenticatedRequest, res
 
 export async function requestUserPersonalData(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
+    if (!process.env.MAIL_ADDRESS || !process.env.MAIL_PASSWORD) {
+      res.status(500).json('Server does not support user personal data request');
+      next();
+      return;
+    }
+
     const userPersonalData = await userService.requestUserPersonalData(req.user);
     const userPersonalDataFileName = 'userPersonalData.json';
-
 
     fs.writeFileSync(userPersonalDataFileName, JSON.stringify(userPersonalData));
 
@@ -232,7 +237,7 @@ export async function requestUserPersonalData(req: AuthenticatedRequest, res: Re
     });
 
     const filePath = path.join(__dirname, '../../../templates/requestUserPersonalData.html');
-    const source = await fs.readFileSync(filePath, 'utf8').toString();
+    const source = fs.readFileSync(filePath, 'utf8').toString();
 
     const mailOptions = {
       from: mailAddress,
@@ -256,13 +261,13 @@ export async function requestUserPersonalData(req: AuthenticatedRequest, res: Re
 
       fs.rm(path.join(__dirname, '../../../../userPersonalData.zip'), error => {
         if (error) {
-          console.log('REQUEST USER PERSONAL DATA ZIP - ' + error);
+          console.error('REQUEST USER PERSONAL DATA ZIP - ' + error);
         }
       });
 
       fs.rm(path.join(__dirname, '../../../../userPersonalData.json'), error => {
         if (error) {
-          console.log('REQUEST USER PERSONAL DATA JSON - ' + error);
+          console.error('REQUEST USER PERSONAL DATA JSON - ' + error);
         }
       });
     });
