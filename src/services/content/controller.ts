@@ -144,8 +144,6 @@ export async function postLogFiles(req: AuthenticatedRequest, res: Response, nex
 
       const fileName = sessionId + '_' + fileId + '_' + req.user.id + '.' + extensionFile;
 
-      console.log(fileName);
-
       const filePath = LOG_PATH_PREFIX + fileName;
 
       file.mv(filePath);
