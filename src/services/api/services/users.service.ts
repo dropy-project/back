@@ -351,7 +351,7 @@ export async function requestUserPersonalData(user: User): Promise<{}> {
   });
 
   if (userMessages.length > 0) {
-    userPersonalData['messages'] = userMessages.map(message => {
+    userPersonalData.messages = userMessages.map(message => {
       return {
         date: message.date.toDateString(),
         content: message.content,
