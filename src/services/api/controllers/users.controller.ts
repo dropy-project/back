@@ -138,7 +138,7 @@ export async function blockUser(req: AuthenticatedRequest, res: Response, next: 
     utils.throwIfNotNumber(userId);
 
     if (parseInt(userId) === req.user.id) {
-      throw new HttpException(301, 'You cannot report block');
+      throw new HttpException(301, 'You cannot block yourself');
     }
 
     await userService.blockUser(parseInt(userId), req.user);
