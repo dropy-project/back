@@ -242,7 +242,7 @@ export async function requestUserPersonalData(req: AuthenticatedRequest, res: Re
     const mailOptions = {
       from: mailAddress,
       to: userEmail,
-      subject: 'DROPY-APP - Vos informations personnelles',
+      subject: 'DROPY-APP - Vos données personnelles',
       html: source,
       attachments: [
         {
