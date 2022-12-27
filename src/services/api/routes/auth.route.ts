@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import errorMiddleware from '@/middlewares/error.middleware';
 import * as authController from '@services/api/controllers/auth.controller';
+import * as swaggerUi from 'swagger-ui-express';
+import * as swaggerDocument from 'resources/swagger/routesDoc.json';
 
 const path = '/';
 
@@ -16,6 +18,11 @@ export function getRouter() {
 
   router.post(`${path}requestResetPassword`, authController.requestResetPassword, errorMiddleware);
   router.post(`${path}resetPassword`, authController.resetPassword, errorMiddleware);
+
+  if (process.env.NODE_ENV != 'production') {
+    router.use('/api-docs', swaggerUi.serve);
+    router.get('/api-docs', swaggerUi.setup(swaggerDocument));
+  }
 
   return router;
 }

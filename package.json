@@ -45,6 +45,7 @@
     "node-pushnotifications": "^2.0.3",
     "nodemailer": "^6.8.0",
     "socket.io": "^4.5.1",
+    "swagger-ui-express": "^4.6.0",
     "webhook-discord": "^3.7.8"
   },
   "devDependencies": {
