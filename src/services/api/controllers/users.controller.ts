@@ -236,7 +236,7 @@ export async function requestUserPersonalData(req: AuthenticatedRequest, res: Re
       },
     });
 
-    const filePath = path.join(__dirname, '../../../templates/requestUserPersonalData.html');
+    const filePath = path.join(__dirname, '../../../resources/templates/requestUserPersonalData.html');
     const source = fs.readFileSync(filePath, 'utf8').toString();
 
     const mailOptions = {

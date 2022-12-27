@@ -7,6 +7,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 import { deleteContent, uploadContent } from '@/utils/content.utils';
 import { displayNameToUsername, hasNotificationsSettings } from '@/utils/user.utils';
+import { decryptMessage } from '@/utils/encrypt';
 import Geohash from 'ngeohash';
 
 const NB_REPORTS_TO_BAN = 15;
@@ -351,10 +352,10 @@ export async function requestUserPersonalData(user: User): Promise<{}> {
   });
 
   if (userMessages.length > 0) {
-    userPersonalData.messages = userMessages.map(message => {
+    userPersonalData['messages'] = userMessages.map(message => {
       return {
         date: message.date.toDateString(),
-        content: message.content,
+        content: decryptMessage(message.content),
       };
     });
   }
