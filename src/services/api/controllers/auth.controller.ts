@@ -103,7 +103,7 @@ export async function requestResetPassword(req: Request, res: Response, next: Ne
       },
     });
 
-    const filePath = path.join(__dirname, '../../../templates/resetPasswordMail.hbs');
+    const filePath = path.join(__dirname, '../../../resources/templates/resetPasswordMail.hbs');
     const source = await fs.readFileSync(filePath, 'utf8').toString();
     const template = handlebars.compile(source);
     const replacements = {

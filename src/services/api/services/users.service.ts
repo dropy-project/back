@@ -7,6 +7,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import { UploadedFile } from 'express-fileupload';
 import { deleteContent, uploadContent } from '@/utils/content.utils';
 import { displayNameToUsername, hasNotificationsSettings } from '@/utils/user.utils';
+import { decryptMessage } from '@/utils/encrypt';
 import Geohash from 'ngeohash';
 
 const NB_REPORTS_TO_BAN = 15;
@@ -323,4 +324,41 @@ export async function updateNotificationsSettings(user: User, settings: Notifica
     where: { id: user.id },
     data: { notificationSettings: settings_binary },
   });
+}
+
+export async function requestUserPersonalData(user: User): Promise<{}> {
+  let userPersonalData = {};
+
+  const userData = await client.user.findUnique({
+    where: { id: user.id },
+  });
+
+  if (userData != null) {
+    userPersonalData = {
+      email: userData.email,
+      username: userData.username,
+      registerData: userData.registerDate.toDateString(),
+      avatarUrl: userData.avatarUrl,
+      pronouns: userData.pronouns,
+      about: userData.about,
+      isPremium: userData.isPremium,
+      isAmbassador: userData.isAmbassador,
+    };
+  }
+
+  const userMessages = await client.chatMessage.findMany({
+    where: { senderId: user.id },
+    include: { conversation: true },
+  });
+
+  if (userMessages.length > 0) {
+    userPersonalData['messages'] = userMessages.map(message => {
+      return {
+        date: message.date.toDateString(),
+        content: decryptMessage(message.content),
+      };
+    });
+  }
+
+  return userPersonalData;
 }
