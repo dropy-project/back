@@ -31,5 +31,7 @@ export function getRouter() {
 
   router.get(`${path}/requestUserPersonalData`, authMiddleware as any, usersController.requestUserPersonalData, errorMiddleware);
 
+  router.get(`${path}/logout`, authMiddleware as any, usersController.logOut, errorMiddleware);
+
   return router;
 }

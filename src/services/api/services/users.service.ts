@@ -362,3 +362,10 @@ export async function requestUserPersonalData(user: User): Promise<{}> {
 
   return userPersonalData;
 }
+
+export async function logOut(user: User): Promise<void> {
+  await client.user.update({
+    where: { id: user.id },
+    data: { deviceToken: '' },
+  });
+}
