@@ -1158,6 +1158,33 @@
         }
       }
     },
+    "/user/requestUserPersonalData": {
+      "get": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Envoie par mail les infos personnelles de l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'email a été envoyé"
+          },
+          "500": {
+            "description": "les variables d'environnement liéées au mail n'ont pas été configurées ||OU|| le mail n'a pas pu être envoyé"
+          }
+        }
+      }
+    },
     "/metrics": {
       "get": {
         "tags": [
