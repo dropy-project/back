@@ -366,6 +366,6 @@ export async function requestUserPersonalData(user: User): Promise<{}> {
 export async function logOut(user: User): Promise<void> {
   await client.user.update({
     where: { id: user.id },
-    data: { deviceToken: '' },
+    data: { deviceToken: null },
   });
 }
