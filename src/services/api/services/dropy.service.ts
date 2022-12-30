@@ -1,9 +1,11 @@
 import client from '@/client';
 import { HttpException } from '@exceptions/HttpException';
-import { MediaType, User } from '@prisma/client';
+import { Dropy, MediaType, User } from '@prisma/client';
 import { deleteContent } from '@/utils/content.utils';
 import { DropyAround, DropyWithUsers } from '@/interfaces/dropy.interface';
 import { SimplifiedUser } from '@/interfaces/user.interface';
+import Geohash from 'ngeohash';
+import { GEOHASH_SIZE } from '@/utils/geolocation.utils';
 
 export async function getDropy(dropyId: number): Promise<DropyWithUsers> {
   const dropy = await client.dropy.findUnique({
@@ -155,4 +157,29 @@ export async function getUnretrievedDropyInfos(dropyId: number): Promise<DropyAr
       displayName: dropy.emitter.displayName,
     },
   };
+}
+
+export async function welcomeDropy(user: User, latitude: number, longitude: number): Promise<Dropy> {
+  const devUsers = await client.user.findMany({
+    where: { isDeveloper: true },
+  });
+
+  if (devUsers.length == 0) {
+    throw new HttpException(500, `No developer user found`);
+  }
+
+  const devUserEmitter = devUsers[Math.floor(Math.random() * devUsers.length)];
+
+  const welcomeDropy = await client.dropy.create({
+    data: {
+      emitterId: devUserEmitter.id,
+      latitude: latitude + (Math.random() - 0.5) * 0.01,
+      longitude: longitude + (Math.random() - 0.2) * 0.01,
+      mediaType: MediaType.PICTURE,
+      mediaUrl: devUserEmitter.avatarUrl,
+      geohash: Geohash.encode_int(latitude, longitude, GEOHASH_SIZE).toString(),
+    },
+  });
+
+  return welcomeDropy;
 }
