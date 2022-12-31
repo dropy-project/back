@@ -170,14 +170,17 @@ export async function welcomeDropy(user: User, latitude: number, longitude: numb
 
   const devUserEmitter = devUsers[Math.floor(Math.random() * devUsers.length)];
 
+  const randLatitude = latitude + (Math.random() - 0.2) * 0.01;
+  const randLongitude = longitude + (Math.random() - 0.2) * 0.01;
+
   const welcomeDropy = await client.dropy.create({
     data: {
       emitterId: devUserEmitter.id,
-      latitude: latitude + (Math.random() - 0.5) * 0.01,
-      longitude: longitude + (Math.random() - 0.2) * 0.01,
+      latitude: randLatitude,
+      longitude: randLongitude,
       mediaType: MediaType.PICTURE,
       mediaUrl: devUserEmitter.avatarUrl,
-      geohash: Geohash.encode_int(latitude, longitude, GEOHASH_SIZE).toString(),
+      geohash: Geohash.encode_int(randLatitude, randLongitude, GEOHASH_SIZE).toString(),
     },
   });
 
