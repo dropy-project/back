@@ -275,3 +275,12 @@ export async function requestUserPersonalData(req: AuthenticatedRequest, res: Re
     next(error);
   }
 }
+
+export async function logOut(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    await userService.logOut(req.user);
+    res.status(200).json('User logged out');
+  } catch (error) {
+    next(error);
+  }
+}
