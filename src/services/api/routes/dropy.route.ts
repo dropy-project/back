@@ -17,7 +17,7 @@ export function getRouter() {
   router.get(`${path}/:id/media`, authMiddleware as any, dropyController.getDropyMedia, errorMiddleware);
   router.get(`${path}/:id`, authMiddleware as any, dropyController.getDropy, errorMiddleware);
 
-  router.post(`${path}/welcomeDropy`, authMiddleware as any, dropyController.welcomeDropy, errorMiddleware);
+  router.post(`${path}/onboardingDropy`, authMiddleware as any, dropyController.onboardingDropy, errorMiddleware);
 
   return router;
 }

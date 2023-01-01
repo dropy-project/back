@@ -159,7 +159,7 @@ export async function getUnretrievedDropyInfos(dropyId: number): Promise<DropyAr
   };
 }
 
-export async function welcomeDropy(user: User, latitude: number, longitude: number): Promise<Dropy> {
+export async function onboardingDropy(user: User, latitude: number, longitude: number): Promise<Dropy> {
   const devUsers = await client.user.findMany({
     where: { isDeveloper: true },
   });
@@ -170,19 +170,21 @@ export async function welcomeDropy(user: User, latitude: number, longitude: numb
 
   const devUserEmitter = devUsers[Math.floor(Math.random() * devUsers.length)];
 
-  const randLatitude = latitude + (Math.random() - 0.2) * 0.01;
-  const randLongitude = longitude + (Math.random() - 0.2) * 0.01;
+  const offsetPosition = 0.0005;
 
-  const welcomeDropy = await client.dropy.create({
+  const onboardingDropyLatitude = latitude + offsetPosition;
+  const onboardingDropyLongitude = longitude + offsetPosition;
+
+  const onboardingDropy = await client.dropy.create({
     data: {
       emitterId: devUserEmitter.id,
-      latitude: randLatitude,
-      longitude: randLongitude,
+      latitude: onboardingDropyLatitude,
+      longitude: onboardingDropyLongitude,
       mediaType: MediaType.PICTURE,
       mediaUrl: devUserEmitter.avatarUrl,
-      geohash: Geohash.encode_int(randLatitude, randLongitude, GEOHASH_SIZE).toString(),
+      geohash: Geohash.encode_int(onboardingDropyLatitude, onboardingDropyLongitude, GEOHASH_SIZE).toString(),
     },
   });
 
-  return welcomeDropy;
+  return onboardingDropy;
 }

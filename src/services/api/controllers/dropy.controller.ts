@@ -93,13 +93,13 @@ export async function deleteDropy(req: AuthenticatedRequest, res: Response, next
   }
 }
 
-export async function welcomeDropy(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+export async function onboardingDropy(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const { latitude, longitude } = req.body;
     utils.throwIfNotNumber(latitude, longitude);
 
-    const welcomeDropy = await dropyService.welcomeDropy(req.user, latitude, longitude);
-    res.status(200).json(welcomeDropy);
+    const onboardingDropy = await dropyService.onboardingDropy(req.user, latitude, longitude);
+    res.status(200).json(onboardingDropy);
   } catch (error) {
     next(error);
   }
