@@ -52,6 +52,109 @@
 - Rebase la branche production et push
 - Sur le vps : pull la branche et build puis lancer docker-compose
 
+### Ajouter une route à la doc 
+> Dans le fichier src/resources/swagger/routesDoc.json
+
+- Les routes s'ajoutent au niveau de l'objet "paths"
+- On ajoute le nom de la route comme un objet "test/truc": {}
+- Il faut donner un "tag" pour choisir dans quelle catégorie sera inscrit notre route (API - User, API - Auth, CONTENT, ...)
+- Lorsque les réponses sont complexes, on utilise les schemas en bas du json. Ils sont en suite appelé avec le $ref
+
+***Exemple route avec paramètre URL*** :
+
+Si c'est des paramètres d'URL sont nécessaire on les note de cette façon : 
+
+> Dans le tableau "parameters" on peut retrouver des paramètres de "path" : ceux de l'URL. Mais aussi des paramètres "header", comme l'Authorization
+
+    "dropy/{id}" : {
+        "get": {
+            "tags": [
+                "API - Dropy"
+            ],
+            "description": "Une route qui donne les infos du dropy qui correspond à l'id";
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "L'id du dropy",
+                    "required": true,
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "Authorization",
+                    "in": "header",
+                    "description": "Le token d'accés de l'utilisateur",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Les infos du drop",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DropyAroundSimplifiedUser"
+                            }
+                        }
+                    }
+                },
+                "404": {
+                    "description": "Aucun drop avec l'id donné n'est présent dans la base de donnée"
+                }
+            }
+        }
+    },
+
+***Exemple route avec body***
+
+> On rajoute un objet "requestBody"
+
+    "user/changePassword" : {
+        "post": {
+            "tags": [
+                "API - User"
+            ],
+            "description": "Une route qui change le mot de passe du user connecté";
+            "parameters": [
+                {
+                    "name": "Authorization",
+                    "in": "header",
+                    "description": "Le token d'accés de l'utilisateur",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "requestBody": {
+                "description": "Le nouveau mot de passe",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "password": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": true
+            },
+            "responses": {
+                "200": {
+                    "description": "Mot de passe modifié",
+                },
+            }
+        }
+    },
+
 ### Variables d'environnement : 
 ```
 NODE_ENV=development

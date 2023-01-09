@@ -1,0 +1,1635 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Dropy-App - ENDPOINTS",
+    "description": "La liste des endpoints de Dropy, incluant les routes de l'api, content, socket..\n\nLes liens utiles:\n- [GITHUB - Dropy](https://github.com/dropy-project)\n- [GITHUB - Dropy Front](https://github.com/dropy-project/front)\n- [GITHUB - Dropy Back](https://github.com/dropy-project/back)\n- [GITHUB - Dropy Website](https://github.com/dropy-project/dropy-website)\n\n\n- [PROD - Website](https://dropy-app.com/)\n- [PROD - Prisma Studio](https://database.dropy-app.com/)\n- [PROD - Api](https://api.dropy-app.com/)\n- [PROD - Content](https://content.dropy-app.com/)\n- [GRAFANA](https://admin.dropy-app.com/?orgId=1)\n- [PREPROD - Prisma Studio](https://preprod-database.dropy-app.com/)\n- [PREPROD - Api](https://preprod-api.dropy-app.com/)\n- [PREPROD - Content](https://preprod-content.dropy-app.com/)\n\nLes ports utilisés:\n- API : 3000\n- SOCKET : 4000\n- CONTENT : 6000\n- POSTGRES : 5432\n- STUDIO : 5555",
+    "version": "1.0.11"
+  },
+  "tags": [
+    {
+      "name": "API - Auth",
+      "description": "Tout ce qui concerne l'authentification ou ce qui ne nécessite pas d'être connecté"
+    },
+    {
+      "name": "API - Dropy",
+      "description": "Tout ce qui concerne la gestion des drops"
+    },
+    {
+      "name": "API - User",
+      "description": "Tout ce qui concerne la gestion des utilisateurs"
+    },
+    {
+      "name": "API - Metrics",
+      "description": "Les metrics pour le grafana"
+    },
+    {
+      "name": "CONTENT",
+      "description": "Tout ce qui va venir toucher au serveur de content"
+    }
+  ],
+  "paths": {
+    "/version/{serverVersion}": {
+      "get": {
+        "tags": [
+          "API - Auth"
+        ],
+        "description": "On regarde si la version du front n'est pas plus ancienne que la version minimum définie",
+        "parameters": [
+          {
+            "name": "serverVersion",
+            "in": "path",
+            "description": "version à verifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correct current version"
+          },
+          "418": {
+            "description": "Current version outdated"
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "tags": [
+          "API - Auth"
+        ],
+        "description": "Inscription de l'utilisateur avec les paramètres donnés",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "newsLetter": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "L'utilisateur crée avec les user tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "refreshToken": {
+                      "type": "string"
+                    },
+                    "expires": {
+                      "type": "integer"
+                    },
+                    "profile": {
+                      "$ref": "#/components/schemas/Profile"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "L'email est déjà utilisé"
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "API - Auth"
+        ],
+        "description": "Check le password pour l'email, donne les informations de ce profil si c'est bon",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Le mot de passe correspond à l'email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "refreshToken": {
+                      "type": "string"
+                    },
+                    "expires": {
+                      "type": "integer"
+                    },
+                    "profile": {
+                      "$ref": "#/components/schemas/Profile"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucun utilisateur avec cet email"
+          },
+          "403": {
+            "description": "Cet utilisateur a été supprimé ||OU|| mot de passe incorect pour cet email"
+          }
+        }
+      }
+    },
+    "/refresh": {
+      "post": {
+        "tags": [
+          "API - Auth"
+        ],
+        "description": "Refresh les user token",
+        "requestBody": {
+          "description": "Le refresh token contenant l'id du user",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Les tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "refreshToken": {
+                      "type": "string"
+                    },
+                    "expires": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "L'id contenu dans le resfreshToken ne correspond à aucun utilisateur connu"
+          }
+        }
+      }
+    },
+    "/emailAvailable/{email}": {
+      "get": {
+        "tags": [
+          "API - Auth"
+        ],
+        "description": "Check la disponibilité d'un email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "description": "email à verifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Si l'email est disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/requestResetPassword": {
+      "post": {
+        "tags": [
+          "API - Auth"
+        ],
+        "description": "Demande de changement de mot de passe, envoie de l'email",
+        "requestBody": {
+          "description": "L'adresse mail à laquelle envoyer le mail de changement de mot de passe",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "L'email de changement de mot de passe a été envoyé"
+          },
+          "404": {
+            "description": "L'email ne correspond à aucun utilisateur"
+          }
+        }
+      }
+    },
+    "/resetPassword": {
+      "post": {
+        "tags": [
+          "API - Auth"
+        ],
+        "description": "Modification du mot de passe",
+        "requestBody": {
+          "description": "Le token généré lors de la demande de changement et le nouveau mot de passe",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resetPasswordToken": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Le mot de passe a été modifié"
+          },
+          "404": {
+            "description": "L'id contenu dans le token ne correspond à aucun utilisateur"
+          }
+        }
+      }
+    },
+    "/dropy/userEmitted": {
+      "get": {
+        "tags": [
+          "API - Dropy"
+        ],
+        "description": "Récupère tous les drops posés par l'utilisateur",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Les drops de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DropyWithUsers"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dropy/userRetrieved": {
+      "get": {
+        "tags": [
+          "API - Dropy"
+        ],
+        "description": "Récupère tous les drops posés par l'utilisateur et récupérés par un autre utilisateur",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Les drops récupérés de l'utilisateur par un autre utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DropyWithUsers"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dropy/{id}": {
+      "delete": {
+        "tags": [
+          "API - Dropy"
+        ],
+        "description": "Supprime un drop",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "L'id du drop à supprimer",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Drop supprimé"
+          },
+          "403": {
+            "description": "L'utilisateur demandant la suppression de ce drop n'est pas son emitter"
+          },
+          "404": {
+            "description": "Aucun drop avec l'id donné n'est présent dans la base de donnée"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "API - Dropy"
+        ],
+        "description": "Récupére les informations d'un drop",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "L'id du drop dont on demande les informations",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Les infos du drop",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropyWithUsers"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "L'utilisateur qui fait cette demande n'est pas le retriever"
+          },
+          "404": {
+            "description": "Aucun drop dans la base de données ne correspond à l'id donné"
+          }
+        }
+      }
+    },
+    "/dropy/unretrievedDropyInfos/{id}": {
+      "get": {
+        "tags": [
+          "API - Dropy"
+        ],
+        "description": "Récupére les données d'un dropy pas encore récupéré",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "L'id du drop dont on demande les infos",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Les infos du drop",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropyAroundSimplifiedUser"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Le drop a déjà été recupéré"
+          },
+          "404": {
+            "description": "Aucun drop avec l'id donné n'est présent dans la base de donnée"
+          }
+        }
+      }
+    },
+    "/dropy/{id}/media": {
+      "get": {
+        "tags": [
+          "API - Dropy"
+        ],
+        "description": "Récupére le contenu du drop",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "L'id du drop dont on demande le contenu",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le contenu du drop",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "L'utilisateur qui demande le contenu, n'est ni le retriever, ni l'emitter"
+          },
+          "404": {
+            "description": "Aucun drop avec l'id donné n'est présent dans la base de donnée ||OU|| Le drop demandé est une photo ou une vidéo, le contenu doit être obtenu par le serveur de content"
+          }
+        }
+      }
+    },
+    "/user/updateDeviceToken": {
+      "post": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Modification du deviceToken de l'utilisateur",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Le nouveau deviceToken",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deviceToken": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Le device token a été modifié"
+          }
+        }
+      }
+    },
+    "/user/backgroundGeolocationPing": {
+      "post": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Mise à jour de la derniere position de l'utilisateur, envoie une notifications si il y a des drops autour de cette position",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Les coordonnées actuelle de l'utilisateur au moment du ping",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coords": {
+                    "type": "object",
+                    "properties": {
+                      "latitude": {
+                        "type": "string"
+                      },
+                      "longitude": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "La dernière position de l'utilisateur a été modifié, des notifications ont possiblement été envoyées"
+          }
+        }
+      }
+    },
+    "/user/profile/{userId}": {
+      "get": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Récupére le contenu du profil de l'utilisateur donnée en paramètre",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "L'id de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le profil de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucun utilisateur avec l'id donné"
+          }
+        }
+      }
+    },
+    "/user/profile/{userId}/picture": {
+      "get": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Récupére l'image de profil de l'utilisateur donnée en paramètre",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "L'id de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'image de profil l'utilisateur",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucun utilisateur avec l'id donné"
+          }
+        }
+      }
+    },
+    "/user/profile": {
+      "get": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Récupére le contenu du profil de l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le profil de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucun utilisateur avec cet id"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Modifie le contenu du profil de l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Les informations à modifier",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "about": {
+                    "type": "string"
+                  },
+                  "pronouns": {
+                    "type": "string"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Le profil de l'utilisateur modifié",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/profile/picture": {
+      "post": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Modifie le chemin d'accés de l'image de profil de l'utilisateur connecté et la sauvegarde sur le serveur de content",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "La nouvelle image de profil",
+          "content": {
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Le nouveau chemin d'accés",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Supprime l'image de l'utilisateur connecté, du serveur de content",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'image a été supprimée"
+          }
+        }
+      }
+    },
+    "/user/report/{userId}": {
+      "post": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Ajoute un report à l'utilisateur, si il depasse le nombre maximum de report, il est banni",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "L'id du user à report",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Le drop déclencheur du report",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "L'utilisateur a bien été report"
+          },
+          "301": {
+            "description": "L'id de l'utilisateur connecté est le même que celui donné en paramètre"
+          },
+          "401": {
+            "description": "L'utilisateur connecté a déjà report l'utilisateur donné en paramètre dans l'heure"
+          },
+          "404": {
+            "description": "L'id de l'utilisateur donné en paramètre ne correspond à aucun utilisateur dans la base de données"
+          }
+        }
+      }
+    },
+    "/user/block/{userId}": {
+      "post": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Bloquer l'utilisateur donné en paramètre pour l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "L'id du user à bloquer",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur a bien été bloqué pour l'utilisateur connecté"
+          },
+          "301": {
+            "description": "L'id de l'utilisateur connecté est le même que celui donné en paramètre"
+          },
+          "404": {
+            "description": "L'id de l'utilisateur donné en paramètre ne correspond à aucun utilisateur dans la base de données"
+          }
+        }
+      }
+    },
+    "/user/blocked": {
+      "get": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Récupére les utilisateurs bloqués par l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Les utilisateurs bloqués",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SimplifiedUser"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/unblock/{userId}": {
+      "post": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Debloquer l'utilisateur donné en paramètre pour l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "L'id du user à debloquer",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur a bien été debloqué pour l'utilisateur connecté"
+          },
+          "404": {
+            "description": "L'id de l'utilisateur donné en paramètre ne correspond à aucun utilisateur dans la base de données"
+          }
+        }
+      }
+    },
+    "/user/delete": {
+      "delete": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Suppression du compte de l'utilisateur connecté, on passe l'attribut isDeleted à true et on garde ses informations, mais il ne peut plus se connecter et l'email est a nouveau disponible pour la création d'un autre compte",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur est supprimé"
+          }
+        }
+      }
+    },
+    "/user/notificationsSettings": {
+      "get": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Recupere les options de notifications de l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Les options de notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dailyDropyReminder": {
+                      "type": "boolean"
+                    },
+                    "dropyCollected": {
+                      "type": "boolean"
+                    },
+                    "newFeature": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Modifie les options de notifications de l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Les nouvelles options de notifications",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dailyDropyReminder": {
+                    "type": "boolean"
+                  },
+                  "dropyCollected": {
+                    "type": "boolean"
+                  },
+                  "newFeature": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Les options de notifications ont été modifiées"
+          }
+        }
+      }
+    },
+    "/user/requestUserPersonalData": {
+      "get": {
+        "tags": [
+          "API - User"
+        ],
+        "description": "Envoie par mail les infos personnelles de l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'email a été envoyé"
+          },
+          "500": {
+            "description": "les variables d'environnement liéées au mail n'ont pas été configurées ||OU|| le mail n'a pas pu être envoyé"
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "API - Metrics"
+        ],
+        "description": "Récupère toutes les informations pour la page grafana",
+        "responses": {
+          "200": {
+            "description": "Les informations des metrics"
+          }
+        }
+      }
+    },
+    "/{fileName}": {
+      "get": {
+        "tags": [
+          "CONTENT"
+        ],
+        "description": "Recupere le fichier correspondant au nom donné en paramètre",
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "description": "Le nom du fichier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le fichier",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Le nom donné ne correspond a aucun fichier"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "CONTENT"
+        ],
+        "description": "Supprime le fichier correspondant au nom donné en paramètre",
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "description": "Le nom du fichier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le fichier a été supprimé"
+          },
+          "403": {
+            "description": "L'utilisateur connecté n'est pas le proprietaire du fichier a supprimer"
+          },
+          "404": {
+            "description": "Le nom donné ne correspond a aucun fichier"
+          }
+        }
+      }
+    },
+    "/": {
+      "post": {
+        "tags": [
+          "CONTENT"
+        ],
+        "description": "Ajoute une image au serveur de content",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "L'image a sauvegarder",
+          "content": {
+            "image/*": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Le chemin d'accés du fichier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fileUrl": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "L'extension du fichier n'est pas png ou jpeg"
+          }
+        }
+      }
+    },
+    "/private": {
+      "post": {
+        "tags": [
+          "CONTENT"
+        ],
+        "description": "Ajoute une image au serveur privé de content",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "L'image a sauvegarder",
+          "content": {
+            "image/*": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Le chemin d'accés du fichier et son accessToken",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fileUrl": {
+                      "type": "string"
+                    },
+                    "accessToken": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "L'extension du fichier n'est pas png ou jpeg"
+          }
+        }
+      }
+    },
+    "/private/{fileName}": {
+      "get": {
+        "tags": [
+          "CONTENT"
+        ],
+        "description": "Recupere l'image sur serveur privé de content",
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "description": "Le nom du fichier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "Le token d'accés au fichier privé",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le fichier",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "L'accessToken donné n'est pas celui attendu pour ce fichier"
+          },
+          "404": {
+            "description": "Le nom donné ne correspond a aucun fichier"
+          }
+        }
+      }
+    },
+    "/log/logFiles": {
+      "post": {
+        "tags": [
+          "CONTENT"
+        ],
+        "description": "Ajoute des fichiers de logs au serveur log de content avec un fichier d'info les concernant",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Le token d'accés de l'utilisateur",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Les fichiers a sauvegarder avec les infos sur les fichiers",
+          "content": {
+            "file/*": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Les fichiers ont été sauvegardés"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DropyWithUsers": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "mediaUrl": {
+            "type": "string"
+          },
+          "creationDate": {
+            "type": "integer"
+          },
+          "retrieveDate": {
+            "type": "integer"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "conversationId": {
+            "type": "integer"
+          },
+          "emitter": {
+            "$ref": "#/components/schemas/SimplifiedUser"
+          },
+          "retriever": {
+            "$ref": "#/components/schemas/SimplifiedUser"
+          }
+        }
+      },
+      "DropyAround": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "emitterId": {
+            "type": "integer"
+          },
+          "creationDate": {
+            "type": "integer"
+          },
+          "premium": {
+            "type": "boolean"
+          },
+          "ambassador": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SimplifiedUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "DropyAroundSimplifiedUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DropyAround"
+          },
+          {
+            "properties": {
+              "emitter": {
+                "$ref": "#/components/schemas/SimplifiedUser"
+              }
+            }
+          }
+        ]
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "registerDate": {
+            "type": "integer"
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "about": {
+            "type": "string"
+          },
+          "pronouns": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "emittedDropiesCount": {
+            "type": "integer"
+          },
+          "retrievedDropiesCount": {
+            "type": "integer"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "isAmbassador": {
+            "type": "boolean"
+          },
+          "isBanned": {
+            "type": "boolean"
+          },
+          "isDeveloper": {
+            "type": "boolean"
+          },
+          "isPremium": {
+            "type": "boolean"
+          },
+          "energy": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
