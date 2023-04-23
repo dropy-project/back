@@ -14,7 +14,6 @@ export function startSocket() {
   dropyNamespace.on('connection', async (socket: AuthenticatedSocket) => {
     const logger = new Logger('Dropy Socket', socket.user);
     socket.user = await resetUserBadgeNotification(socket.user);
-
     logger.log('Connected');
 
     socket.on('zones_update', async (data: any, callback) => {

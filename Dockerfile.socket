@@ -10,5 +10,6 @@ RUN npm install -g --unsafe-perm prisma
 RUN npx prisma generate
 
 EXPOSE 4000
+EXPOSE 4001
 
 CMD [ "npm", "run", "socket" ]

@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
-import { NextFunction } from 'express';
+import express, { NextFunction } from 'express';
+import { addMetricsRoute } from './metrics/metrics.socket';
 
 import { logStartedService } from '@/utils/logs.utils';
 
@@ -11,6 +12,7 @@ import * as dropySocket from './listeners/dropy.socket.listeners';
 import * as chatSocket from './listeners/chat.socket.listeners';
 
 const socketPort = 4000;
+const metricsPort = 4001;
 
 const io = new Server(socketPort, {
   maxHttpBufferSize: 1e8,
@@ -37,5 +39,12 @@ dropySocket.startSocket();
 chatSocket.startSocket();
 
 logStartedService('Dropy Socket', socketPort);
+
+const metrics_server = express();
+addMetricsRoute(metrics_server);
+
+metrics_server.listen(metricsPort, () => {
+  logStartedService('Socket Metrics', metricsPort);
+});
 
 export default io;
