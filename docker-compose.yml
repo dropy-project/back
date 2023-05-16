@@ -5,8 +5,6 @@ services:
     image: postgres:14.1-alpine
     networks:
       - back
-    ports:
-      - '${POSTGRES_EXPOSE_PORTS}'
     environment:
       TZ: Europe/Paris
       POSTGRES_USER: '${POSTGRES_USER}'
