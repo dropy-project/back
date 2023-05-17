@@ -92,3 +92,15 @@ export async function deleteDropy(req: AuthenticatedRequest, res: Response, next
     next(error);
   }
 }
+
+export async function onboardingDropy(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { latitude, longitude } = req.body;
+    utils.throwIfNotNumber(latitude, longitude);
+
+    const onboardingDropy = await dropyService.onboardingDropy(req.user, latitude, longitude);
+    res.status(200).json(onboardingDropy);
+  } catch (error) {
+    next(error);
+  }
+}
